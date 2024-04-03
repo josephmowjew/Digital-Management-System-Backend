@@ -5,6 +5,8 @@ VisualStudioVersion = 17.9.34622.214
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MLS-Digital-MGM-API", "MLS-Digital-MGM-API\MLS-Digital-MGM-API.csproj", "{8D86C1E5-42DF-43E3-8FEB-71975051D955}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataStore", "DataStore\DataStore.csproj", "{4FFC5967-E680-4F93-83B0-9ADAA714DEE5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{8D86C1E5-42DF-43E3-8FEB-71975051D955}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8D86C1E5-42DF-43E3-8FEB-71975051D955}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8D86C1E5-42DF-43E3-8FEB-71975051D955}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4FFC5967-E680-4F93-83B0-9ADAA714DEE5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4FFC5967-E680-4F93-83B0-9ADAA714DEE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4FFC5967-E680-4F93-83B0-9ADAA714DEE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4FFC5967-E680-4F93-83B0-9ADAA714DEE5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
