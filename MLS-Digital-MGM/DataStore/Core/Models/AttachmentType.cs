@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DataStore.Core.Models
 {
-    public class AttachmentType: Meta<int>
+    public class AttachmentType: Meta
     {
         [Required]
         [StringLength(maximumLength:200)]

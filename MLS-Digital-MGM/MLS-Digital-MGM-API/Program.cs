@@ -1,6 +1,10 @@
 using DataStore.Core.Models;
+using DataStore.Core.Services;
+using DataStore.Core.Services.Interfaces;
 using DataStore.Data;
 using DataStore.Middleware;
+using DataStore.Persistence.Interfaces;
+using DataStore.Persistence.SQLRepositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -49,8 +53,14 @@ builder.Services.AddControllers().AddNewtonsoftJson(x => x.SerializerSettings.Re
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+//add repository services
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
 builder.Services.AddTransient<TokenManagerMiddleware>();
+builder.Services.AddScoped<IErrorLogService, ErrorLogService>();
 builder.Services.AddTransient<ITokenManager, TokenManager>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IErrorLogRepository, ErrorLogRepository>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddDistributedRedisCache(r => { r.Configuration = builder.Configuration["redis:connectionString"]; });
 var provider = builder.Configuration["ServerSettings:ServerName"];
@@ -62,12 +72,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(
 options => _ = provider switch
 {
     "MySQL" => options.UseMySQL(mySqlConnectionStr),
-    // "MySQL" => options.UseMySQL(mySqlConnectionStr, ServerVersion.AutoDetect(mySqlConnectionStr),
-    //b => b.SchemaBehavior(MySqlSchemaBehavior.Ignore)),
-
-    //"SqlServer" => options.UseSqlServer(
-    //    builder.Configuration.GetConnectionString("DefaultConnection")),
-
     _ => throw new Exception($"Unsupported provider: {provider}")
 });
 

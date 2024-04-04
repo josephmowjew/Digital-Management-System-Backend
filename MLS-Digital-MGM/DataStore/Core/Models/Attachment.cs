@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DataStore.Core.Models
 {
-    public class Attachment: Meta<int>
+    public class Attachment: Meta
     {
         public Attachment()
         {

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DataStore.Core.Models
 {
-    public class IdentityType: Meta<int>
+    public class IdentityType: Meta
     {
         [Required]
         [StringLength(maximumLength: 150, MinimumLength = 3)]

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DataStore.Core.Models
 {
-    public class Country: Meta<int>
+    public class Country: Meta
     {
         [StringLength(maximumLength: 100, MinimumLength = 2)]
         public string Name { get; set; }

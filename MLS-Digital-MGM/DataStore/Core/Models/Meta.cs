@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace DataStore.Core.Models
 {
-    public class Meta<T> : IEntity<T>
+    public class Meta : IEntity
     {
         public DateTime CreatedDate { get; set; } = DateTime.Now;
         [Display(Name = "Created By Id")]
@@ -22,6 +22,6 @@ namespace DataStore.Core.Models
         public DateTime UpdatedDate { get; set; } = DateTime.Now;
         [Display(Name = "Deleted Date")]
         public DateTime? DeletedDate { get; set; }
-        public T Id { get ; set; }
+        public int Id { get ; set; }
     }
 }

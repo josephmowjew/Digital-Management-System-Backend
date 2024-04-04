@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace DataStore.Core.Models
 {
-    public class ApplicationUser: IdentityUser, IEntity<string>
+    public class ApplicationUser: IdentityUser, IEntity
     {
 
         public ApplicationUser()
@@ -59,6 +59,8 @@ namespace DataStore.Core.Models
         public string Status { get; set; }
         public DateTime UpdatedDate { get; set; }
         public DateTime? DeletedDate { get; set; }
+        public DateTime LastLogin { get; set; }
+        public int? Pin { get; set; }
 
         //add association to attachments
         public ICollection<Attachment> Attachments { get; set; }

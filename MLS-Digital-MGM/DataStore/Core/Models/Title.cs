@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DataStore.Core.Models
 {
-    public class Title: Meta<int>
+    public class Title: Meta
     {
         [Required]
         [StringLength(maximumLength:50, MinimumLength = 3)]

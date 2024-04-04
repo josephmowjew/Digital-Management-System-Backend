@@ -121,6 +121,7 @@ namespace DataStore.Data
         public DbSet<Country> Countries { get; set; }
         public DbSet<Title> Titles { get; set; }
         public DbSet<IdentityType> IdentityTypes { get; set; }
+        public DbSet<ErrorLog> ErrorLogs { get; set; }
 
 
 

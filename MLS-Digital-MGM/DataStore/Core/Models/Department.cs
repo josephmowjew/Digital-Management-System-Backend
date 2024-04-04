@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DataStore.Core.Models
 {
-    public class Department: Meta<int>
+    public class Department: Meta
     {
         public Department()
         {

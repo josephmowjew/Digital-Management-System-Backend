@@ -7,9 +7,8 @@ using System.Threading.Tasks;
 
 namespace DataStore.Core.Models.Interfaces
 {
-    public interface IEntity<T>
+    public interface IEntity
     {
-        T Id { get; set; }
         public DateTime CreatedDate { get; set; }
         //public string? CreatedById { get; set; }
         public string Status { get; set; }

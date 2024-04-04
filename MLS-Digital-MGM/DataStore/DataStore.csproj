@@ -7,12 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Core\DTOs\" />
+    <Folder Include="Core\DTOs\NewFolder\" />
     <Folder Include="Core\Mappers\" />
-    <Folder Include="Core\ViewModels\" />
     <Folder Include="Migrations\" />
-    <Folder Include="Persistence\Interfaces\" />
-    <Folder Include="Persistence\SQLRepositories\" />
   </ItemGroup>
 
   <ItemGroup>
