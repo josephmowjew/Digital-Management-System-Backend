@@ -42,7 +42,7 @@ namespace DataStore.Persistence.SQLRepositories
 
         public async Task<T> GetAsync(Expression<Func<T, bool>> predicate)
         {
-            return await _context.Set<T>().Where(q => q.Status != Lambda.Deleted && predicate.Compile()(q)).FirstOrDefaultAsync();
+            return await _context.Set<T>().Where(q => q.Status != Lambda.Deleted).Where(predicate).FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<T>> GetPagedAsync(Expression<Func<T, bool>> predicate, int pageNumber, int pageSize)

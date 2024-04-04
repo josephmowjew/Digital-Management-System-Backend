@@ -15,6 +15,8 @@ namespace DataStore.Persistence.Interfaces
 
         IDepartmentRepository DepartmentRepository { get; }
 
+        ICountryRepository CountryRepository { get; }
+
 
 
     }

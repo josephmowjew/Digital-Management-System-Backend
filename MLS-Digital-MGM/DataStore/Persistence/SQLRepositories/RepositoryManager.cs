@@ -16,6 +16,7 @@ namespace DataStore.Persistence.SQLRepositories
         private IUserRepository _userRepository;
         private IDepartmentRepository _departmentRepository;
         private IErrorLogRepository _errorLogRepository;
+        private ICountryRepository _countryRepository;
 
         // Add other repository fields here, e.g., private IProductRepository _productRepository;
 
@@ -30,6 +31,8 @@ namespace DataStore.Persistence.SQLRepositories
         public IDepartmentRepository DepartmentRepository => _departmentRepository ??= new DepartmentRepository(_context, _unitOfWork);
 
         public IErrorLogRepository ErrorLogRepository => _errorLogRepository ??= new ErrorLogRepository(_context, _unitOfWork);
+
+        public ICountryRepository CountryRepository => _countryRepository ??= new CountryRepository(_context, _unitOfWork);
 
         public IUnitOfWork UnitOfWork => _unitOfWork;
     }
