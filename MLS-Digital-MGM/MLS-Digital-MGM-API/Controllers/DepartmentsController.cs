@@ -122,5 +122,29 @@ namespace MLS_Digital_MGM_API.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+
+        // DELETE api/departments/{id}
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteDepartment(int id)
+        {
+            try
+            {
+                var department = await _repositoryManager.DepartmentRepository.GetByIdAsync(id);
+                if (department == null)
+                {
+                    return NotFound();
+                }
+
+                await _repositoryManager.DepartmentRepository.DeleteAsync(department);
+                await _unitOfWork.CommitAsync();
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
     }
 }

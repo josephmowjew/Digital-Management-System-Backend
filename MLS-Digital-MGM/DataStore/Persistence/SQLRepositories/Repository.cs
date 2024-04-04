@@ -35,16 +35,20 @@ namespace DataStore.Persistence.SQLRepositories
 
         public async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>> predicate)
         {
-            return await _context.Set<T>().Where(predicate).ToListAsync();
+            return await _context.Set<T>()
+                                 .Where(q => q.Status != Lambda.Deleted && predicate.Compile()(q))
+                                 .ToListAsync();
         }
+
         public async Task<T> GetAsync(Expression<Func<T, bool>> predicate)
         {
-            return await _context.Set<T>().Where(predicate).FirstOrDefaultAsync();
+            return await _context.Set<T>().Where(q => q.Status != Lambda.Deleted && predicate.Compile()(q)).FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<T>> GetPagedAsync(Expression<Func<T, bool>> predicate, int pageNumber, int pageSize)
         {
             var query = _context.Set<T>().Where(predicate);
+            query = query.Where(q => q.Status != Lambda.Deleted);
             var result = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
 
             return result;
@@ -61,13 +65,13 @@ namespace DataStore.Persistence.SQLRepositories
             await Task.CompletedTask; // No need for asynchronous update
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task DeleteAsync(T entity)
         {
-            var entityToDelete = await GetByIdAsync(id);
-            if (entityToDelete != null)
+           
+            if (entity != null)
             {
-                entityToDelete.DeletedDate = DateTime.Now;
-                entityToDelete.Status = Lambda.Deleted;
+                entity.DeletedDate = DateTime.Now;
+                entity.Status = Lambda.Deleted;
             }
         }
 

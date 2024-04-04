@@ -17,7 +17,7 @@ namespace DataStore.Persistence.Interfaces
         Task<IEnumerable<T>> GetPagedAsync(Expression<Func<T, bool>> predicate, int pageNumber, int pageSize);
         Task AddAsync(T entity);
         Task UpdateAsync(T entity);
-        Task DeleteAsync(int id);
+        Task DeleteAsync(T entity);
 
         // New method to project entities to DTOs
         //Task<IEnumerable<TDto>> ProjectToAsync<TDto>(Expression<Func<T, bool>> predicate);
