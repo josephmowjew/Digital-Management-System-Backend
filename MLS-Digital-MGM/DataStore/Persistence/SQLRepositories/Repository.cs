@@ -2,9 +2,9 @@
 using DataStore.Data;
 using DataStore.Helpers;
 using DataStore.Persistence.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.Data.Entity;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -33,9 +33,13 @@ namespace DataStore.Persistence.SQLRepositories
             return await _context.Set<T>().ToListAsync();
         }
 
-        public async Task<IEnumerable<T>> GetAsync(Expression<Func<T, bool>> predicate)
+        public async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>> predicate)
         {
             return await _context.Set<T>().Where(predicate).ToListAsync();
+        }
+        public async Task<T> GetAsync(Expression<Func<T, bool>> predicate)
+        {
+            return await _context.Set<T>().Where(predicate).FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<T>> GetPagedAsync(Expression<Func<T, bool>> predicate, int pageNumber, int pageSize)
@@ -66,5 +70,7 @@ namespace DataStore.Persistence.SQLRepositories
                 entityToDelete.Status = Lambda.Deleted;
             }
         }
+
+       
     }
 }

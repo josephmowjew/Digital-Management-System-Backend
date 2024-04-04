@@ -53,6 +53,8 @@ builder.Services.AddControllers().AddNewtonsoftJson(x => x.SerializerSettings.Re
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+//add automapper to middleware and get all profiles automatically        
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 //add repository services
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();

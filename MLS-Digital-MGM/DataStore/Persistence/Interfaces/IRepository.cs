@@ -12,7 +12,8 @@ namespace DataStore.Persistence.Interfaces
     {
         Task<T> GetByIdAsync(int id);
         Task<IEnumerable<T>> GetAllAsync();
-        Task<IEnumerable<T>> GetAsync(Expression<Func<T, bool>> predicate);
+        Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>> predicate);
+        Task<T> GetAsync(Expression<Func<T, bool>> predicate);
         Task<IEnumerable<T>> GetPagedAsync(Expression<Func<T, bool>> predicate, int pageNumber, int pageSize);
         Task AddAsync(T entity);
         Task UpdateAsync(T entity);

@@ -13,7 +13,7 @@ namespace DataStore.Persistence.Interfaces
         // Add other repository properties here, e.g., IProductRepository ProductRepository { get; }
         IUnitOfWork UnitOfWork { get; }
 
-       
+        IDepartmentRepository DepartmentRepository { get; }
 
 
 
