@@ -13,11 +13,13 @@ namespace MLS_Digital_MGM_API.Controllers
     [Route("api/[controller]")]
     public class RolesController : Controller
     {
+        // Dependency Injection
         private readonly IRepositoryManager _repositoryManager;
         private readonly IErrorLogService _errorLogService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
+        // Constructor
         public RolesController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper)
         {
             _repositoryManager = repositoryManager;
@@ -26,18 +28,22 @@ namespace MLS_Digital_MGM_API.Controllers
             _mapper = mapper;
         }
 
+        // AddRole - Create a new Role
         [HttpPost]
         public async Task<IActionResult> AddRole([FromBody] CreateRoleDTO roleDTO)
         {
             try
             {
+                // Check if model state is valid
                 if (!ModelState.IsValid)
                 {
                     return BadRequest(ModelState);
                 }
 
+                // Map the DTO to a Role object
                 var role = _mapper.Map<Role>(roleDTO);
 
+                // Check if a Role with the same name already exists
                 var existingRoles = await _repositoryManager.RoleRepository.GetRolesAsync();
                 if (existingRoles.Any(r => r.Name.Trim().Equals(role.Name.Trim(), StringComparison.OrdinalIgnoreCase)))
                 {
@@ -45,81 +51,104 @@ namespace MLS_Digital_MGM_API.Controllers
                     return BadRequest(ModelState);
                 }
 
-                 _repositoryManager.RoleRepository.AddRole(role.Name);
+                // Add the new Role to the repository and commit the changes
+                _repositoryManager.RoleRepository.AddRole(role.Name);
                 await _unitOfWork.CommitAsync();
 
+                // Return a CreatedAtAction result
                 return CreatedAtAction("GetRoles", new { id = role.Id }, role);
             }
             catch (Exception ex)
             {
+                // Log the error and return a StatusCode(500) result
                 await _errorLogService.LogErrorAsync(ex);
                 return StatusCode(500, "Internal server error");
             }
         }
 
+        // GetRoles - Retrieve all Roles
         [HttpGet]
         public async Task<IActionResult> GetRoles(int pageNumber = 1, int pageSize = 10)
         {
             try
             {
+                // Get a paged list of Roles from the repository
                 var pagedRoles = await _repositoryManager.RoleRepository.GetPagedAsync(c => true, pageNumber, pageSize);
+
+                // Map the Roles to a list of ReadRoleDTOs
                 var mappedRoles = pagedRoles.Select(r => _mapper.Map<ReadRoleDTO>(r));
+
+                // Return an Ok result with the mapped Roles
                 return Ok(mappedRoles);
             }
             catch (Exception ex)
             {
+                // Log the error and return a StatusCode(500) result
                 await _errorLogService.LogErrorAsync(ex);
                 return StatusCode(500, "Internal server error");
             }
         }
 
+        // DeleteRole - Delete a Role by id
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteRole(string id)
         {
             try
             {
+                // Get the Role by id from the repository
                 var role = await _repositoryManager.RoleRepository.GetRoleByIdAsync(id);
                 if (role == null)
                 {
                     return NotFound();
                 }
 
+                // Delete the Role from the repository and commit the changes
                 await _repositoryManager.RoleRepository.DeleteRoleAsync(role.Id);
                 await _unitOfWork.CommitAsync();
 
+                // Return a NoContent result
                 return NoContent();
             }
             catch (Exception ex)
             {
+                // Log the error and return a StatusCode(500) result
                 await _errorLogService.LogErrorAsync(ex);
                 return StatusCode(500, "Internal server error");
             }
         }
 
+        // EditRole - Update a Role by id
         [HttpPut("{id}")]
         public async Task<IActionResult> EditRole(string id, [FromBody] UpdateRoleDTO roleDTO)
         {
             try
             {
+                // Check if model state is valid
                 if (!ModelState.IsValid)
                 {
                     return BadRequest(ModelState);
                 }
 
+                // Get the Role by id from the repository
                 var role = await _repositoryManager.RoleRepository.GetRoleByIdAsync(id);
                 if (role == null)
                 {
                     return NotFound();
                 }
 
+                // Map the DTO to the Role object
                 _mapper.Map(roleDTO, role);
+
+                // Update the Role in the repository and commit the changes
                 await _repositoryManager.RoleRepository.UpdateRoleAsync(role);
                 await _unitOfWork.CommitAsync();
 
+                // Return a NoContent result
                 return NoContent();
             }
             catch (Exception ex)
             {
+                // Log the error and return a StatusCode(500) result
                 await _errorLogService.LogErrorAsync(ex);
                 return StatusCode(500, "Internal server error");
             }

@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace DataStore.Persistence.Interfaces
 {
-    public interface ITitleRepository : IRepository<Title>
-    {
+   public interface ITitleRepository : IRepository<Title>
+  {
         // Additional methods specific to the Title entity, if needed
-    }
+  }
 }

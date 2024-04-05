@@ -1,4 +1,5 @@
-﻿using DataStore.Data;
+﻿using DataStore.Core.Models;
+using DataStore.Data;
 using DataStore.Persistence.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -19,6 +20,7 @@ namespace DataStore.Persistence.SQLRepositories
         private ICountryRepository _countryRepository;
         private ITitleRepository _titleRepository;
         private IRoleRepository _roleRepository;
+        private IIdentityTypeRepository _identityTypeRepository;
 
         // Add other repository fields here, e.g., private IProductRepository _productRepository;
 
@@ -39,6 +41,8 @@ namespace DataStore.Persistence.SQLRepositories
         public ITitleRepository TitleRepository => _titleRepository ??= new TitleRepository(_context, _unitOfWork);
 
         public IRoleRepository RoleRepository => _roleRepository ??= new RoleRepository(_context, _unitOfWork);
+
+        public IIdentityTypeRepository IdentityTypeRepository => _identityTypeRepository ??= new IdentityTypeRepository(_context, _unitOfWork);
 
         public IUnitOfWork UnitOfWork => _unitOfWork;
     }

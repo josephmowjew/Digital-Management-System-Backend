@@ -21,6 +21,7 @@ namespace DataStore.Persistence.Interfaces
 
         IRoleRepository RoleRepository { get; }
 
+        IIdentityTypeRepository IdentityTypeRepository { get; }
 
 
     }

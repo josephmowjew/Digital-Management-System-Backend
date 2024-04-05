@@ -33,7 +33,7 @@ namespace DataStore.Persistence.SQLRepositories
         public void AddRole(string roleName)
         {
             //add role
-            _context.Roles.Add(new Role { Name = roleName });
+            _context.Roles.Add(new Role { Name = roleName, NormalizedName = roleName.ToUpper(), Status = Lambda.Active,ConcurrencyStamp = Guid.NewGuid().ToString() });
         }
 
         //method to update role
