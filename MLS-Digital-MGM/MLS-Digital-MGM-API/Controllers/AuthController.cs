@@ -51,7 +51,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 user.LastLogin = DateTime.UtcNow;
                 await _repositoryManager.UnitOfWork.CommitAsync();
 
-                var token = GenerateToken(user);
+                var token = await GenerateToken(user);
 
                 return Ok(new { TokenData = token });
             }
@@ -145,7 +145,7 @@ namespace MLS_Digital_MGM_API.Controllers
         }
         [AllowAnonymous]
         [HttpPost("GenerateToken")]
-        private LoginDTO GenerateToken(ApplicationUser user)
+        private async Task<LoginDTO> GenerateToken(ApplicationUser user)
         {
             //if successful generate the token based on details given. Valid for one day
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -164,7 +164,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
 
             var role = _repositoryManager.UserRepository.GetUserRoleByUserId( user.Id);
-            var roleData = _repositoryManager.UserRepository.GetRoleById(role.RoleId);
+            var roleData = await _repositoryManager.RoleRepository.GetRoleByIdAsync(role.RoleId);
 
             // login DTO
             var userData = new LoginDTO()

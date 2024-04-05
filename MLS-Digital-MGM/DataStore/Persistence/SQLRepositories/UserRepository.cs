@@ -18,6 +18,7 @@ namespace DataStore.Persistence.SQLRepositories
         protected readonly ApplicationDbContext _context;
         private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
 
         public UserRepository(ApplicationDbContext context, IUnitOfWork unitOfWork) : base(context, unitOfWork)
@@ -26,11 +27,12 @@ namespace DataStore.Persistence.SQLRepositories
             this._unitOfWork = unitOfWork;
         }
 
-        public UserRepository(ApplicationDbContext context, IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager ) :base(context, unitOfWork)
+        public UserRepository(ApplicationDbContext context, IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager) :base(context, unitOfWork)
         {
             this._context = context;
             this._unitOfWork = unitOfWork;
             this._userManager = userManager;
+            this._roleManager = roleManager;
         }
        
         public  async Task<IdentityResult> AddAsync(ApplicationUser entity, string password)
@@ -67,9 +69,9 @@ namespace DataStore.Persistence.SQLRepositories
             return _context.UserRoles.FirstOrDefault(u => u.UserId == userId);
         }
 
-        public IdentityRole GetRoleById(string roleId)
-        {
-            return _context.Roles.FirstOrDefault(r => r.Id == roleId);
-        }
+
+
+       
+
     }
 }

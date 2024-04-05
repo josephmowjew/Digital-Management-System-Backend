@@ -17,6 +17,10 @@ namespace DataStore.Persistence.Interfaces
 
         ICountryRepository CountryRepository { get; }
 
+        ITitleRepository TitleRepository { get; }
+
+        IRoleRepository RoleRepository { get; }
+
 
 
     }

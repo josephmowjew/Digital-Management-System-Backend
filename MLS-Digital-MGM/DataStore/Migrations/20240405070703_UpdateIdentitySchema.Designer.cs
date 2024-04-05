@@ -3,6 +3,7 @@ using System;
 using DataStore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240405070703_UpdateIdentitySchema")]
+    partial class UpdateIdentitySchema
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -31,7 +34,7 @@ namespace DataStore.Migrations
 
                     b.HasIndex("UsersId");
 
-                    b.ToTable("ApplicationUserAttachment", (string)null);
+                    b.ToTable("ApplicationUserAttachment");
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.ApplicationUser", b =>
@@ -214,7 +217,7 @@ namespace DataStore.Migrations
 
                     b.HasIndex("AttachmentTypeId");
 
-                    b.ToTable("Attachments", (string)null);
+                    b.ToTable("Attachments");
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.AttachmentType", b =>
@@ -243,7 +246,7 @@ namespace DataStore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("AttachmentTypes", (string)null);
+                    b.ToTable("AttachmentTypes");
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.Country", b =>
@@ -277,7 +280,7 @@ namespace DataStore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Countries", (string)null);
+                    b.ToTable("Countries");
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.Department", b =>
@@ -306,7 +309,7 @@ namespace DataStore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Departments", (string)null);
+                    b.ToTable("Departments");
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.ErrorLog", b =>
@@ -346,7 +349,7 @@ namespace DataStore.Migrations
 
                     b.HasIndex("CreatedById");
 
-                    b.ToTable("ErrorLogs", (string)null);
+                    b.ToTable("ErrorLogs");
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.IdentityType", b =>
@@ -375,7 +378,7 @@ namespace DataStore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("IdentityTypes", (string)null);
+                    b.ToTable("IdentityTypes");
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.Title", b =>
@@ -404,7 +407,7 @@ namespace DataStore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Titles", (string)null);
+                    b.ToTable("Titles");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

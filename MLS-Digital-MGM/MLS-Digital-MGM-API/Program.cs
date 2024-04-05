@@ -77,7 +77,7 @@ options => _ = provider switch
     _ => throw new Exception($"Unsupported provider: {provider}")
 });
 
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+builder.Services.AddIdentity<ApplicationUser, Role>()
                    .AddEntityFrameworkStores<ApplicationDbContext>()
                    .AddDefaultUI()
                    .AddDefaultTokenProviders();

@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace DataStore.Data
 {
-    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser,Role,string>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
            : base(options)
@@ -27,7 +27,7 @@ namespace DataStore.Data
             {
                 entity.ToTable(name: "Users");
             });
-            builder.Entity<IdentityRole>(entity =>
+            builder.Entity<Role>(entity =>
             {
                 entity.ToTable(name: "Roles");
             });
@@ -52,6 +52,9 @@ namespace DataStore.Data
                 entity.ToTable("UserTokens");
             });
 
+            builder.Entity<Role>()
+                .HasBaseType<IdentityRole>()
+                .ToTable("Roles");
 
             builder.Entity<ApplicationUser>(entity =>
             {
