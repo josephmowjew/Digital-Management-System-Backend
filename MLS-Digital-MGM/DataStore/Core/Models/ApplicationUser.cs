@@ -1,4 +1,5 @@
 ﻿using DataStore.Core.Models.Interfaces;
+using DataStore.Helpers;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
@@ -54,10 +55,10 @@ namespace DataStore.Core.Models
         public Country Country { get; set; }
 
         //Meta properties
-        public DateTime CreatedDate { get; set; }
-        public string CreatedById { get; set; }
-        public string Status { get; set; }
-        public DateTime UpdatedDate { get; set; }
+        public DateTime CreatedDate { get; set; } = DateTime.Now;
+        public string? CreatedById { get; set; }
+        public string Status { get; set; } = Lambda.Active;
+        public DateTime UpdatedDate { get; set; } = DateTime.Now;
         public DateTime? DeletedDate { get; set; }
         public DateTime LastLogin { get; set; }
         public int? Pin { get; set; }

@@ -1,6 +1,7 @@
 ﻿using DataStore.Core.Models;
 using DataStore.Data;
 using DataStore.Persistence.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,16 +22,21 @@ namespace DataStore.Persistence.SQLRepositories
         private ITitleRepository _titleRepository;
         private IRoleRepository _roleRepository;
         private IIdentityTypeRepository _identityTypeRepository;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<Role> _roleManager;
 
         // Add other repository fields here, e.g., private IProductRepository _productRepository;
 
-        public RepositoryManager(ApplicationDbContext context, IUnitOfWork unitOfWork)
+       
+        public RepositoryManager(ApplicationDbContext context, IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, RoleManager<Role> roleManager)
         {
-            _context = context;
-            _unitOfWork = unitOfWork;
+            this._context = context;
+            this._unitOfWork = unitOfWork;
+            this._userManager = userManager;
+            this._roleManager = roleManager;
         }
 
-        public IUserRepository UserRepository => _userRepository ??= new UserRepository(_context, _unitOfWork);
+        public IUserRepository UserRepository => _userRepository ??= new UserRepository(_context, _unitOfWork, _userManager, _roleManager);
 
         public IDepartmentRepository DepartmentRepository => _departmentRepository ??= new DepartmentRepository(_context, _unitOfWork);
 

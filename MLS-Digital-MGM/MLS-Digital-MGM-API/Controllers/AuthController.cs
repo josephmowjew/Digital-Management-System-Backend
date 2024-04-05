@@ -115,7 +115,7 @@ namespace MLS_Digital_MGM_API.Controllers
             if (!string.IsNullOrWhiteSpace(model.RoleName))
             {
                 // Associate the user with the specified role
-                var roleResult = await _repositoryManager.UserRepository.AddAsync(user, model.RoleName);
+                var roleResult = await _repositoryManager.UserRepository.AddUserToRoleAsync(user, model.RoleName);
                 if (!roleResult.Succeeded)
                 {
                     ModelState.AddModelError("Role", "Failed to associate the user with the specified role.");
@@ -124,7 +124,7 @@ namespace MLS_Digital_MGM_API.Controllers
             }
 
             // Send login details email
-            string passwordBody = $"Your account has been created on Sparc Rides. Your password is {model.Password}";
+            string passwordBody = $"Your account has been created on Malawi Law Society. Your login details are as follows: <br /> Email: {model.Email} <br /> Password: {model.Password} <br /> Login to Sparc Rides. Your password is {model.Password}";
             var passwordEmailResult = await _emailService.SendMailWithKeyVarReturn(user.Email, "Login Details", passwordBody);
             if (!passwordEmailResult.Key)
             {
@@ -133,7 +133,7 @@ namespace MLS_Digital_MGM_API.Controllers
             }
 
             // Send OTP email
-            string pinBody = $"An account has been created on Sparc Rides. Your OTP is {pin} <br /> Enter the OTP to activate your account <br /> You can activate your account by clicking <a href='https://cutt.ly/mentallab'>here</a>";
+            string pinBody = $"An account has been created on Malawi Law Society. Your OTP is {pin} <br /> Enter the OTP to activate your account <br /> You can activate your account by clicking <a href='https://cutt.ly/mentallab'>here</a>";
             var pinEmailResult = await _emailService.SendMailWithKeyVarReturn(user.Email, "Login Details", pinBody);
             if (!pinEmailResult.Key)
             {
