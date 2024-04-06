@@ -27,5 +27,7 @@ namespace DataStore.Persistence.Interfaces
 
         UserManager<ApplicationUser> UserManager { get; }
 
+        IYearOfOperationRepository YearOfOperationRepository { get; }
+
     }
 }

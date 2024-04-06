@@ -24,6 +24,7 @@ namespace DataStore.Persistence.SQLRepositories
         private IIdentityTypeRepository _identityTypeRepository;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<Role> _roleManager;
+        private IYearOfOperationRepository _yearOfOperationRepository;
 
         // Add other repository fields here, e.g., private IProductRepository _productRepository;
 
@@ -53,5 +54,7 @@ namespace DataStore.Persistence.SQLRepositories
         public IUnitOfWork UnitOfWork => _unitOfWork;
 
         public UserManager<ApplicationUser> UserManager => _userManager;
+
+        public IYearOfOperationRepository YearOfOperationRepository => _yearOfOperationRepository ??= new YearOfOperationRepository(_context, _unitOfWork);
     }
 }

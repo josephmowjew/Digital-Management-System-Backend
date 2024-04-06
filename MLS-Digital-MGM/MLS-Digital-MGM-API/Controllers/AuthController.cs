@@ -33,31 +33,41 @@ namespace MLS_Digital_MGM_API.Controllers
             this._emailService = emailService;
         }
 
+        /// Authenticates a user with the provided email and password.
         [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginViewModel loginViewModel)
         {
+            // Find the user by email
             var user = await _repositoryManager.UserRepository.FindByEmailAsync(loginViewModel.Email);
 
+            // Check if the user exists, is not deleted, and has confirmed their email
             if (user == null || user.DeletedDate != null || !user.EmailConfirmed)
             {
+                // Return an error message based on the user's status
                 return BadRequest(GetErrorMessage(user));
             }
 
+            // Check the password for the user
             var signInResult = await _signInManager.CheckPasswordSignInAsync(user, loginViewModel.Password, false);
 
             if (signInResult.Succeeded)
             {
+                // Update the user's last login date
                 user.LastLogin = DateTime.UtcNow;
                 await _repositoryManager.UnitOfWork.CommitAsync();
 
+                // Generate a token for the user
                 var token = await GenerateToken(user);
 
+                // Return the token
                 return Ok(new { TokenData = token });
             }
 
+            // Return an error message if the password is incorrect
             return BadRequest("Invalid login credentials");
         }
+
 
         // A function that takes an ApplicationUser object as a parameter and returns an error message based on the user's status.
         private string GetErrorMessage(ApplicationUser user)
@@ -144,7 +154,6 @@ namespace MLS_Digital_MGM_API.Controllers
             return Ok(user);
         }
         [AllowAnonymous]
-        [HttpPost("GenerateToken")]
         private async Task<LoginDTO> GenerateToken(ApplicationUser user)
         {
             //if successful generate the token based on details given. Valid for one day
@@ -312,3 +321,4 @@ namespace MLS_Digital_MGM_API.Controllers
 
     }
 }
+
