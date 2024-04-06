@@ -1,4 +1,6 @@
-﻿using DataStore.Data;
+﻿using DataStore.Core.Models;
+using DataStore.Data;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,6 +25,7 @@ namespace DataStore.Persistence.Interfaces
 
         IIdentityTypeRepository IdentityTypeRepository { get; }
 
+        UserManager<ApplicationUser> UserManager { get; }
 
     }
 }

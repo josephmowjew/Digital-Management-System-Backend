@@ -51,5 +51,7 @@ namespace DataStore.Persistence.SQLRepositories
         public IIdentityTypeRepository IdentityTypeRepository => _identityTypeRepository ??= new IdentityTypeRepository(_context, _unitOfWork);
 
         public IUnitOfWork UnitOfWork => _unitOfWork;
+
+        public UserManager<ApplicationUser> UserManager => _userManager;
     }
 }

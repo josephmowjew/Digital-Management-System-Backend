@@ -222,6 +222,93 @@ namespace MLS_Digital_MGM_API.Controllers
             return Ok(new { response = "Account confirmed", user = user });
 
         }
+        [HttpGet]
+        [Route("ResendPin/{email}")]
+        // Resending account activation pin
+        public async Task<IActionResult> ResendPin(string email)
+        {
+            //d6ea9738-d81b-46f9-b6e9-e3260fb75892
+            //check if values are not null
+            if (email == null)
+            {
+
+                return BadRequest("Insufficient parameters, try again");
+            }
+
+            // check if user exist
+            var user = await _repositoryManager.UserRepository.FindByEmailAsync(email);
+
+            if (user == null)
+            {
+                return BadRequest("Account doesn't exist, please create one");
+            }
+
+            // confirming account and saving 
+            int pin = Lambda.RandomNumber();
+            user.Pin = pin;
+
+            await _repositoryManager.UnitOfWork.CommitAsync();
+
+            // sending an email
+            string PinBody = "Your OTP for Sparc Rides Account is " + pin + " <br /> Enter the OTP, email address and the new password to reset your account";
+            var pinEmailResult = await _emailService.SendMailWithKeyVarReturn(user.Email, "Account Reset Details", PinBody);
+
+            if (!pinEmailResult.Key)
+            {
+                ModelState.AddModelError("", $"Failed to send OTP email. Error: {pinEmailResult.Value}");
+                return BadRequest(ModelState);
+            }
+
+            return Ok("Check your email for the pin");
+
+
+        }
+
+        [HttpPost]
+        [Route("ResetPassword")]
+        public async Task<IActionResult> ResetPassword(PasswordResetModel model)
+        {
+            // Check if the model state is valid
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            // Find the user based on the email provided
+            var user = await this._repositoryManager.UserRepository.FindByEmailAsync(model.Email);
+
+            // If the user is not found, return an error
+            if (user == null)
+            {
+                ModelState.AddModelError("Email", "Email not recognized");
+                return BadRequest(ModelState);
+            }
+
+            // Check if the provided pin matches the user's pin
+            if (user.Pin != model.Pin)
+            {
+                ModelState.AddModelError("Pin", "Pin is invalid");
+                return BadRequest(ModelState);
+            }
+
+            // Generate a password reset token for the user
+            var token = await this._repositoryManager.UserManager.GeneratePasswordResetTokenAsync(user);
+
+            // Reset the user's password using the token and the new password
+            var result = await this._repositoryManager.UserManager.ResetPasswordAsync(user, token, model.Password);
+
+            // If the password reset is successful, return a success message
+            if (result.Succeeded)
+            {
+                return Ok("Password reset successfully");
+            }
+
+            // If the password reset fails, return an error
+            ModelState.AddModelError("GeneralError", "Failed to reset password");
+            return BadRequest(ModelState);
+        }
+
+
 
     }
 }
