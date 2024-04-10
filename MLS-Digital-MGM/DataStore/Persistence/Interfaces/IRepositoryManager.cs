@@ -29,5 +29,7 @@ namespace DataStore.Persistence.Interfaces
 
         IYearOfOperationRepository YearOfOperationRepository { get; }
 
+        ILicenseApprovalLevelRepository LicenseApprovalLevelRepository { get; }
+
     }
 }

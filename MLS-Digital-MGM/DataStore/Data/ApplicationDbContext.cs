@@ -125,7 +125,8 @@ namespace DataStore.Data
         public DbSet<Title> Titles { get; set; }
         public DbSet<IdentityType> IdentityTypes { get; set; }
         public DbSet<ErrorLog> ErrorLogs { get; set; }
-        public DbSet<YearOfOperation> Operations { get; set; }
+        public DbSet<YearOfOperation> YearOfOperations { get; set; }
+        public DbSet<LicenseApprovalLevel> LicenseApprovalLevels { get; set; }
 
 
 

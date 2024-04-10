@@ -25,6 +25,7 @@ namespace DataStore.Persistence.SQLRepositories
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<Role> _roleManager;
         private IYearOfOperationRepository _yearOfOperationRepository;
+        private ILicenseApprovalLevelRepository _licenseApprovalLevelRepository;
 
         // Add other repository fields here, e.g., private IProductRepository _productRepository;
 
@@ -56,5 +57,7 @@ namespace DataStore.Persistence.SQLRepositories
         public UserManager<ApplicationUser> UserManager => _userManager;
 
         public IYearOfOperationRepository YearOfOperationRepository => _yearOfOperationRepository ??= new YearOfOperationRepository(_context, _unitOfWork);
+
+        public ILicenseApprovalLevelRepository LicenseApprovalLevelRepository => _licenseApprovalLevelRepository ??= new LicenseApprovalLevelRepository(_context, _unitOfWork);
     }
 }
