@@ -31,5 +31,7 @@ namespace DataStore.Persistence.Interfaces
 
         ILicenseApprovalLevelRepository LicenseApprovalLevelRepository { get; }
 
+        IFirmRepository FirmRepository { get; }
+
     }
 }

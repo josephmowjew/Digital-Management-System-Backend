@@ -108,14 +108,6 @@ namespace DataStore.Data
                 entity.Property(u => u.Value).HasMaxLength(200);
             });
 
-            
-  
-
-
-
-
-
-
         }
 
         public DbSet<Department > Departments{ get; set; }
@@ -127,6 +119,7 @@ namespace DataStore.Data
         public DbSet<ErrorLog> ErrorLogs { get; set; }
         public DbSet<YearOfOperation> YearOfOperations { get; set; }
         public DbSet<LicenseApprovalLevel> LicenseApprovalLevels { get; set; }
+        public DbSet<Firm> Firms { get; set; }
 
 
 
