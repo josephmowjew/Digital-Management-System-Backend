@@ -12,6 +12,7 @@ namespace DataStore.Helpers
         public static string Deleted = "Deleted";
         public static string Disabled = "Disabled";
         public static string Pending = "Pending";
+        public static string Rejected = "Rejected";
 
 
         private static Random _random = new Random(); // declaring it as static and initiating it once

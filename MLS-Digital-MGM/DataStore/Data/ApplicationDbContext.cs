@@ -120,6 +120,11 @@ namespace DataStore.Data
         public DbSet<YearOfOperation> YearOfOperations { get; set; }
         public DbSet<LicenseApprovalLevel> LicenseApprovalLevels { get; set; }
         public DbSet<Firm> Firms { get; set; }
+        public DbSet<ProbonoClient> ProbonoClients { get; set; }
+        public DbSet<ProBonoApplication> ProBonoApplications { get; set; }
+        public DbSet<ProBonoReport> ProBonoReports { get; set;}
+        public DbSet<PropBonoReportFeedback> PropBonoReportFeedbacks { get; set; }
+
 
 
 

@@ -3,6 +3,7 @@ using System;
 using DataStore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240412074304_added probono client table")]
+    partial class addedprobonoclienttable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -32,36 +35,6 @@ namespace DataStore.Migrations
                     b.HasIndex("UsersId");
 
                     b.ToTable("ApplicationUserAttachment");
-                });
-
-            modelBuilder.Entity("AttachmentProBono", b =>
-                {
-                    b.Property<int>("AttachmentsId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ProBonosId")
-                        .HasColumnType("int");
-
-                    b.HasKey("AttachmentsId", "ProBonosId");
-
-                    b.HasIndex("ProBonosId");
-
-                    b.ToTable("AttachmentProBono");
-                });
-
-            modelBuilder.Entity("AttachmentProBonoApplication", b =>
-                {
-                    b.Property<int>("AttachmentsId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ProBonosApplicationsId")
-                        .HasColumnType("int");
-
-                    b.HasKey("AttachmentsId", "ProBonosApplicationsId");
-
-                    b.HasIndex("ProBonosApplicationsId");
-
-                    b.ToTable("AttachmentProBonoApplication");
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.ApplicationUser", b =>
@@ -503,156 +476,6 @@ namespace DataStore.Migrations
                     b.ToTable("LicenseApprovalLevels");
                 });
 
-            modelBuilder.Entity("DataStore.Core.Models.ProBono", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<string>("CaseDetails")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("CreatedById")
-                        .HasColumnType("varchar(200)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("NatureOfDispute")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("varchar(200)");
-
-                    b.Property<int>("ProbonoClientId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("SummaryOfDispute")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedById");
-
-                    b.HasIndex("ProbonoClientId");
-
-                    b.ToTable("ProBono");
-                });
-
-            modelBuilder.Entity("DataStore.Core.Models.ProBonoApplication", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<string>("ApplicationStatus")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("ApprovedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("CaseDetails")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("CreatedById")
-                        .HasColumnType("varchar(200)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("DenialReason")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("varchar(200)");
-
-                    b.Property<string>("NatureOfDispute")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("varchar(200)");
-
-                    b.Property<int>("ProbonoClientId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("SummaryOfDispute")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedById");
-
-                    b.HasIndex("ProbonoClientId");
-
-                    b.ToTable("ProBonoApplications");
-                });
-
-            modelBuilder.Entity("DataStore.Core.Models.ProBonoReport", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<string>("ApprovedById")
-                        .HasColumnType("varchar(200)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<double>("ProBonoHours")
-                        .HasColumnType("double");
-
-                    b.Property<int>("ProBonoId")
-                        .HasColumnType("int");
-
-                    b.Property<double>("ProBonoProposedHours")
-                        .HasColumnType("double");
-
-                    b.Property<string>("ReportStatus")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ApprovedById");
-
-                    b.HasIndex("ProBonoId");
-
-                    b.ToTable("ProBonoReports");
-                });
-
             modelBuilder.Entity("DataStore.Core.Models.ProbonoClient", b =>
                 {
                     b.Property<int>("Id")
@@ -661,6 +484,15 @@ namespace DataStore.Migrations
 
                     b.Property<decimal>("AnnualIncome")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("CaseDetails")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("CreatedById")
+                        .IsRequired()
+                        .HasMaxLength(70)
+                        .HasColumnType("varchar(70)");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime(6)");
@@ -672,6 +504,11 @@ namespace DataStore.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50)");
+
+                    b.Property<string>("NatureOfDispute")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
 
                     b.Property<string>("Occupation")
                         .IsRequired()
@@ -712,46 +549,9 @@ namespace DataStore.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatedById");
+
                     b.ToTable("ProbonoClients");
-                });
-
-            modelBuilder.Entity("DataStore.Core.Models.PropBonoReportFeedback", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("FeedBackById")
-                        .HasColumnType("varchar(200)");
-
-                    b.Property<string>("Feedback")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("varchar(250)");
-
-                    b.Property<int>("ProBonoReportId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("FeedBackById");
-
-                    b.HasIndex("ProBonoReportId");
-
-                    b.ToTable("PropBonoReportFeedbacks");
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.Title", b =>
@@ -1004,36 +804,6 @@ namespace DataStore.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("AttachmentProBono", b =>
-                {
-                    b.HasOne("DataStore.Core.Models.Attachment", null)
-                        .WithMany()
-                        .HasForeignKey("AttachmentsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DataStore.Core.Models.ProBono", null)
-                        .WithMany()
-                        .HasForeignKey("ProBonosId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("AttachmentProBonoApplication", b =>
-                {
-                    b.HasOne("DataStore.Core.Models.Attachment", null)
-                        .WithMany()
-                        .HasForeignKey("AttachmentsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DataStore.Core.Models.ProBonoApplication", null)
-                        .WithMany()
-                        .HasForeignKey("ProBonosApplicationsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("DataStore.Core.Models.ApplicationUser", b =>
                 {
                     b.HasOne("DataStore.Core.Models.Country", "Country")
@@ -1104,72 +874,15 @@ namespace DataStore.Migrations
                     b.Navigation("Department");
                 });
 
-            modelBuilder.Entity("DataStore.Core.Models.ProBono", b =>
+            modelBuilder.Entity("DataStore.Core.Models.ProbonoClient", b =>
                 {
                     b.HasOne("DataStore.Core.Models.ApplicationUser", "CreatedBy")
                         .WithMany()
-                        .HasForeignKey("CreatedById");
-
-                    b.HasOne("DataStore.Core.Models.ProbonoClient", "ProbonoClient")
-                        .WithMany()
-                        .HasForeignKey("ProbonoClientId")
+                        .HasForeignKey("CreatedById")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("CreatedBy");
-
-                    b.Navigation("ProbonoClient");
-                });
-
-            modelBuilder.Entity("DataStore.Core.Models.ProBonoApplication", b =>
-                {
-                    b.HasOne("DataStore.Core.Models.ApplicationUser", "CreatedBy")
-                        .WithMany()
-                        .HasForeignKey("CreatedById");
-
-                    b.HasOne("DataStore.Core.Models.ProbonoClient", "ProbonoClient")
-                        .WithMany()
-                        .HasForeignKey("ProbonoClientId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CreatedBy");
-
-                    b.Navigation("ProbonoClient");
-                });
-
-            modelBuilder.Entity("DataStore.Core.Models.ProBonoReport", b =>
-                {
-                    b.HasOne("DataStore.Core.Models.ApplicationUser", "ApprovedBy")
-                        .WithMany()
-                        .HasForeignKey("ApprovedById");
-
-                    b.HasOne("DataStore.Core.Models.ProBono", "ProBono")
-                        .WithMany()
-                        .HasForeignKey("ProBonoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ApprovedBy");
-
-                    b.Navigation("ProBono");
-                });
-
-            modelBuilder.Entity("DataStore.Core.Models.PropBonoReportFeedback", b =>
-                {
-                    b.HasOne("DataStore.Core.Models.ApplicationUser", "FeedBackBy")
-                        .WithMany()
-                        .HasForeignKey("FeedBackById");
-
-                    b.HasOne("DataStore.Core.Models.ProBonoReport", "ProBonoReport")
-                        .WithMany()
-                        .HasForeignKey("ProBonoReportId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("FeedBackBy");
-
-                    b.Navigation("ProBonoReport");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
