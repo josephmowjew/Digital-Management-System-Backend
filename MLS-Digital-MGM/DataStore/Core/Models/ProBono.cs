@@ -14,6 +14,9 @@ namespace DataStore.Core.Models
         {
             Attachments = new List<Attachment>();
         }
+        [Required]
+        [StringLength(maximumLength:100)]
+        public string FileNumber { get; set; }
         [Required, MaxLength(200)]
         public string NatureOfDispute { get; set; }
         [Required]

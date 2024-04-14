@@ -14,10 +14,6 @@ namespace DataStore.Core.Models
     public class ApplicationUser: IdentityUser, IEntity
     {
 
-        public ApplicationUser()
-        {
-            Attachments = new List<Attachment>();
-        }
         [Required]
         [StringLength(maximumLength: 100)]
         public string FirstName { get; set; }
@@ -63,9 +59,7 @@ namespace DataStore.Core.Models
         public DateTime LastLogin { get; set; }
         public int? Pin { get; set; }
 
-        //add association to attachments
-        public ICollection<Attachment> Attachments { get; set; }
-
+        
         [NotMapped]
         public String FullName
         {

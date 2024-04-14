@@ -33,5 +33,7 @@ namespace DataStore.Persistence.Interfaces
 
         IFirmRepository FirmRepository { get; }
 
+        IProBonoClientRepository ProBonoClientRepository { get; }
+
     }
 }

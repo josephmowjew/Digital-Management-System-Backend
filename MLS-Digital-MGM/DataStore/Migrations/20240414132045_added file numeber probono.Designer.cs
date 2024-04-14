@@ -3,6 +3,7 @@ using System;
 using DataStore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,28 +11,30 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240414132045_added file numeber probono")]
+    partial class addedfilenumeberprobono
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "8.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
-            modelBuilder.Entity("AttachmentLicenseApplication", b =>
+            modelBuilder.Entity("ApplicationUserAttachment", b =>
                 {
                     b.Property<int>("AttachmentsId")
                         .HasColumnType("int");
 
-                    b.Property<int>("LicenseApplicationsId")
-                        .HasColumnType("int");
+                    b.Property<string>("UsersId")
+                        .HasColumnType("varchar(200)");
 
-                    b.HasKey("AttachmentsId", "LicenseApplicationsId");
+                    b.HasKey("AttachmentsId", "UsersId");
 
-                    b.HasIndex("LicenseApplicationsId");
+                    b.HasIndex("UsersId");
 
-                    b.ToTable("AttachmentLicenseApplication");
+                    b.ToTable("ApplicationUserAttachment");
                 });
 
             modelBuilder.Entity("AttachmentProBono", b =>
@@ -62,21 +65,6 @@ namespace DataStore.Migrations
                     b.HasIndex("ProBonosApplicationsId");
 
                     b.ToTable("AttachmentProBonoApplication");
-                });
-
-            modelBuilder.Entity("AttachmentQualification", b =>
-                {
-                    b.Property<int>("AttachmentsId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("QualificationsId")
-                        .HasColumnType("int");
-
-                    b.HasKey("AttachmentsId", "QualificationsId");
-
-                    b.HasIndex("QualificationsId");
-
-                    b.ToTable("AttachmentQualification");
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.ApplicationUser", b =>
@@ -486,217 +474,6 @@ namespace DataStore.Migrations
                     b.ToTable("IdentityTypes");
                 });
 
-            modelBuilder.Entity("DataStore.Core.Models.License", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateOnly>("ExpiryDate")
-                        .HasColumnType("date");
-
-                    b.Property<int>("LicenseApplicationId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("LicenseNumber")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<int>("MemberId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("YearOfOperationId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LicenseApplicationId");
-
-                    b.HasIndex("MemberId");
-
-                    b.HasIndex("YearOfOperationId");
-
-                    b.ToTable("Licenses");
-                });
-
-            modelBuilder.Entity("DataStore.Core.Models.LicenseApplication", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<string>("ApplicationStatus")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<bool>("AttainedMinimumNumberOfCLEUnits")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<bool>("CompliedWithPenaltiesImposedUnderTheAct")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("CurrentApprovalLevelID")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("ExplanationForNoAccountantsCertificate")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("ExplanationForNoComplianceWithPenalties")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("ExplanationForNoContributionToFidelityFund")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("ExplanationForNoContributionToMLSBuildingProjectFund")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("ExplanationForNoFullMandatoryProBonoWork")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("ExplanationForNoMinimumNumberOfCLEUnits")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("ExplanationForNoProfessionalIndemnityInsuranceCover")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("ExplanationForNoSocietysLevy")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("ExplanationForNoValidTaxClearanceCertificate")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<bool>("FirstApplicationForLicense")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<bool>("HasValidAnnualProfessionalIndemnityInsuranceCover")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<bool>("MadeContributionToFidelityFund")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<bool>("MadeContributionToMLSBuildingProjectFund")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<int>("MemberId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("ObtainedLeaveToRenewLicenseOutOfTime")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<bool>("PaidAnnualSubscriptionToSociety")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<bool>("PerformedFullMandatoryProBonoWork")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<bool>("RemittedSocietysLevy")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<bool>("RenewedLicensePreviousYear")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<bool>("SubmittedAccountantsCertificate")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<bool>("SubmittedValidTaxClearanceCertificate")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<DateTime>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("YearOfOperationId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CurrentApprovalLevelID");
-
-                    b.HasIndex("MemberId");
-
-                    b.HasIndex("YearOfOperationId");
-
-                    b.ToTable("LicenseApplications");
-                });
-
-            modelBuilder.Entity("DataStore.Core.Models.LicenseApplicationApproval", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<bool>("Approved")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<string>("CreatedById")
-                        .HasColumnType("varchar(200)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("LicenseApplicationID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("LicenseApprovalLevelID")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Reason_for_Rejection")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("varchar(250)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedById");
-
-                    b.HasIndex("LicenseApplicationID");
-
-                    b.HasIndex("LicenseApprovalLevelID");
-
-                    b.ToTable("LicenseApplicationApprovals");
-                });
-
             modelBuilder.Entity("DataStore.Core.Models.LicenseApprovalLevel", b =>
                 {
                     b.Property<int>("Id")
@@ -727,48 +504,6 @@ namespace DataStore.Migrations
                     b.HasIndex("DepartmentId");
 
                     b.ToTable("LicenseApprovalLevels");
-                });
-
-            modelBuilder.Entity("DataStore.Core.Models.Member", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateOnly>("DateOfAdmissionToPractice")
-                        .HasColumnType("date");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("PermanentAddress")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("varchar(250)");
-
-                    b.Property<string>("PostalAddress")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("varchar(250)");
-
-                    b.Property<string>("ResidentialAddress")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("varchar(250)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Members");
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.ProBono", b =>
@@ -1027,72 +762,6 @@ namespace DataStore.Migrations
                     b.ToTable("PropBonoReportFeedbacks");
                 });
 
-            modelBuilder.Entity("DataStore.Core.Models.Qualification", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateOnly>("DateObtained")
-                        .HasColumnType("date");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("IssuingInstitution")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("varchar(250)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Qualifications");
-                });
-
-            modelBuilder.Entity("DataStore.Core.Models.QualificationType", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("varchar(150)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("QualificationTypes");
-                });
-
             modelBuilder.Entity("DataStore.Core.Models.Title", b =>
                 {
                     b.Property<int>("Id")
@@ -1150,21 +819,6 @@ namespace DataStore.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("YearOfOperations");
-                });
-
-            modelBuilder.Entity("MemberQualification", b =>
-                {
-                    b.Property<int>("MembersId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("QualificationsId")
-                        .HasColumnType("int");
-
-                    b.HasKey("MembersId", "QualificationsId");
-
-                    b.HasIndex("QualificationsId");
-
-                    b.ToTable("MemberQualification");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -1343,7 +997,7 @@ namespace DataStore.Migrations
                     b.HasDiscriminator().HasValue("Role");
                 });
 
-            modelBuilder.Entity("AttachmentLicenseApplication", b =>
+            modelBuilder.Entity("ApplicationUserAttachment", b =>
                 {
                     b.HasOne("DataStore.Core.Models.Attachment", null)
                         .WithMany()
@@ -1351,9 +1005,9 @@ namespace DataStore.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DataStore.Core.Models.LicenseApplication", null)
+                    b.HasOne("DataStore.Core.Models.ApplicationUser", null)
                         .WithMany()
-                        .HasForeignKey("LicenseApplicationsId")
+                        .HasForeignKey("UsersId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -1384,21 +1038,6 @@ namespace DataStore.Migrations
                     b.HasOne("DataStore.Core.Models.ProBonoApplication", null)
                         .WithMany()
                         .HasForeignKey("ProBonosApplicationsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("AttachmentQualification", b =>
-                {
-                    b.HasOne("DataStore.Core.Models.Attachment", null)
-                        .WithMany()
-                        .HasForeignKey("AttachmentsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DataStore.Core.Models.Qualification", null)
-                        .WithMany()
-                        .HasForeignKey("QualificationsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -1460,85 +1099,6 @@ namespace DataStore.Migrations
                         .HasForeignKey("CreatedById");
 
                     b.Navigation("CreatedBy");
-                });
-
-            modelBuilder.Entity("DataStore.Core.Models.License", b =>
-                {
-                    b.HasOne("DataStore.Core.Models.LicenseApplication", "LicenseApplication")
-                        .WithMany()
-                        .HasForeignKey("LicenseApplicationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DataStore.Core.Models.Member", "Member")
-                        .WithMany()
-                        .HasForeignKey("MemberId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DataStore.Core.Models.YearOfOperation", "YearOfOperation")
-                        .WithMany()
-                        .HasForeignKey("YearOfOperationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("LicenseApplication");
-
-                    b.Navigation("Member");
-
-                    b.Navigation("YearOfOperation");
-                });
-
-            modelBuilder.Entity("DataStore.Core.Models.LicenseApplication", b =>
-                {
-                    b.HasOne("DataStore.Core.Models.LicenseApprovalLevel", "CurrentApprovalLevel")
-                        .WithMany()
-                        .HasForeignKey("CurrentApprovalLevelID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DataStore.Core.Models.Member", "Member")
-                        .WithMany()
-                        .HasForeignKey("MemberId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DataStore.Core.Models.YearOfOperation", "YearOfOperation")
-                        .WithMany()
-                        .HasForeignKey("YearOfOperationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CurrentApprovalLevel");
-
-                    b.Navigation("Member");
-
-                    b.Navigation("YearOfOperation");
-                });
-
-            modelBuilder.Entity("DataStore.Core.Models.LicenseApplicationApproval", b =>
-                {
-                    b.HasOne("DataStore.Core.Models.ApplicationUser", "CreatedBy")
-                        .WithMany()
-                        .HasForeignKey("CreatedById");
-
-                    b.HasOne("DataStore.Core.Models.LicenseApplication", "LicenseApplication")
-                        .WithMany()
-                        .HasForeignKey("LicenseApplicationID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DataStore.Core.Models.LicenseApprovalLevel", "LicenseApprovalLevel")
-                        .WithMany()
-                        .HasForeignKey("LicenseApprovalLevelID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CreatedBy");
-
-                    b.Navigation("LicenseApplication");
-
-                    b.Navigation("LicenseApprovalLevel");
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.LicenseApprovalLevel", b =>
@@ -1618,21 +1178,6 @@ namespace DataStore.Migrations
                     b.Navigation("FeedBackBy");
 
                     b.Navigation("ProBonoReport");
-                });
-
-            modelBuilder.Entity("MemberQualification", b =>
-                {
-                    b.HasOne("DataStore.Core.Models.Member", null)
-                        .WithMany()
-                        .HasForeignKey("MembersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DataStore.Core.Models.Qualification", null)
-                        .WithMany()
-                        .HasForeignKey("QualificationsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

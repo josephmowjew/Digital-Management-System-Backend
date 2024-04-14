@@ -27,6 +27,7 @@ namespace DataStore.Persistence.SQLRepositories
         private IYearOfOperationRepository _yearOfOperationRepository;
         private ILicenseApprovalLevelRepository _licenseApprovalLevelRepository;
         private IFirmRepository _firmRepository;
+        private IProBonoClientRepository _proBonoClientRepository;
 
         // Add other repository fields here, e.g., private IProductRepository _productRepository;
 
@@ -61,5 +62,7 @@ namespace DataStore.Persistence.SQLRepositories
 
         public ILicenseApprovalLevelRepository LicenseApprovalLevelRepository => _licenseApprovalLevelRepository ??= new LicenseApprovalLevelRepository(_context, _unitOfWork);
         public IFirmRepository FirmRepository => _firmRepository ??= new FirmRepository(_context, _unitOfWork);
+
+        public IProBonoClientRepository ProBonoClientRepository => _proBonoClientRepository ??= new ProBonoClientRepository(_context, _unitOfWork);
     }
 }

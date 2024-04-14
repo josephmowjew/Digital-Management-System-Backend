@@ -11,9 +11,11 @@ namespace DataStore.Core.Models
     {
         public Attachment()
         {
-            Users = new List<ApplicationUser>();
+        
             ProBonos = new List<ProBono>();
             ProBonosApplications = new List<ProBonoApplication>();
+            Qualifications = new List<Qualification>();
+            LicenseApplications = new List<LicenseApplication>();
         }
         
         [Required]
@@ -28,12 +30,11 @@ namespace DataStore.Core.Models
         public int AttachmentTypeId { get; set; }
         public AttachmentType AttachmentType { get; set; }
 
-        //add many to many association to User
-
-        public ICollection<ApplicationUser> Users { get; set; } 
+     
         public ICollection<ProBono> ProBonos { get; set; }
         public ICollection<ProBonoApplication> ProBonosApplications { get; set;}
-
+        public ICollection<Qualification> Qualifications { get; set; } 
+        public ICollection<LicenseApplication> LicenseApplications { get; set; }
 
 
     }
