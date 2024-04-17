@@ -16,6 +16,7 @@ namespace DataStore.Core.Models
             ProBonosApplications = new List<ProBonoApplication>();
             Qualifications = new List<Qualification>();
             LicenseApplications = new List<LicenseApplication>();
+            ProBonoReports = new List<ProBonoReport>();
         }
         
         [Required]
@@ -35,6 +36,7 @@ namespace DataStore.Core.Models
         public ICollection<ProBonoApplication> ProBonosApplications { get; set;}
         public ICollection<Qualification> Qualifications { get; set; } 
         public ICollection<LicenseApplication> LicenseApplications { get; set; }
+        public ICollection<ProBonoReport> ProBonoReports { get; set; }
 
 
     }

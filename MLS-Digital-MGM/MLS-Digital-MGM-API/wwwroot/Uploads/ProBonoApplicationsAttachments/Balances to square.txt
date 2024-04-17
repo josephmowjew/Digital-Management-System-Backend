@@ -1,0 +1,12 @@
+Alice: 125,000
+Jonathan: 150,000
+Birthday: 100,000
+Fuel: 200,000
+accomodation: 350,000
+change of ownership: 20,000
+insurance: 55,000
+COF: 21,000
+starlink: 52,000
+
+
+AUTHORIZE, NONE, PURCHASE, VERIFY

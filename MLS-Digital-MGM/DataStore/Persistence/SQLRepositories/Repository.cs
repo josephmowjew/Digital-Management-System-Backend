@@ -45,10 +45,18 @@ namespace DataStore.Persistence.SQLRepositories
             return await _context.Set<T>().Where(q => q.Status != Lambda.Deleted).Where(predicate).FirstOrDefaultAsync();
         }
 
-        public async Task<IEnumerable<T>> GetPagedAsync(Expression<Func<T, bool>> predicate, int pageNumber, int pageSize)
+       public async Task<IEnumerable<T>> GetPagedAsync(Expression<Func<T, bool>> predicate, int pageNumber, int pageSize, params Expression<Func<T, object>>[] includes)
         {
             var query = _context.Set<T>().Where(predicate);
+
+            // Include the specified navigation properties
+            foreach (var include in includes)
+            {
+                query = query.Include(include);
+            }
+
             query = query.Where(q => q.Status != Lambda.Deleted);
+
             var result = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
 
             return result;

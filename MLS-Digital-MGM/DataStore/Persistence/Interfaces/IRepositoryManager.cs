@@ -35,5 +35,13 @@ namespace DataStore.Persistence.Interfaces
 
         IProBonoClientRepository ProBonoClientRepository { get; }
 
+        IProBonoApplicationRepository ProBonoApplicationRepository { get; }
+
+        IAttachmentTypeRepository AttachmentTypeRepository { get; }
+
+        IProBonoRepository ProBonoRepository { get; }
+
+        IProBonoReportRepository ProBonoReportRepository { get; }
+
     }
 }

@@ -1,33 +1,41 @@
-﻿using DataStore.Helpers;
+using DataStore.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace DataStore.Core.Models
+namespace DataStore.Core.DTOs.ProBonoApplication
 {
-    public class ProBono: Meta
+    public class ReadProBonoApplicationDTO
     {
-        public ProBono()
+        public ReadProBonoApplicationDTO()
         {
             Attachments = new List<Attachment>();
         }
-        [Required]
-        [StringLength(maximumLength:100)]
-        public string FileNumber { get; set; }
+
+        public int Id { get; set; }
+
         [Required, MaxLength(200)]
         public string NatureOfDispute { get; set; }
+
         [Required]
         public string CaseDetails { get; set; }
-        public string? CreatedById { get; set; }
+
+        public string CreatedById { get; set; }
+
         public ApplicationUser CreatedBy { get; set; }
+
         public int ProbonoClientId { get; set; }
+
         public ProbonoClient ProbonoClient { get; set; }
-        public int ProBonoApplicationId { get; set; }
-        public ProBonoApplication ProBonoApplication { get; set; }
+
+        public string ApplicationStatus { get; set; }
+
+        public DateTime ApprovedDate { get; set; }
+
+        public string DenialReason { get; set; }
+
         public string SummaryOfDispute { get; set; }
+
         public ICollection<Attachment> Attachments { get; set; }
     }
 }

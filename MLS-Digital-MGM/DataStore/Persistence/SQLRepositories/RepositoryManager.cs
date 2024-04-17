@@ -28,6 +28,11 @@ namespace DataStore.Persistence.SQLRepositories
         private ILicenseApprovalLevelRepository _licenseApprovalLevelRepository;
         private IFirmRepository _firmRepository;
         private IProBonoClientRepository _proBonoClientRepository;
+        private IProBonoApplicationRepository _proBonoApplicationRepository; 
+        private IAttachmentTypeRepository _attachmentTypeRepository;
+        private IProBonoRepository _proBonoRepository;
+        private IProBonoReportRepository _proBonoReportRepository;
+
 
         // Add other repository fields here, e.g., private IProductRepository _productRepository;
 
@@ -64,5 +69,13 @@ namespace DataStore.Persistence.SQLRepositories
         public IFirmRepository FirmRepository => _firmRepository ??= new FirmRepository(_context, _unitOfWork);
 
         public IProBonoClientRepository ProBonoClientRepository => _proBonoClientRepository ??= new ProBonoClientRepository(_context, _unitOfWork);
+
+        public IProBonoApplicationRepository ProBonoApplicationRepository => _proBonoApplicationRepository ??= new ProBonoApplicationRepository(_context, _unitOfWork);
+
+        public IAttachmentTypeRepository AttachmentTypeRepository => _attachmentTypeRepository ??= new AttachmentTypeRepository(_context, _unitOfWork);
+
+        public IProBonoRepository ProBonoRepository => _proBonoRepository ??= new ProBonoRepository(_context, _unitOfWork);
+
+        public IProBonoReportRepository ProBonoReportRepository => _proBonoReportRepository ??= new ProBonoReportRepository(_context, _unitOfWork);
     }
 }

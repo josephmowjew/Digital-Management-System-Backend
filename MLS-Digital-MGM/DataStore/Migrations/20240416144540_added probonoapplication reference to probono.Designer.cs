@@ -3,6 +3,7 @@ using System;
 using DataStore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240416144540_added probonoapplication reference to probono")]
+    partial class addedprobonoapplicationreferencetoprobono
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -62,21 +65,6 @@ namespace DataStore.Migrations
                     b.HasIndex("ProBonosApplicationsId");
 
                     b.ToTable("AttachmentProBonoApplication");
-                });
-
-            modelBuilder.Entity("AttachmentProBonoReport", b =>
-                {
-                    b.Property<int>("AttachmentsId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ProBonoReportsId")
-                        .HasColumnType("int");
-
-                    b.HasKey("AttachmentsId", "ProBonoReportsId");
-
-                    b.HasIndex("ProBonoReportsId");
-
-                    b.ToTable("AttachmentProBonoReport");
                 });
 
             modelBuilder.Entity("AttachmentQualification", b =>
@@ -917,11 +905,6 @@ namespace DataStore.Migrations
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("varchar(250)");
-
                     b.Property<double>("ProBonoHours")
                         .HasColumnType("double");
 
@@ -1409,21 +1392,6 @@ namespace DataStore.Migrations
                     b.HasOne("DataStore.Core.Models.ProBonoApplication", null)
                         .WithMany()
                         .HasForeignKey("ProBonosApplicationsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("AttachmentProBonoReport", b =>
-                {
-                    b.HasOne("DataStore.Core.Models.Attachment", null)
-                        .WithMany()
-                        .HasForeignKey("AttachmentsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DataStore.Core.Models.ProBonoReport", null)
-                        .WithMany()
-                        .HasForeignKey("ProBonoReportsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
