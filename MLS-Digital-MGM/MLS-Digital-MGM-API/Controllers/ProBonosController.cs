@@ -10,6 +10,7 @@ using DataStore.Persistence.Interfaces;
 using DataStore.Core.Services.Interfaces;
 using DataStore.Core.Models;
 using DataStore.Core.DTOs.ProBono;
+using DataStore.Helpers;
 
 
 namespace MLS_Digital_MGM_API.Controllers
@@ -71,7 +72,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 
                 //check if there is no probono associated with the CreateProBonoDTO.ProBonoApplicationId
-                var existingProbono = await _repositoryManager.ProBonoApplicationRepository.GetByIdAsync(probonoDTO.ProBonoApplicationId);
+                var existingProbono = await _repositoryManager.ProBonoRepository.GetByIdAsync(probonoDTO.ProBonoApplicationId);
                 if (existingProbono != null)
                 {
                     ModelState.AddModelError(nameof(probonoDTO.ProBonoApplicationId), "a probono with this application Id already exists");
@@ -86,14 +87,23 @@ namespace MLS_Digital_MGM_API.Controllers
                 }
 
                 var probono = _mapper.Map<ProBono>(probonoApplication);
+
+                probono.ProBonoApplicationId = probonoDTO.ProBonoApplicationId;
                
                 string fileNumber = await GenerateUniqueFileNumber();
 
                 probono.FileNumber = fileNumber;
     
                 await _repositoryManager.ProBonoRepository.AddAsync(probono);
+                //approve the probono application automatically
+                probonoApplication.ApplicationStatus = Lambda.Approved;
+
+                probonoApplication.ApprovedDate = DateTime.UtcNow;
+                
+                await _repositoryManager.ProBonoApplicationRepository.UpdateAsync(probonoApplication);
+
                 await _unitOfWork.CommitAsync();
-    
+
                 return CreatedAtAction("GetProBonos", new { id = probono.Id }, probono);
             }
             catch (Exception ex)
