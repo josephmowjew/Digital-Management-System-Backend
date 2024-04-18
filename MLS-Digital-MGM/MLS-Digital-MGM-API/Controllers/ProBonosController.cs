@@ -35,7 +35,7 @@ namespace MLS_Digital_MGM_API.Controllers
         {
             try
             {
-                var probonos = await _repositoryManager.ProBonoRepository.GetPagedAsync(c => true, pageNumber, pageSize);
+                var probonos = await _repositoryManager.ProBonoRepository.GetPagedAsync(c => true, pageNumber, pageSize, p => p.ProBonoApplication);
     
                 if (probonos == null || !probonos.Any())
                 {

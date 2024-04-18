@@ -26,5 +26,8 @@ namespace DataStore.Core.DTOs.ProBono
         public int ProbonoClientId { get; set; }
 
         public ReadProBonoClientDTO ProbonoClient { get; set; }
+
+        public int ProBonoApplicationId { get; set; }
+        public DataStore.Core.Models.ProBonoApplication ProBonoApplication { get; set; }
     }
 }

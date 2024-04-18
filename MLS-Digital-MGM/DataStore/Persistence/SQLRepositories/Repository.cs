@@ -25,8 +25,25 @@ namespace DataStore.Persistence.SQLRepositories
 
         public async Task<T> GetByIdAsync(int id)
         {
-            return await _context.Set<T>().FindAsync(id);
+            var type = typeof(T);
+            var property = type.GetProperty("Id");
+            
+            if (property == null)
+            {
+                throw new ArgumentException($"The entity of type {typeof(T).Name} does not have an Id property.");
+            }
+
+            var parameter = Expression.Parameter(type, "record");
+            var propertyAccess = Expression.Property(parameter, property);
+            var idValue = Expression.Constant(id);
+            var equal = Expression.Equal(propertyAccess, idValue);
+            var statusCondition = Expression.NotEqual(Expression.Property(parameter, "Status"), Expression.Constant(Lambda.Deleted));
+            var andCondition = Expression.AndAlso(statusCondition, equal);
+            var lambda = Expression.Lambda<Func<T, bool>>(andCondition, parameter);
+
+            return await _context.Set<T>().FirstOrDefaultAsync(lambda);
         }
+
 
         public async Task<IEnumerable<T>> GetAllAsync()
         {
