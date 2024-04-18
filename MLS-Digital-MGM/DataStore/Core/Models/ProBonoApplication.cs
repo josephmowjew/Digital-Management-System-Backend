@@ -29,5 +29,7 @@ namespace DataStore.Core.Models
         public string DenialReason { get; set; }
         public string SummaryOfDispute { get; set; }
         public ICollection<Attachment> Attachments { get; set; }
+        public int YearOfOperationId { get; set; }
+        public YearOfOperation YearOfOperation { get; set; }
     }
 }

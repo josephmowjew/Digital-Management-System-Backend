@@ -28,6 +28,8 @@ namespace DataStore.Core.DTOs.ProBonoApplication
 
         public string SummaryOfDispute { get; set; }
 
+        public int YearOfOperationId { get; set; }
+
         public ICollection<IFormFile> Attachments { get; set; }  
 
     }

@@ -22,5 +22,6 @@ namespace DataStore.Core.DTOs.ProBono
         public string SummaryOfDispute { get; set; }
 
         public int ProbonoClientId { get; set; }
+        public int YearOfOperationId { get; set; }
     }
 }

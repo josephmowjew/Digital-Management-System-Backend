@@ -29,5 +29,7 @@ namespace DataStore.Core.DTOs.ProBono
 
         public int ProBonoApplicationId { get; set; }
         public DataStore.Core.Models.ProBonoApplication ProBonoApplication { get; set; }
+        public int YearOfOperationId { get; set; }
+        public DataStore.Core.Models.YearOfOperation YearOfOperation { get; set; }
     }
 }

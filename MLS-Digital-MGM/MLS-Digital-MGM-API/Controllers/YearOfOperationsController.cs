@@ -66,7 +66,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 var yearOfOperation = _mapper.Map<YearOfOperation>(yearOfOperationDTO);
 
-                var existingYearOfOperation = await _repositoryManager.YearOfOperationRepository.GetAsync(c => c.StartDate.Date.Equals(yearOfOperation.EndDate.Date));
+                var existingYearOfOperation = await _repositoryManager.YearOfOperationRepository.GetAsync(c => c.StartDate.Equals(yearOfOperation.EndDate));
 
                 if (existingYearOfOperation != null)
                 {

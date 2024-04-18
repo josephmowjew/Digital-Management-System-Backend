@@ -3,6 +3,7 @@ using System;
 using DataStore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240418085227_added year of operation to probono")]
+    partial class addedyearofoperationtoprobono
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1169,11 +1172,11 @@ namespace DataStore.Migrations
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("datetime(6)");
+                    b.Property<DateOnly>("EndDate")
+                        .HasColumnType("date");
 
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime(6)");
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date");
 
                     b.Property<string>("Status")
                         .IsRequired()

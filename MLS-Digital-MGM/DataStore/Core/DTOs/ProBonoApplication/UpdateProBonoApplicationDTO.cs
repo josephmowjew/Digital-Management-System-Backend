@@ -27,6 +27,7 @@ namespace DataStore.Core.DTOs.ProBonoApplication
         public string DenialReason { get; set; }
 
         public string SummaryOfDispute { get; set; }
+        public int YearOfOperationId { get; set; }
 
         public ICollection<IFormFile> Attachments { get; set; } = new List<IFormFile>(); 
     }
