@@ -2,6 +2,7 @@
 using DataStore.Core.DTOs.Role;
 using DataStore.Core.Models;
 using DataStore.Core.Services.Interfaces;
+using DataStore.Helpers;
 using DataStore.Persistence.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -72,8 +73,15 @@ namespace MLS_Digital_MGM_API.Controllers
         {
             try
             {
+                  // Create PagingParameters object
+                var pagingParameters = new PagingParameters<Role>{
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    //SearchTerm = null
+
+                };
                 // Get a paged list of Roles from the repository
-                var pagedRoles = await _repositoryManager.RoleRepository.GetPagedAsync(c => true, pageNumber, pageSize);
+                var pagedRoles = await _repositoryManager.RoleRepository.GetPagedAsync(pagingParameters);
 
                 // Map the Roles to a list of ReadRoleDTOs
                 var mappedRoles = pagedRoles.Select(r => _mapper.Map<ReadRoleDTO>(r));

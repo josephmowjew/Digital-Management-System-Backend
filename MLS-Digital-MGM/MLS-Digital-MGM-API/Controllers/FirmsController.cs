@@ -2,6 +2,7 @@ using AutoMapper;
 using DataStore.Core.DTOs.Firms;
 using DataStore.Core.Models;
 using DataStore.Core.Services.Interfaces;
+using DataStore.Helpers;
 using DataStore.Persistence.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -30,7 +31,14 @@ public class FirmsController : Controller
     {
         try
         {
-            var firms = await _repositoryManager.FirmRepository.GetPagedAsync(f => true, pageNumber, pageSize);
+                    // Create PagingParameters object
+                var pagingParameters = new PagingParameters<Firm>{
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    //SearchTerm = null
+
+                };
+            var firms = await _repositoryManager.FirmRepository.GetPagedAsync(pagingParameters);
 
             if (firms == null || !firms.Any())
             {

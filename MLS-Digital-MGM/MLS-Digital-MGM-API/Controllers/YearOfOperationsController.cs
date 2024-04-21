@@ -2,6 +2,7 @@ using AutoMapper;
 using DataStore.Core.DTOs.YearOfOperation;
 using DataStore.Core.Models;
 using DataStore.Core.Services.Interfaces;
+using DataStore.Helpers;
 using DataStore.Persistence.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -31,8 +32,16 @@ namespace MLS_Digital_MGM_API.Controllers
         {
             try
             {
+                  // Create PagingParameters object
+                var pagingParameters = new PagingParameters<YearOfOperation>{
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    //SearchTerm = null
+
+                };
+
                 // Retrieve paged year of operations from repository
-                var yearOfOperations = await _repositoryManager.YearOfOperationRepository.GetPagedAsync(c => true, pageNumber, pageSize);
+                var yearOfOperations = await _repositoryManager.YearOfOperationRepository.GetPagedAsync(pagingParameters);
 
                 if (yearOfOperations == null || !yearOfOperations.Any())
                 {

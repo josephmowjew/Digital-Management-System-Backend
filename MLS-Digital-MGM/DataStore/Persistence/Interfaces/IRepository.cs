@@ -1,10 +1,12 @@
 ﻿using DataStore.Core.Models.Interfaces;
+using DataStore.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+
 
 namespace DataStore.Persistence.Interfaces
 {
@@ -14,7 +16,7 @@ namespace DataStore.Persistence.Interfaces
         Task<IEnumerable<T>> GetAllAsync();
         Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>> predicate);
         Task<T> GetAsync(Expression<Func<T, bool>> predicate);
-        Task<IEnumerable<T>> GetPagedAsync(Expression<Func<T, bool>> predicate, int pageNumber, int pageSize,params Expression<Func<T, object>>[] includes);
+        Task<IEnumerable<T>> GetPagedAsync(PagingParameters<T> pagingParameters);
         Task AddAsync(T entity);
         Task UpdateAsync(T entity);
         Task DeleteAsync(T entity);

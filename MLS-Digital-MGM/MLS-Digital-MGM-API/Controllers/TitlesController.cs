@@ -3,6 +3,7 @@ using DataStore.Core.DTOs.Country;
 using DataStore.Core.DTOs.Title;
 using DataStore.Core.Models;
 using DataStore.Core.Services.Interfaces;
+using DataStore.Helpers;
 using DataStore.Persistence.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -33,7 +34,14 @@ namespace MLS_Digital_MGM_API.Controllers
         {
             try
             {
-                var titles = await _repositoryManager.TitleRepository.GetPagedAsync(c => true, pageNumber, pageSize);
+                  // Create PagingParameters object
+                var pagingParameters = new PagingParameters<Title>{
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    //SearchTerm = null
+
+                };
+                var titles = await _repositoryManager.TitleRepository.GetPagedAsync(pagingParameters);
 
                 if (titles == null || !titles.Any())
                 {

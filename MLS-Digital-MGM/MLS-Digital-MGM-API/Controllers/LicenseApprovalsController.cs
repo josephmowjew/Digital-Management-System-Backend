@@ -2,6 +2,7 @@ using AutoMapper;
 using DataStore.Core.DTOs.LicenseApprovalLevelDTO;
 using DataStore.Core.Models;
 using DataStore.Core.Services.Interfaces;
+using DataStore.Helpers;
 using DataStore.Persistence.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -41,8 +42,15 @@ namespace MLS_Digital_MGM_API.Controllers
         {
             try
             {
+                     // Create PagingParameters object
+                var pagingParameters = new PagingParameters<LicenseApprovalLevel>{
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    //SearchTerm = null
+
+                };
                 // Retrieve paged license approval levels from the repository
-                var licenseApprovalLevels = await _repositoryManager.LicenseApprovalLevelRepository.GetPagedAsync(d => true, pageNumber, pageSize);
+                var licenseApprovalLevels = await _repositoryManager.LicenseApprovalLevelRepository.GetPagedAsync(pagingParameters);
 
                 // If no license approval levels were found, return a 404 Not Found response
                 if (licenseApprovalLevels == null || !licenseApprovalLevels.Any())

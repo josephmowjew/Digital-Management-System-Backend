@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Linq.Dynamic.Core;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -47,7 +48,7 @@ namespace DataStore.Persistence.SQLRepositories
 
         public async Task<IEnumerable<T>> GetAllAsync()
         {
-            return await _context.Set<T>().ToListAsync();
+            return await _context.Set<T>().Where(q => q.Status != Lambda.Deleted).ToListAsync();
         }
 
         public async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>> predicate)
@@ -62,22 +63,47 @@ namespace DataStore.Persistence.SQLRepositories
             return await _context.Set<T>().Where(q => q.Status != Lambda.Deleted).Where(predicate).FirstOrDefaultAsync();
         }
 
-       public async Task<IEnumerable<T>> GetPagedAsync(Expression<Func<T, bool>> predicate, int pageNumber, int pageSize, params Expression<Func<T, object>>[] includes)
+        public async Task<IEnumerable<T>> GetPagedAsync(PagingParameters<T> pagingParameters)
         {
-            var query = _context.Set<T>().Where(predicate);
+            var query = _context.Set<T>().Where(pagingParameters.Predicate);
+
+            if (!string.IsNullOrEmpty(pagingParameters.SearchTerm))
+            {
+                // Use reflection to get the properties of the entity type
+                var entityProperties = typeof(T).GetProperties();
+                foreach (var property in entityProperties)
+                {
+                    var parameter = Expression.Parameter(typeof(T), "record");
+                    var propertyAccess = Expression.Property(parameter, property);
+                    var searchTermValue = Expression.Constant(pagingParameters.SearchTerm, typeof(string));
+                    var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) });
+                    var containsExpression = Expression.Call(propertyAccess, containsMethod, searchTermValue);
+                    var lambda = Expression.Lambda<Func<T, bool>>(containsExpression, parameter);
+                    query = query.Where(lambda);
+                }
+            }
 
             // Include the specified navigation properties
-            foreach (var include in includes)
+            foreach (var include in pagingParameters.Includes)
             {
                 query = query.Include(include);
             }
 
-            query = query.Where(q => q.Status != Lambda.Deleted);
+            //query = query.Where(q => q.Status != Lambda.Deleted);
 
-            var result = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
+            // Apply sort ordering
+            if (!string.IsNullOrEmpty(pagingParameters.SortColumn) && !string.IsNullOrEmpty(pagingParameters.SortDirection))
+            {
+                query = query.OrderBy($"{pagingParameters.SortColumn} {pagingParameters.SortDirection.ToLower()}");
+            }
+            var result = await query.Skip((pagingParameters.PageNumber - 1) * pagingParameters.PageSize).Take(pagingParameters.PageSize).ToListAsync();
 
             return result;
         }
+
+  
+
+
 
         public async Task AddAsync(T entity)
         {
@@ -100,6 +126,6 @@ namespace DataStore.Persistence.SQLRepositories
             }
         }
 
-       
+
     }
 }

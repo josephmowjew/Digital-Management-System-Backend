@@ -10,6 +10,7 @@ using DataStore.Persistence.Interfaces;
 using DataStore.Core.Services.Interfaces;
 using DataStore.Core.Models;
 using DataStore.Core.DTOs.ProBonoClient;
+using DataStore.Helpers;
 
 namespace MLS_Digital_MGM_API.Controllers // Update with your actual namespace
 {
@@ -34,7 +35,14 @@ namespace MLS_Digital_MGM_API.Controllers // Update with your actual namespace
         {
             try
             {
-                var clients = await _repositoryManager.ProBonoClientRepository.GetPagedAsync(c => true, pageNumber, pageSize);
+                  // Create PagingParameters object
+                var pagingParameters = new PagingParameters<ProbonoClient>{
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    //SearchTerm = null
+
+                };
+                var clients = await _repositoryManager.ProBonoClientRepository.GetPagedAsync(pagingParameters);
 
                 if (clients == null || !clients.Any())
                 {

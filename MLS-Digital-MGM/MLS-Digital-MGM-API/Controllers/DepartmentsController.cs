@@ -2,6 +2,7 @@
 using DataStore.Core.DTOs.Department;
 using DataStore.Core.Models;
 using DataStore.Core.Services.Interfaces;
+using DataStore.Helpers;
 using DataStore.Persistence.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -28,8 +29,15 @@ namespace MLS_Digital_MGM_API.Controllers
         {
             try
             {
+                      // Create PagingParameters object
+                var pagingParameters = new PagingParameters<Department>{
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    //SearchTerm = null
+
+                };
                 // Fetch paginated departments using the DepartmentRepository
-                var departments = await _repositoryManager.DepartmentRepository.GetPagedAsync(d => true, pageNumber, pageSize);
+                var departments = await _repositoryManager.DepartmentRepository.GetPagedAsync(pagingParameters);
 
                 // Check if departments exist
                 if (departments == null || !departments.Any())

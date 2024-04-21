@@ -2,6 +2,7 @@ using AutoMapper;
 using DataStore.Core.DTOs.IdentityType;
 using DataStore.Core.Models;
 using DataStore.Core.Services.Interfaces;
+using DataStore.Helpers;
 using DataStore.Persistence.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -36,8 +37,15 @@ namespace MLS_Digital_MGM_API.Controllers
         {
             try
             {
+                       // Create PagingParameters object
+                var pagingParameters = new PagingParameters<IdentityType>{
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    //SearchTerm = null
+
+                };
                 // Get paged list of identity types from repository
-                var identityTypes = await _repositoryManager.IdentityTypeRepository.GetPagedAsync(d => true, pageNumber, pageSize);
+                var identityTypes = await _repositoryManager.IdentityTypeRepository.GetPagedAsync(pagingParameters);
 
                 // If no identity types found, return NotFound result
                 if (identityTypes == null || !identityTypes.Any())

@@ -2,6 +2,7 @@ using AutoMapper;
 using DataStore.Core.DTOs.Country;
 using DataStore.Core.Models;
 using DataStore.Core.Services.Interfaces;
+using DataStore.Helpers;
 using DataStore.Persistence.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -35,8 +36,17 @@ namespace MLS_Digital_MGM_API.Controllers
         {
             try
             {
+                 // Create PagingParameters object
+                var pagingParameters = new PagingParameters<Country>{
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    Predicate = c => true
+                    //SearchTerm = null
+
+                };
+
                 // Get paged data from the data layer
-                var countries = await _repositoryManager.CountryRepository.GetPagedAsync(c => true, pageNumber, pageSize);
+                var countries = await _repositoryManager.CountryRepository.GetPagedAsync(pagingParameters);
 
                 if (countries == null || !countries.Any())
                 {

@@ -11,6 +11,7 @@ using DataStore.Core.Services.Interfaces;
 using DataStore.Core.Models;
 using DataStore.Core.DTOs.ProBono;
 using DataStore.Helpers;
+using System.Linq.Expressions;
 
 
 namespace MLS_Digital_MGM_API.Controllers
@@ -36,8 +37,16 @@ namespace MLS_Digital_MGM_API.Controllers
         {
             try
             {
-                var probonos = await _repositoryManager.ProBonoRepository.GetPagedAsync(c => true, pageNumber, pageSize, p => p.ProBonoApplication);
-    
+                  // Create PagingParameters object
+                var pagingParameters = new PagingParameters<ProBono>{
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    Includes = new Expression<Func<ProBono, object>>[] {
+                        p => p.ProBonoApplication
+                    }
+
+                };
+                var probonos = await _repositoryManager.ProBonoRepository.GetPagedAsync(pagingParameters);
                 if (probonos == null || !probonos.Any())
                 {
                     return NotFound();

@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using AutoMapper;
 using DataStore.Core.DTOs.ProBonoReport;
 using DataStore.Core.Models;
 using DataStore.Core.Services.Interfaces;
+using DataStore.Helpers;
 using DataStore.Persistence.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -34,7 +36,15 @@ public class ProBonoReportsController : Controller
     {
         try
         {
-            var reports = await _repositoryManager.ProBonoReportRepository.GetPagedAsync(r => true, pageNumber, pageSize,u => u.Attachments);
+             var pagingParameters = new PagingParameters<ProBonoReport>{
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    Includes = new Expression<Func<ProBonoReport, object>>[] {
+                        p => p.Attachments
+                    }
+             };
+
+            var reports = await _repositoryManager.ProBonoReportRepository.GetPagedAsync(pagingParameters);
 
             if (reports == null || !reports.Any())
             {
