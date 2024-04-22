@@ -14,11 +14,12 @@ namespace DataStore.Persistence.Interfaces
 
         Task<ApplicationUser> FindByEmailAsync(string email);
         Task<ApplicationUser> ConfirmAccount(string id, int pin);
-        Task<ApplicationUser?> GetSingleUser(string id, bool includeRelated = true);
+        Task<ApplicationUser?> GetSingleUser(string id);
     
         IdentityUserRole<string> GetUserRoleByUserId(string userId);
         Task<IdentityResult> AddAsync(ApplicationUser entity, string password);
         Task<IdentityResult> AddUserToRoleAsync(ApplicationUser applicationUser, string roleName);
+        void ActivateAccount(ApplicationUser user);
 
     }
 }

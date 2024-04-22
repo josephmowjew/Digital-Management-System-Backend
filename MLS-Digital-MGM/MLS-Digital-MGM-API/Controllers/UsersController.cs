@@ -121,7 +121,7 @@ namespace YourNamespaceHere.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
-        [HttpGet("deletedUsers")]
+        [HttpGet("getDeletedUsers")]
         public async Task<IActionResult> DeletedUsers(int pageNumber = 1, int pageSize = 10)
         {
             try
@@ -217,7 +217,29 @@ namespace YourNamespaceHere.Controllers
             }
         }
 
-        // Add more methods as needed
+        [HttpGet("activate/{userId}")]
+        public async Task<IActionResult> ActivateAccount(string userId)
+        {
+            try
+            {
+                var user = await _repositoryManager.UserRepository.GetSingleUser(userId);
+                if (user == null)
+                {
+                    return NotFound();
+                }
+               
+                _repositoryManager.UserRepository.ActivateAccount(user);
+                await _repositoryManager.UserRepository.UpdateAsync(user);
+                await _unitOfWork.CommitAsync();
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
 
     }
 }

@@ -50,10 +50,10 @@ namespace DataStore.Persistence.SQLRepositories
            return await _context.Users.Where(x => x.Email == email && x.Status != Lambda.Deleted).FirstOrDefaultAsync();
         }
 
-        public async Task<ApplicationUser?> GetSingleUser(string id, bool includeRelated = true)
+        public async Task<ApplicationUser?> GetSingleUser(string id)
         {
 
-            return await this._context.Users.FirstOrDefaultAsync(u => u.Id == id && u.DeletedDate == null);
+            return await this._context.Users.FirstOrDefaultAsync(u => u.Id == id && u.Status != Lambda.Deleted);
 
         }
 
@@ -67,6 +67,13 @@ namespace DataStore.Persistence.SQLRepositories
         public IdentityUserRole<string> GetUserRoleByUserId(string userId)
         {
             return _context.UserRoles.FirstOrDefault(u => u.UserId == userId);
+        }
+
+        public void ActivateAccount(ApplicationUser user)
+        {
+            user.EmailConfirmed = true;
+            user.Status = Lambda.Active;
+            user.DeletedDate = null;
         }
 
       
