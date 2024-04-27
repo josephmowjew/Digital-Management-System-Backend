@@ -5,10 +5,7 @@ using DataStore.Core.Services.Interfaces;
 using DataStore.Helpers;
 using DataStore.Persistence.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using MLS_Digital_MGM.DataStore.Helpers;
 
 [Route("api/[controller]")]
 public class FirmsController : Controller
@@ -17,13 +14,16 @@ public class FirmsController : Controller
     private readonly IErrorLogService _errorLogService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
+    private IHttpContextAccessor _httpContextAccessor;
 
-    public FirmsController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper)
+
+    public FirmsController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor)
     {
         _repositoryManager = repositoryManager;
         _errorLogService = errorLogService;
         _unitOfWork = unitOfWork;
         _mapper = mapper;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     [HttpGet("paged")]
@@ -31,22 +31,59 @@ public class FirmsController : Controller
     {
         try
         {
-                    // Create PagingParameters object
-                var pagingParameters = new PagingParameters<Firm>{
-                    PageNumber = pageNumber,
-                    PageSize = pageSize,
-                    //SearchTerm = null
+            // Create a new DataTablesParameters object
+            var dataTableParams = new DataTablesParameters();
 
-                };
-            var firms = await _repositoryManager.FirmRepository.GetPagedAsync(pagingParameters);
-
-            if (firms == null || !firms.Any())
+            var pagingParameters = new PagingParameters<Firm>
             {
-                return NotFound();
+                Predicate = u => u.Status != Lambda.Deleted,
+                PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
+                PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
+                SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
+                SortColumn = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumn : null,
+                SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null
+            };
+
+            // Fetch paginated firms using the FirmRepository
+            var pagedFirms = await _repositoryManager.FirmRepository.GetPagedAsync(pagingParameters);
+
+            // Check if roles exist
+            if (pagedFirms == null || !pagedFirms.Any())
+            {
+                if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                {
+                    var draw = dataTableParams.Draw;
+                    return Json(new
+                    {
+                        draw,
+                        recordsFiltered = 0,
+                        recordsTotal = 0,
+                        data = Enumerable.Empty<ReadFirmDTO>()
+                    });
+                }
+                return Ok(Enumerable.Empty<ReadFirmDTO>()); // Return empty list
             }
 
-            var mappedFirms = _mapper.Map<IEnumerable<ReadFirmDTO>>(firms);
+            // Map the Roles to a list of ReadFirmDTOs
+            var mappedFirms = _mapper.Map<List<ReadFirmDTO>>(pagedFirms);
 
+            // Return datatable JSON if the request came from a datatable
+            if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+            {
+                var draw = dataTableParams.Draw;
+                var resultTotalFiltred = mappedFirms.Count;
+
+                return Json(new
+                {
+                    draw,
+                    recordsFiltered = resultTotalFiltred,
+                    recordsTotal = resultTotalFiltred,
+                    data = mappedFirms.ToList() // Materialize the enumerable
+                });
+            }
+
+
+            // Return an Ok result with the mapped Roles
             return Ok(mappedFirms);
 
         }
