@@ -5,6 +5,7 @@ using DataStore.Core.Services.Interfaces;
 using DataStore.Helpers;
 using DataStore.Persistence.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using MLS_Digital_MGM.DataStore.Helpers;
 
 namespace MLS_Digital_MGM_API.Controllers
 {
@@ -15,6 +16,7 @@ namespace MLS_Digital_MGM_API.Controllers
         private readonly IErrorLogService _errorLogService; // Interface to the error logging service
         private readonly IUnitOfWork _unitOfWork; // Interface to the unit of work pattern
         private readonly IMapper _mapper; // Interface to the object-to-object mapping service
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         /// <summary>
         /// Constructor for the CountriesController
@@ -23,50 +25,110 @@ namespace MLS_Digital_MGM_API.Controllers
         /// <param name="errorLogService">Interface to the error logging service</param>
         /// <param name="unitOfWork">Interface to the unit of work pattern</param>
         /// <param name="mapper">Interface to the object-to-object mapping service</param>
-        public CountriesController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper)
+        public CountriesController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor)
         {
             _repositoryManager = repositoryManager;
             _errorLogService = errorLogService;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _httpContextAccessor = httpContextAccessor;
         }
 
-        [HttpGet("paged")]
-        public async Task<IActionResult> GetCountries(int pageNumber = 1, int pageSize = 10)
+        
+
+       [HttpGet("paged")]
+       public async Task<IActionResult> GetCountries(int pageNumber = 1, int pageSize = 10)
+       {
+           try
+           {
+               var dataTableParams = new DataTablesParameters();
+               var pagingParameters = new PagingParameters<Country>
+               {
+                   Predicate = c => true,
+                   PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
+                   PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
+                   SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
+                   SortColumn = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumn : null,
+                   SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null
+               };
+       
+               var countries = await _repositoryManager.CountryRepository.GetPagedAsync(pagingParameters);
+       
+               if (countries == null || !countries.Any())
+               {
+                   if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                   {
+                       var draw = dataTableParams.Draw;
+                       return Json(new
+                       {
+                           draw,
+                           recordsFiltered = 0,
+                           recordsTotal = 0,
+                           data = Enumerable.Empty<ReadCountryDTO>()
+                       });
+                   }
+                   return Ok(Enumerable.Empty<ReadCountryDTO>());
+               }
+       
+               var mappedCountries = _mapper.Map<IEnumerable<ReadCountryDTO>>(countries);
+       
+               if (mappedCountries == null || !mappedCountries.Any())
+               {
+                   if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                   {
+                       var draw = dataTableParams.Draw;
+                       var resultTotalFiltered = mappedCountries.Count();
+       
+                       return Json(new
+                       {
+                           draw,
+                           recordsFiltered = resultTotalFiltered,
+                           recordsTotal = resultTotalFiltered,
+                           data = mappedCountries.ToList()
+                       });
+                   }
+                   return Ok(mappedCountries);
+               }
+       
+               return Ok(mappedCountries);
+       
+           }
+           catch (Exception ex)
+           {
+               await _errorLogService.LogErrorAsync(ex);
+               return StatusCode(500, "Internal server error");
+           }
+       }
+        [HttpGet("getAll")]
+        public async Task<IActionResult> GetAllCountries()
         {
             try
             {
-                 // Create PagingParameters object
-                var pagingParameters = new PagingParameters<Country>{
-                    PageNumber = pageNumber,
-                    PageSize = pageSize,
-                    Predicate = c => true
-                    //SearchTerm = null
+               
+                // Fetch paginated countries using the DepartmentRepository
+                var countries = await _repositoryManager.CountryRepository.GetAllAsync();
 
-                };
-
-                // Get paged data from the data layer
-                var countries = await _repositoryManager.CountryRepository.GetPagedAsync(pagingParameters);
-
+                // Check if countries exist
                 if (countries == null || !countries.Any())
                 {
-                    return NotFound();
+                    return Ok(Enumerable.Empty<ReadCountryDTO>()); // Return 404 Not Found if no departments are found
                 }
 
-                // Map the data to a DTO
-                var mappedCountries = _mapper.Map<IEnumerable<ReadCountryDTO>>(countries);
+                // Map countries entities to ReadCountryDTO
+                var mappedDepartments = _mapper.Map<IEnumerable<ReadCountryDTO>>(countries);
 
-                return Ok(mappedCountries);
+                return Ok(mappedDepartments); // Return paginated countries
 
             }
             catch (Exception ex)
             {
-                // Log the error and return an error response
+                // Log the exception using ErrorLogService
                 await _errorLogService.LogErrorAsync(ex);
+
+                // Return 500 Internal Server Error
                 return StatusCode(500, "Internal server error");
             }
         }
-
         [HttpPost]
         public async Task<IActionResult> AddCountry([FromBody] CreateCountryDTO countryDTO)
         {

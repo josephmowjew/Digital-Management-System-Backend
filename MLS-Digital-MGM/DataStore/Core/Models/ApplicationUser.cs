@@ -60,15 +60,8 @@ namespace DataStore.Core.Models
         public int? Pin { get; set; }
 
         
-        [NotMapped]
-        public String FullName
-        {
-            get
-            {
-                return FirstName + " " + LastName;
-            }
-        }
         
+
 
 
     }

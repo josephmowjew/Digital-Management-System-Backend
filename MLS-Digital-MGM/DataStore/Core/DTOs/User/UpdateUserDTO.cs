@@ -53,6 +53,6 @@ namespace DataStore.Core.DTOs.User
         [EmailAddress]
         [StringLength(100, MinimumLength = 5)]
         public string Email { get; set; }
-        public string Password { get; set; }
+        
   }
 }

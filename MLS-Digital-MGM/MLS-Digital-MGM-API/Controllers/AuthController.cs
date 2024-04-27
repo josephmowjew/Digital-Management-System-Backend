@@ -77,7 +77,7 @@ namespace MLS_Digital_MGM_API.Controllers
         [HttpPost]
         [AllowAnonymous]
         [Route("Register")]
-        public async Task<ActionResult> Register([FromBody] RegisterDTO model)
+        public async Task<ActionResult> Register([FromBody]RegisterDTO model)
         {
             // Validate the model
             if (!ModelState.IsValid)

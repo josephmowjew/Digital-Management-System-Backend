@@ -9,10 +9,16 @@ namespace DataStore.Core.Models
 {
     public class QualificationType : Meta
     {
+        public QualificationType()
+        {
+            this.Members = new List<Member>();
+            //this.Attachments = new List<Attachment>();
+        }
 
         [Required]
-        [StringLength(maximumLength: 150)]
+        [StringLength(maximumLength: 100)]
         public string Name { get; set; }
-
+        public virtual List<Member> Members { get; set; }
+       
     }
 }

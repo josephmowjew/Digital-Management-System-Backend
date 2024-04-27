@@ -66,6 +66,34 @@ namespace MLS_Digital_MGM_API.Controllers
             }
         }
 
+        [HttpGet("getAll")]
+        public async Task<IActionResult> GetAllIdentityTypes()
+        {
+            try
+            {
+
+                // Get paged list of identity types from repository
+                var identityTypes = await _repositoryManager.IdentityTypeRepository.GetAllAsync();
+
+                // If no identity types found, return NotFound result
+                if (identityTypes == null || !identityTypes.Any())
+                {
+                    return NotFound();
+                }
+
+                // Map identity types to DTOs and return as Ok result
+                var mappedIdentityTypes = _mapper.Map<IEnumerable<ReadIdentityTypeDTO>>(identityTypes);
+
+                return Ok(mappedIdentityTypes);
+            }
+            catch (Exception ex)
+            {
+                // Log error and return Internal Server Error result
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
         // Action for adding a new identity type
         [HttpPost]
         public async Task<IActionResult> AddIdentityType([FromBody] CreateIdentityTypeDTO identityTypeDTO)

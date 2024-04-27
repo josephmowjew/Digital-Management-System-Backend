@@ -59,6 +59,29 @@ namespace MLS_Digital_MGM_API.Controllers
             }
         }
 
+        [HttpGet("getAll")]
+        public async Task<IActionResult> GetAllTitles()
+        {
+            try
+            {
+                var titles = await _repositoryManager.TitleRepository.GetAllAsync();
+
+                if (titles == null || !titles.Any())
+                {
+                    return NotFound();
+                }
+
+                var mappedTitles = _mapper.Map<IEnumerable<ReadTitleDTO>>(titles);
+
+                return Ok(mappedTitles);
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
         [HttpPost]
         public async Task<IActionResult> AddTitle([FromBody] CreateTitleDTO titleDTO)
         {

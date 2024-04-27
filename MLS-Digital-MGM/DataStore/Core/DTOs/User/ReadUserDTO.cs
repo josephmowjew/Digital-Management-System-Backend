@@ -16,17 +16,16 @@ namespace DataStore.Core.DTOs.User {
         public string Gender { get; set; }
         public string PhoneNumber { get; set; }
         public string IdentityNumber { get; set; }
-        public DateTime IdentityExpiryDate { get; set; }
-        public DateTime DateOfBirth { get; set; }
+        public DateOnly IdentityExpiryDate { get; set; }
+        public DateOnly DateOfBirth { get; set; }
         public int DepartmentId { get; set; }
-
         public int IdentityTypeId { get; set; }
-
         public int TitleId { get; set; }
         public int CountryId { get; set; }
-
         public string RoleName { get; set; }
         public string Email { get; set; }
+        public DateOnly LastLogin { get; set; }
+        public DateOnly CreatedDate { get; set; }
 
 
   }

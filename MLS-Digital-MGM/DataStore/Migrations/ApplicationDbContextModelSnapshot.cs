@@ -34,6 +34,21 @@ namespace DataStore.Migrations
                     b.ToTable("AttachmentLicenseApplication");
                 });
 
+            modelBuilder.Entity("AttachmentMemberQualification", b =>
+                {
+                    b.Property<int>("AttachmentsId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MemberQualificationsId")
+                        .HasColumnType("int");
+
+                    b.HasKey("AttachmentsId", "MemberQualificationsId");
+
+                    b.HasIndex("MemberQualificationsId");
+
+                    b.ToTable("AttachmentMemberQualification");
+                });
+
             modelBuilder.Entity("AttachmentProBono", b =>
                 {
                     b.Property<int>("AttachmentsId")
@@ -77,21 +92,6 @@ namespace DataStore.Migrations
                     b.HasIndex("ProBonoReportsId");
 
                     b.ToTable("AttachmentProBonoReport");
-                });
-
-            modelBuilder.Entity("AttachmentQualification", b =>
-                {
-                    b.Property<int>("AttachmentsId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("QualificationsId")
-                        .HasColumnType("int");
-
-                    b.HasKey("AttachmentsId", "QualificationsId");
-
-                    b.HasIndex("QualificationsId");
-
-                    b.ToTable("AttachmentQualification");
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.ApplicationUser", b =>
@@ -786,6 +786,38 @@ namespace DataStore.Migrations
                     b.ToTable("Members");
                 });
 
+            modelBuilder.Entity("DataStore.Core.Models.MemberQualification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<DateOnly>("DateObtained")
+                        .HasColumnType("date");
+
+                    b.Property<string>("IssuingInstitution")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("varchar(250)");
+
+                    b.Property<int>("MemberId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("QualificationId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("QualificationTypeId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MemberId");
+
+                    b.HasIndex("QualificationId");
+
+                    b.ToTable("MemberQualification");
+                });
+
             modelBuilder.Entity("DataStore.Core.Models.ProBono", b =>
                 {
                     b.Property<int>("Id")
@@ -1062,43 +1094,6 @@ namespace DataStore.Migrations
                     b.ToTable("PropBonoReportFeedbacks");
                 });
 
-            modelBuilder.Entity("DataStore.Core.Models.Qualification", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateOnly>("DateObtained")
-                        .HasColumnType("date");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("IssuingInstitution")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("varchar(250)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Qualifications");
-                });
-
             modelBuilder.Entity("DataStore.Core.Models.QualificationType", b =>
                 {
                     b.Property<int>("Id")
@@ -1113,8 +1108,8 @@ namespace DataStore.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("varchar(150)");
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -1187,19 +1182,19 @@ namespace DataStore.Migrations
                     b.ToTable("YearOfOperations");
                 });
 
-            modelBuilder.Entity("MemberQualification", b =>
+            modelBuilder.Entity("MemberQualificationType", b =>
                 {
                     b.Property<int>("MembersId")
                         .HasColumnType("int");
 
-                    b.Property<int>("QualificationsId")
+                    b.Property<int>("QualificationTypesId")
                         .HasColumnType("int");
 
-                    b.HasKey("MembersId", "QualificationsId");
+                    b.HasKey("MembersId", "QualificationTypesId");
 
-                    b.HasIndex("QualificationsId");
+                    b.HasIndex("QualificationTypesId");
 
-                    b.ToTable("MemberQualification");
+                    b.ToTable("MemberQualificationType");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -1393,6 +1388,21 @@ namespace DataStore.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("AttachmentMemberQualification", b =>
+                {
+                    b.HasOne("DataStore.Core.Models.Attachment", null)
+                        .WithMany()
+                        .HasForeignKey("AttachmentsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataStore.Core.Models.MemberQualification", null)
+                        .WithMany()
+                        .HasForeignKey("MemberQualificationsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("AttachmentProBono", b =>
                 {
                     b.HasOne("DataStore.Core.Models.Attachment", null)
@@ -1434,21 +1444,6 @@ namespace DataStore.Migrations
                     b.HasOne("DataStore.Core.Models.ProBonoReport", null)
                         .WithMany()
                         .HasForeignKey("ProBonoReportsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("AttachmentQualification", b =>
-                {
-                    b.HasOne("DataStore.Core.Models.Attachment", null)
-                        .WithMany()
-                        .HasForeignKey("AttachmentsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DataStore.Core.Models.Qualification", null)
-                        .WithMany()
-                        .HasForeignKey("QualificationsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -1602,6 +1597,25 @@ namespace DataStore.Migrations
                     b.Navigation("Department");
                 });
 
+            modelBuilder.Entity("DataStore.Core.Models.MemberQualification", b =>
+                {
+                    b.HasOne("DataStore.Core.Models.Member", "Member")
+                        .WithMany()
+                        .HasForeignKey("MemberId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataStore.Core.Models.QualificationType", "QualificationType")
+                        .WithMany()
+                        .HasForeignKey("QualificationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Member");
+
+                    b.Navigation("QualificationType");
+                });
+
             modelBuilder.Entity("DataStore.Core.Models.ProBono", b =>
                 {
                     b.HasOne("DataStore.Core.Models.ApplicationUser", "CreatedBy")
@@ -1694,7 +1708,7 @@ namespace DataStore.Migrations
                     b.Navigation("ProBonoReport");
                 });
 
-            modelBuilder.Entity("MemberQualification", b =>
+            modelBuilder.Entity("MemberQualificationType", b =>
                 {
                     b.HasOne("DataStore.Core.Models.Member", null)
                         .WithMany()
@@ -1702,9 +1716,9 @@ namespace DataStore.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DataStore.Core.Models.Qualification", null)
+                    b.HasOne("DataStore.Core.Models.QualificationType", null)
                         .WithMany()
-                        .HasForeignKey("QualificationsId")
+                        .HasForeignKey("QualificationTypesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

@@ -60,6 +60,36 @@ namespace MLS_Digital_MGM_API.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+        [HttpGet("getAll")]
+        public async Task<IActionResult> GetAllDepartments()
+        {
+            try
+            {
+               
+                // Fetch paginated departments using the DepartmentRepository
+                var departments = await _repositoryManager.DepartmentRepository.GetAllAsync();
+
+                // Check if departments exist
+                if (departments == null || !departments.Any())
+                {
+                    return Ok(Enumerable.Empty<ReadDepartmentDTO>()); // Return 404 Not Found if no departments are found
+                }
+
+                // Map Department entities to ReadDepartmentDTOs
+                var mappedDepartments = _mapper.Map<IEnumerable<ReadDepartmentDTO>>(departments);
+
+                return Ok(mappedDepartments); // Return paginated departments
+
+            }
+            catch (Exception ex)
+            {
+                // Log the exception using ErrorLogService
+                await _errorLogService.LogErrorAsync(ex);
+
+                // Return 500 Internal Server Error
+                return StatusCode(500, "Internal server error");
+            }
+        }
 
         [HttpPost]
         public async Task<IActionResult> AddDepartment([FromBody] CreateDepartmentDTO departmentDTO)

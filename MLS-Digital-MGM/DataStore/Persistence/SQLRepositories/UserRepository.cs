@@ -76,6 +76,20 @@ namespace DataStore.Persistence.SQLRepositories
             user.DeletedDate = null;
         }
 
+        public string GetRoleName(string roleId)
+        {
+            var role = this._context.Roles.FirstOrDefault(r => r.Id == roleId);
+
+            if(role != null)
+            {
+                return role.Name;
+            }else{
+                return "";
+            }
+        }
+
+        
+
       
 
 

@@ -12,7 +12,7 @@ namespace DataStore.Core.Models
        
        public Member()
        {
-           this.Qualifications = new List<Qualification>();
+           this.QualificationTypes = new List<QualificationType>();
        }
         [Required, MaxLength(250)]
         public string PostalAddress { get; set; }
@@ -22,8 +22,7 @@ namespace DataStore.Core.Models
         public string ResidentialAddress { get; set; }
         [Required]
         public DateOnly DateOfAdmissionToPractice { get; set; }
-
-         public virtual List<Qualification> Qualifications { get; set; }
+        public virtual List<QualificationType> QualificationTypes { get; set; }
 
     }
 }

@@ -10,6 +10,7 @@ using System.Linq.Expressions;
 using System.Linq.Dynamic.Core;
 using System.Text;
 using System.Threading.Tasks;
+using System.Reflection;
 
 namespace DataStore.Persistence.SQLRepositories
 {
@@ -69,18 +70,32 @@ namespace DataStore.Persistence.SQLRepositories
 
             if (!string.IsNullOrEmpty(pagingParameters.SearchTerm))
             {
-                // Use reflection to get the properties of the entity type
-                var entityProperties = typeof(T).GetProperties();
-                foreach (var property in entityProperties)
-                {
-                    var parameter = Expression.Parameter(typeof(T), "record");
-                    var propertyAccess = Expression.Property(parameter, property);
-                    var searchTermValue = Expression.Constant(pagingParameters.SearchTerm, typeof(string));
-                    var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) });
-                    var containsExpression = Expression.Call(propertyAccess, containsMethod, searchTermValue);
-                    var lambda = Expression.Lambda<Func<T, bool>>(containsExpression, parameter);
-                    query = query.Where(lambda);
-                }
+                // Get properties of T
+                var entityProperties = typeof(T).GetProperties((BindingFlags.Instance | BindingFlags.Public));
+                // Create parameter for query
+                var parameter = Expression.Parameter(typeof(T), "record");
+
+                // Convert search term to lower
+                var searchTermValue = Expression.Constant(pagingParameters.SearchTerm.ToLower(), typeof(string));
+                // Create search expressions
+                var searchExpressions = entityProperties
+                    .Where(p => p.PropertyType == typeof(string))
+                    .Select(p =>
+                    {
+                        var propertyAccess = Expression.Property(parameter, p);
+                        var toLowerExpression = Expression.Call(propertyAccess, typeof(string).GetMethod("ToLower", Type.EmptyTypes));
+                        var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) });
+                        var containsExpression = Expression.Call(toLowerExpression, containsMethod, searchTermValue);
+                        return containsExpression;
+                    });
+
+                // Combine search expressions
+                var orExpression = searchExpressions.Aggregate<Expression>(Expression.OrElse);
+                // Create lambda for query
+                var lambda = Expression.Lambda<Func<T, bool>>(orExpression, parameter);
+
+                // Add search term to query
+                query = query.Where(lambda);
             }
 
             // Include the specified navigation properties

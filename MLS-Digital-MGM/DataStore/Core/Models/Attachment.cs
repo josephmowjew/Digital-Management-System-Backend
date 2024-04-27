@@ -14,7 +14,7 @@ namespace DataStore.Core.Models
         
             ProBonos = new List<ProBono>();
             ProBonosApplications = new List<ProBonoApplication>();
-            Qualifications = new List<Qualification>();
+            MemberQualifications = new List<MemberQualification>();
             LicenseApplications = new List<LicenseApplication>();
             ProBonoReports = new List<ProBonoReport>();
         }
@@ -30,11 +30,9 @@ namespace DataStore.Core.Models
 
         public int AttachmentTypeId { get; set; }
         public AttachmentType AttachmentType { get; set; }
-
-     
         public ICollection<ProBono> ProBonos { get; set; }
         public ICollection<ProBonoApplication> ProBonosApplications { get; set;}
-        public ICollection<Qualification> Qualifications { get; set; } 
+        public ICollection<MemberQualification> MemberQualifications { get; set; } 
         public ICollection<LicenseApplication> LicenseApplications { get; set; }
         public ICollection<ProBonoReport> ProBonoReports { get; set; }
 

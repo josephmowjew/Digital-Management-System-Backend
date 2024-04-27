@@ -21,5 +21,7 @@ namespace DataStore.Persistence.Interfaces
         Task<IdentityResult> AddUserToRoleAsync(ApplicationUser applicationUser, string roleName);
         void ActivateAccount(ApplicationUser user);
 
+        string GetRoleName(string roleId);
+
     }
 }

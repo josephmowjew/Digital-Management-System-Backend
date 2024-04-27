@@ -58,7 +58,7 @@ namespace DataStore.Core.DTOs.Authentication
         [EmailAddress]
         [StringLength(100, MinimumLength = 5)]
         public string Email { get; set; }
-        public string Password { get; set; }
+        public string Password { get; set; } = "P@$$w0rd";
 
        
     }

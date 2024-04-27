@@ -9,6 +9,7 @@ namespace MLS_Digital_MGM.DataStore.Helpers
     public string SortColumn { get; set; }
     public string SortColumnAscDesc { get; set; }
     public string SearchValue { get; set; }
+    public string Draw {get; set;}
 
     public bool LoadFromRequest(IHttpContextAccessor httpContextAccessor)
     {
@@ -27,6 +28,7 @@ namespace MLS_Digital_MGM.DataStore.Helpers
             SortColumn = request.Query["columns[" + request.Query["order[0][column]"].FirstOrDefault() + "][name]"].FirstOrDefault();
             SortColumnAscDesc = request.Query["order[0][dir]"].FirstOrDefault();
             SearchValue = request.Query["search[value]"].FirstOrDefault();
+            Draw = request.Query["draw"].FirstOrDefault();
 
             PageSize = length != null ? Convert.ToInt32(length) : 0;
             PageNumber = start != null ? Convert.ToInt32(start) / PageSize + 1 : 1;
