@@ -48,7 +48,7 @@ namespace DataStore.Persistence.SQLRepositories
 
         public async Task<Role> GetRoleByNameAsync(string roleName)
         {
-            return await _context.Roles.FirstOrDefaultAsync(r => r.Name == roleName);
+            return await _context.Roles.FirstOrDefaultAsync(r => r.Name.ToLower().Trim() == roleName.ToLower().Trim());
         }
 
         //method to get role by id

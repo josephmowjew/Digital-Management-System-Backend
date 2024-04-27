@@ -5,6 +5,7 @@ using DataStore.Core.Services.Interfaces;
 using DataStore.Helpers;
 using DataStore.Persistence.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using MLS_Digital_MGM.DataStore.Helpers;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,14 +20,18 @@ namespace MLS_Digital_MGM_API.Controllers
         private readonly IErrorLogService _errorLogService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private IHttpContextAccessor _httpContextAccessor;
+
 
         // Constructor
-        public RolesController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper)
+        public RolesController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor)
         {
             _repositoryManager = repositoryManager;
             _errorLogService = errorLogService;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _httpContextAccessor = httpContextAccessor;
+
         }
 
         // AddRole - Create a new Role
@@ -46,14 +51,25 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 // Check if a Role with the same name already exists
                 var existingRoles = await _repositoryManager.RoleRepository.GetRolesAsync();
+
                 if (existingRoles.Any(r => r.Name.Trim().Equals(role.Name.Trim(), StringComparison.OrdinalIgnoreCase)))
                 {
-                    ModelState.AddModelError(nameof(roleDTO.Name), "A role with the same name already exists");
-                    return BadRequest(ModelState);
+                    //get the role with the name
+
+                    var existingRole = await _repositoryManager.RoleRepository.GetRoleByNameAsync(role.Name);
+
+                    //change the status of the role to active
+                    existingRole.Status = Lambda.Active;
+                    existingRole.DeletedDate = null;
+
+                }else{
+
+                    // Add the new Role to the repository and commit the changes
+                    _repositoryManager.RoleRepository.AddRole(role.Name);
+
                 }
 
-                // Add the new Role to the repository and commit the changes
-                _repositoryManager.RoleRepository.AddRole(role.Name);
+                
                 await _unitOfWork.CommitAsync();
 
                 // Return a CreatedAtAction result
@@ -68,23 +84,64 @@ namespace MLS_Digital_MGM_API.Controllers
         }
 
         // GetRoles - Retrieve all Roles
-        [HttpGet]
+        [HttpGet("paged")]
         public async Task<IActionResult> GetRoles(int pageNumber = 1, int pageSize = 10)
         {
             try
             {
-                  // Create PagingParameters object
-                var pagingParameters = new PagingParameters<Role>{
-                    PageNumber = pageNumber,
-                    PageSize = pageSize,
-                    //SearchTerm = null
 
+                // Create a new DataTablesParameters object
+                var dataTableParams = new DataTablesParameters();
+            
+                var pagingParameters = new PagingParameters<Role>
+                {
+                    Predicate = u => u.Status != Lambda.Deleted,
+                    PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
+                    PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
+                    SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
+                    SortColumn = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumn : null,
+                    SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null
                 };
+
+              
                 // Get a paged list of Roles from the repository
                 var pagedRoles = await _repositoryManager.RoleRepository.GetPagedAsync(pagingParameters);
 
+                // Check if roles exist
+                if (pagedRoles == null || !pagedRoles.Any())
+                {
+                    if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                    {
+                        var draw = dataTableParams.Draw;
+                        return Json(new 
+                        { 
+                            draw, 
+                            recordsFiltered = 0, 
+                            recordsTotal = 0, 
+                            data = Enumerable.Empty<ReadRoleDTO>()
+                        });
+                    }
+                    return Ok(Enumerable.Empty<ReadRoleDTO>()); // Return empty list
+                }
+
                 // Map the Roles to a list of ReadRoleDTOs
-                var mappedRoles = pagedRoles.Select(r => _mapper.Map<ReadRoleDTO>(r));
+                var mappedRoles = _mapper.Map<List<ReadRoleDTO>>(pagedRoles);
+
+                 // Return datatable JSON if the request came from a datatable
+                if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                {
+                    var draw = dataTableParams.Draw;
+                    var resultTotalFiltred = mappedRoles.Count;
+
+                    return Json(new 
+                    { 
+                        draw, 
+                        recordsFiltered = resultTotalFiltred, 
+                        recordsTotal = resultTotalFiltred, 
+                        data = mappedRoles.ToList() // Materialize the enumerable
+                    });
+                }
+
 
                 // Return an Ok result with the mapped Roles
                 return Ok(mappedRoles);
