@@ -11,6 +11,8 @@ using DataStore.Core.Services.Interfaces;
 using DataStore.Core.Models;
 using DataStore.Core.DTOs.ProBonoClient;
 using DataStore.Helpers;
+using MLS_Digital_MGM.DataStore.Helpers;
+using Microsoft.CodeAnalysis.Elfie.Serialization;
 
 namespace MLS_Digital_MGM_API.Controllers // Update with your actual namespace
 {
@@ -21,13 +23,15 @@ namespace MLS_Digital_MGM_API.Controllers // Update with your actual namespace
         private readonly IErrorLogService _errorLogService; 
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         
-        public ProBonoClientsController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper)
+        public ProBonoClientsController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor)
         {
             _repositoryManager = repositoryManager;
             _errorLogService = errorLogService;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         [HttpGet("paged")]
@@ -35,21 +39,54 @@ namespace MLS_Digital_MGM_API.Controllers // Update with your actual namespace
         {
             try
             {
-                  // Create PagingParameters object
-                var pagingParameters = new PagingParameters<ProbonoClient>{
-                    PageNumber = pageNumber,
-                    PageSize = pageSize,
-                    //SearchTerm = null
 
+                // Create a new DataTablesParameters object
+                var dataTableParams = new DataTablesParameters();
+            
+                var pagingParameters = new PagingParameters<ProbonoClient>
+                {
+                    Predicate = u => u.Status != Lambda.Deleted,
+                    PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
+                    PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
+                    SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
+                    SortColumn = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumn : null,
+                    SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null
                 };
+
                 var clients = await _repositoryManager.ProBonoClientRepository.GetPagedAsync(pagingParameters);
 
                 if (clients == null || !clients.Any())
                 {
-                    return NotFound();
+                    if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                    {
+                        var draw = dataTableParams.Draw;
+                        return Json(new 
+                        { 
+                            draw, 
+                            recordsFiltered = 0, 
+                            recordsTotal = 0, 
+                            data = Enumerable.Empty<ReadProBonoClientDTO>()
+                        });
+                    }
+                    return Ok(Enumerable.Empty<ReadProBonoClientDTO>()); // Return empty list
                 }
 
-                var mappedClients = _mapper.Map<IEnumerable<ReadProBonoClientDTO>>(clients);
+                var mappedClients = _mapper.Map<List<ReadProBonoClientDTO>>(clients);
+                 // Return datatable JSON if the request came from a datatable
+                if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                {
+                    var draw = dataTableParams.Draw;
+                    var resultTotalFiltred = mappedClients.Count;
+
+                    return Json(new 
+                    { 
+                        draw, 
+                        recordsFiltered = resultTotalFiltred, 
+                        recordsTotal = resultTotalFiltred, 
+                        data = mappedClients.ToList() // Materialize the enumerable
+                    });
+                }
+
 
                 return Ok(mappedClients);
             }
@@ -139,6 +176,33 @@ namespace MLS_Digital_MGM_API.Controllers // Update with your actual namespace
             catch (Exception ex)
             {
                 await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpGet("getclient/{id}")]
+        public async Task<IActionResult> GetClient(int id)
+        {
+             try
+            {
+                // Fetch  clients using the UserRepository
+                var client = await _repositoryManager.ProBonoClientRepository.GetByIdAsync(id);
+
+                if(client != null)
+                {
+                    var mappedData = _mapper.Map<ReadProBonoClientDTO>(client);
+                    return Ok(mappedData);
+                }
+                return BadRequest("user not found");
+
+            }
+            catch (Exception ex)
+            {
+
+                // Log the exception using ErrorLogService
+                await _errorLogService.LogErrorAsync(ex);
+
+                // Return 500 Internal Server Error
                 return StatusCode(500, "Internal server error");
             }
         }

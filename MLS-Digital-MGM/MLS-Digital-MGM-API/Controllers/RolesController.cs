@@ -240,5 +240,30 @@ namespace MLS_Digital_MGM_API.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+
+        [HttpGet("singleRole/{id}")]
+        public async Task<IActionResult> GetRoleById(string id)
+        {
+            try
+            {
+                // Get the Role by id from the repository
+                var role = await _repositoryManager.RoleRepository.GetRoleByIdAsync(id);
+                if (role == null)
+                {
+                    return NotFound();
+                }
+                // Map the Role to a ReadRoleDTO
+                var readRoleDTO = _mapper.Map<ReadRoleDTO>(role);
+
+                // Return an Ok result with the mapped Role
+                return Ok(readRoleDTO);
+            }
+            catch (Exception ex)
+            {
+                // Log the error and return a StatusCode(500) result
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
     }
 }

@@ -17,6 +17,8 @@ namespace DataStore.Persistence.Interfaces
         Task<ApplicationUser?> GetSingleUser(string id);
     
         IdentityUserRole<string> GetUserRoleByUserId(string userId);
+
+        Task<ApplicationUser?> GetSingleUserNoFilter(string id);
         Task<IdentityResult> AddAsync(ApplicationUser entity, string password);
         Task<IdentityResult> AddUserToRoleAsync(ApplicationUser applicationUser, string roleName);
         void ActivateAccount(ApplicationUser user);
