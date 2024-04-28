@@ -5,6 +5,7 @@ using DataStore.Core.Services.Interfaces;
 using DataStore.Helpers;
 using DataStore.Persistence.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using MLS_Digital_MGM.DataStore.Helpers;
 
 namespace MLS_Digital_MGM_API.Controllers
 {
@@ -12,15 +13,17 @@ namespace MLS_Digital_MGM_API.Controllers
     public class DepartmentsController : Controller
     {
         private readonly IRepositoryManager _repositoryManager;
-        private readonly IErrorLogService _errorLogService; 
+        private readonly IErrorLogService _errorLogService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        public DepartmentsController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper)
+        private IHttpContextAccessor _httpContextAccessor;
+        public DepartmentsController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor)
         {
             _repositoryManager = repositoryManager;
             _errorLogService = errorLogService;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         // Add a method to fetch paginated departments
@@ -29,26 +32,60 @@ namespace MLS_Digital_MGM_API.Controllers
         {
             try
             {
-                      // Create PagingParameters object
-                var pagingParameters = new PagingParameters<Department>{
-                    PageNumber = pageNumber,
-                    PageSize = pageSize,
-                    //SearchTerm = null
+                // Create a new DataTablesParameters object
+                 var dataTableParams = new DataTablesParameters();
 
-                };
-                // Fetch paginated departments using the DepartmentRepository
-                var departments = await _repositoryManager.DepartmentRepository.GetPagedAsync(pagingParameters);
-
-                // Check if departments exist
-                if (departments == null || !departments.Any())
+                var pagingParameters = new PagingParameters<Department>
                 {
-                    return NotFound(); // Return 404 Not Found if no departments are found
+                    Predicate = u => u.Status != Lambda.Deleted,
+                    PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
+                    PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
+                    SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
+                    SortColumn = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumn : null,
+                    SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null
+                };
+
+                // Fetch paginated departments using the DepartmentRepository
+                var pagedDepartments = await _repositoryManager.DepartmentRepository.GetPagedAsync(pagingParameters);
+
+                // Check if roles exist
+                if (pagedDepartments == null || !pagedDepartments.Any())
+                {
+                    if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                    {
+                        var draw = dataTableParams.Draw;
+                        return Json(new
+                        {
+                            draw,
+                            recordsFiltered = 0,
+                            recordsTotal = 0,
+                            data = Enumerable.Empty<ReadDepartmentDTO>()
+                        });
+                    }
+                    return Ok(Enumerable.Empty<ReadDepartmentDTO>()); // Return empty list
                 }
 
-                // Map Department entities to ReadDepartmentDTOs
-                var mappedDepartments = _mapper.Map<IEnumerable<ReadDepartmentDTO>>(departments);
+                // Map the Roles to a list of ReadDepartmentDTOs
+                var mappedDepartments = _mapper.Map<List<ReadDepartmentDTO>>(pagedDepartments);
 
-                return Ok(mappedDepartments); // Return paginated departments
+                // Return datatable JSON if the request came from a datatable
+                if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                {
+                    var draw = dataTableParams.Draw;
+                    var resultTotalFiltred = mappedDepartments.Count;
+
+                    return Json(new
+                    {
+                        draw,
+                        recordsFiltered = resultTotalFiltred,
+                        recordsTotal = resultTotalFiltred,
+                        data = mappedDepartments.ToList() // Materialize the enumerable
+                    });
+                }
+
+
+                // Return an Ok result with the mapped Roles
+                return Ok(mappedDepartments);
 
             }
             catch (Exception ex)
@@ -65,7 +102,7 @@ namespace MLS_Digital_MGM_API.Controllers
         {
             try
             {
-               
+
                 // Fetch paginated departments using the DepartmentRepository
                 var departments = await _repositoryManager.DepartmentRepository.GetAllAsync();
 
@@ -107,7 +144,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 //check if there isn't a department with the name already
 
-               // Check if there isn't a department with the same name already
+                // Check if there isn't a department with the same name already
                 var existingDepartment = await _repositoryManager.DepartmentRepository.GetAsync(d => d.Name.Trim().Equals(department.Name.Trim(), StringComparison.OrdinalIgnoreCase));
                 if (existingDepartment != null)
                 {
