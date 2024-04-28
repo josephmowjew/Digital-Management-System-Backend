@@ -176,4 +176,24 @@ public class FirmsController : Controller
             return StatusCode(500, "Internal server error");
         }
     }
+
+    [HttpGet("getfirm/{id}")]
+    public async Task<IActionResult> GetFirmById(int id)
+    {
+        try
+        {
+            var firm = await _repositoryManager.FirmRepository.GetByIdAsync(id);
+            if (firm == null)
+            {
+                return NotFound();
+            }
+            var firmDTO = _mapper.Map<ReadFirmDTO>(firm);
+            return Ok(firmDTO);
+        }
+        catch (Exception ex)
+        {
+            await _errorLogService.LogErrorAsync(ex);
+            return StatusCode(500, "Internal server error");
+        }
+    }
 }
