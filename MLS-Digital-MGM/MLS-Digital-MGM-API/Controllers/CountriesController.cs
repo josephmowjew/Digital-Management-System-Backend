@@ -70,25 +70,23 @@ namespace MLS_Digital_MGM_API.Controllers
                    return Ok(Enumerable.Empty<ReadCountryDTO>());
                }
        
-               var mappedCountries = _mapper.Map<IEnumerable<ReadCountryDTO>>(countries);
+               var mappedCountries = _mapper.Map<List<ReadCountryDTO>>(countries);
        
-               if (mappedCountries == null || !mappedCountries.Any())
-               {
-                   if (dataTableParams.LoadFromRequest(_httpContextAccessor))
-                   {
-                       var draw = dataTableParams.Draw;
-                       var resultTotalFiltered = mappedCountries.Count();
-       
-                       return Json(new
-                       {
-                           draw,
-                           recordsFiltered = resultTotalFiltered,
-                           recordsTotal = resultTotalFiltered,
-                           data = mappedCountries.ToList()
-                       });
-                   }
-                   return Ok(mappedCountries);
-               }
+               // Return datatable JSON if the request came from a datatable
+                if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                {
+                    var draw = dataTableParams.Draw;
+                    var resultTotalFiltred = mappedCountries.Count;
+
+                    return Json(new 
+                    { 
+                        draw, 
+                        recordsFiltered = resultTotalFiltred, 
+                        recordsTotal = resultTotalFiltred, 
+                        data = mappedCountries.ToList() // Materialize the enumerable
+                    });
+                }
+
        
                return Ok(mappedCountries);
        
@@ -218,6 +216,31 @@ namespace MLS_Digital_MGM_API.Controllers
                 await _unitOfWork.CommitAsync();
 
                 return NoContent();
+            }
+            catch (Exception ex)
+            {
+                // Log the error and return an error response
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpGet("getcountry/{id}")]
+        public async Task<IActionResult> GetCountryById(int id)
+        {
+            try
+            {
+                // Get the country from the data layer
+                var country = await _repositoryManager.CountryRepository.GetByIdAsync(id);
+                if (country == null)
+                {
+                    return NotFound();
+                }
+
+                // Map the country to a ReadCountryDTO
+                var mappedCountry = _mapper.Map<ReadCountryDTO>(country);
+
+                return Ok(mappedCountry);
             }
             catch (Exception ex)
             {
