@@ -14,10 +14,12 @@ using Microsoft.Extensions.Hosting;
 using DataStore.Helpers;
 using MLS_Digital_MGM.DataStore.Helpers;
 using System.Linq.Expressions;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MLS_Digital_MGM_API.Controllers 
 {
     [Route("api/[controller]")]
+    [Authorize(AuthenticationSchemes = "Bearer")]
     public class ProBonoApplicationsController : Controller
     {
         private readonly IRepositoryManager _repositoryManager;
@@ -115,6 +117,16 @@ namespace MLS_Digital_MGM_API.Controllers
                     return BadRequest(ModelState);
 
                 var proBonoApplication = _mapper.Map<ProBonoApplication>(proBonoApplicationDTO);
+
+                //update the created by field
+                string username = _httpContextAccessor.HttpContext.User.Identity.Name;
+
+                //get user id from username
+                var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
+                proBonoApplication.CreatedById = user.Id;
+
+
+                await _repositoryManager.ProBonoApplicationRepository.AddAsync(proBonoApplication);
 
                 //update status of the pro bono application to approved since it is created by the secretariat
 

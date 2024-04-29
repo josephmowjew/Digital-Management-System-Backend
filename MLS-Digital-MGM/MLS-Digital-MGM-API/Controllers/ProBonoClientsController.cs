@@ -13,10 +13,12 @@ using DataStore.Core.DTOs.ProBonoClient;
 using DataStore.Helpers;
 using MLS_Digital_MGM.DataStore.Helpers;
 using Microsoft.CodeAnalysis.Elfie.Serialization;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MLS_Digital_MGM_API.Controllers // Update with your actual namespace
 {
     [Route("api/[controller]")]
+    [Authorize(AuthenticationSchemes = "Bearer")]
     public class ProBonoClientsController : Controller
     {
         private readonly IRepositoryManager _repositoryManager;
