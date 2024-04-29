@@ -1,5 +1,6 @@
 using AutoMapper;
 using DataStore.Core.DTOs.Country;
+using DataStore.Core.DTOs.Country;
 using DataStore.Core.Models;
 using DataStore.Core.Services.Interfaces;
 using DataStore.Helpers;
@@ -41,56 +42,62 @@ namespace MLS_Digital_MGM_API.Controllers
        {
            try
            {
-               var dataTableParams = new DataTablesParameters();
-               var pagingParameters = new PagingParameters<Country>
-               {
-                   Predicate = c => true,
-                   PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
-                   PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
-                   SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
-                   SortColumn = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumn : null,
-                   SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null
-               };
-       
-               var countries = await _repositoryManager.CountryRepository.GetPagedAsync(pagingParameters);
-       
-               if (countries == null || !countries.Any())
-               {
-                   if (dataTableParams.LoadFromRequest(_httpContextAccessor))
-                   {
-                       var draw = dataTableParams.Draw;
-                       return Json(new
-                       {
-                           draw,
-                           recordsFiltered = 0,
-                           recordsTotal = 0,
-                           data = Enumerable.Empty<ReadCountryDTO>()
-                       });
-                   }
-                   return Ok(Enumerable.Empty<ReadCountryDTO>());
-               }
-       
-               var mappedCountries = _mapper.Map<List<ReadCountryDTO>>(countries);
-       
-               // Return datatable JSON if the request came from a datatable
+                // Create a new DataTablesParameters object
+                var dataTableParams = new DataTablesParameters();
+
+                var pagingParameters = new PagingParameters<Country>
+                {
+                    Predicate = u => u.Status != Lambda.Deleted,
+                    PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
+                    PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
+                    SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
+                    SortColumn = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumn : null,
+                    SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null
+                };
+
+                // Fetch paginated countries using the CountryRepository
+                var pagedCountries = await _repositoryManager.CountryRepository.GetPagedAsync(pagingParameters);
+
+                // Check if roles exist
+                if (pagedCountries == null || !pagedCountries.Any())
+                {
+                    if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                    {
+                        var draw = dataTableParams.Draw;
+                        return Json(new
+                        {
+                            draw,
+                            recordsFiltered = 0,
+                            recordsTotal = 0,
+                            data = Enumerable.Empty<ReadCountryDTO>()
+                        });
+                    }
+                    return Ok(Enumerable.Empty<ReadCountryDTO>()); // Return empty list
+                }
+
+                // Map the Roles to a list of ReadCountryDTOs
+                var mappedCountries = _mapper.Map<List<ReadCountryDTO>>(pagedCountries);
+
+                // Return datatable JSON if the request came from a datatable
                 if (dataTableParams.LoadFromRequest(_httpContextAccessor))
                 {
                     var draw = dataTableParams.Draw;
                     var resultTotalFiltred = mappedCountries.Count;
 
-                    return Json(new 
-                    { 
-                        draw, 
-                        recordsFiltered = resultTotalFiltred, 
-                        recordsTotal = resultTotalFiltred, 
+                    return Json(new
+                    {
+                        draw,
+                        recordsFiltered = resultTotalFiltred,
+                        recordsTotal = resultTotalFiltred,
                         data = mappedCountries.ToList() // Materialize the enumerable
                     });
                 }
 
-       
-               return Ok(mappedCountries);
-       
-           }
+
+                // Return an Ok result with the mapped Roles
+                return Ok(mappedCountries);
+
+            }
            catch (Exception ex)
            {
                await _errorLogService.LogErrorAsync(ex);

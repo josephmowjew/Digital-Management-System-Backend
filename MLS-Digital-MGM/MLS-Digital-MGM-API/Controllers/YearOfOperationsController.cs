@@ -1,11 +1,14 @@
 using AutoMapper;
 using DataStore.Core.DTOs.YearOfOperation;
+using DataStore.Core.DTOs.YearOfOperation;
+using DataStore.Core.DTOs.YearOfOperation;
 using DataStore.Core.Models;
 using DataStore.Core.Services.Interfaces;
 using DataStore.Helpers;
 using DataStore.Persistence.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.Elfie.Serialization;
+using MLS_Digital_MGM.DataStore.Helpers;
 using MLS_Digital_MGM.DataStore.Helpers;
 
 namespace MLS_Digital_MGM_API.Controllers
@@ -37,9 +40,8 @@ namespace MLS_Digital_MGM_API.Controllers
         {
             try
             {
-                // Create a new DataTablesParameters object
                 var dataTableParams = new DataTablesParameters();
-            
+
                 var pagingParameters = new PagingParameters<YearOfOperation>
                 {
                     Predicate = u => u.Status != Lambda.Deleted,
@@ -50,39 +52,40 @@ namespace MLS_Digital_MGM_API.Controllers
                     SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null
                 };
 
-                // Retrieve paged year of operations from repository
-                var yearOfOperations = await _repositoryManager.YearOfOperationRepository.GetPagedAsync(pagingParameters);
+                // Fetch paginated yearOfOperations using the YearOfOperationRepository
+                var pagedYearOfOperations = await _repositoryManager.YearOfOperationRepository.GetPagedAsync(pagingParameters);
 
-                if (yearOfOperations == null || !yearOfOperations.Any())
+                // Check if roles exist
+                if (pagedYearOfOperations == null || !pagedYearOfOperations.Any())
                 {
                     if (dataTableParams.LoadFromRequest(_httpContextAccessor))
                     {
                         var draw = dataTableParams.Draw;
-                        return Json(new 
-                        { 
-                            draw, 
-                            recordsFiltered = 0, 
-                            recordsTotal = 0, 
+                        return Json(new
+                        {
+                            draw,
+                            recordsFiltered = 0,
+                            recordsTotal = 0,
                             data = Enumerable.Empty<ReadYearOfOperationDTO>()
                         });
                     }
                     return Ok(Enumerable.Empty<ReadYearOfOperationDTO>()); // Return empty list
                 }
 
-                 // Map the Roles to a list of ReadRoleDTOs
-                var mappedYearOfOperations = _mapper.Map<List<ReadYearOfOperationDTO>>(yearOfOperations);
+                // Map the Roles to a list of ReadYearOfOperationDTOs
+                var mappedYearOfOperations = _mapper.Map<List<ReadYearOfOperationDTO>>(pagedYearOfOperations);
 
-                 // Return datatable JSON if the request came from a datatable
+                // Return datatable JSON if the request came from a datatable
                 if (dataTableParams.LoadFromRequest(_httpContextAccessor))
                 {
                     var draw = dataTableParams.Draw;
                     var resultTotalFiltred = mappedYearOfOperations.Count;
 
-                    return Json(new 
-                    { 
-                        draw, 
-                        recordsFiltered = resultTotalFiltred, 
-                        recordsTotal = resultTotalFiltred, 
+                    return Json(new
+                    {
+                        draw,
+                        recordsFiltered = resultTotalFiltred,
+                        recordsTotal = resultTotalFiltred,
                         data = mappedYearOfOperations.ToList() // Materialize the enumerable
                     });
                 }
