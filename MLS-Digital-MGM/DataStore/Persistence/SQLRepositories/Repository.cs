@@ -55,7 +55,7 @@ namespace DataStore.Persistence.SQLRepositories
         public async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>> predicate)
         {
             return await _context.Set<T>()
-                                 .Where(q => q.Status != Lambda.Deleted && predicate.Compile()(q))
+                                 .Where(predicate)
                                  .ToListAsync();
         }
 

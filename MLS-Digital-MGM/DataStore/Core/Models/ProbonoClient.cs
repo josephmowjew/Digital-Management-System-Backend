@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DataStore.Core.Models.Interfaces;
 
 namespace DataStore.Core.Models
 {
@@ -24,10 +25,14 @@ namespace DataStore.Core.Models
         public string PhoneNumber { get; set; }
         [MaxLength(150)]
         public string OtherContacts { get; set; }
+        public DateTime ApprovedDate { get; set; }
 
         [Required, MaxLength(150)]
         public string Occupation { get; set; }
         [Required, Range(0, double.MaxValue)]
         public decimal AnnualIncome { get; set; }
+        public ApplicationUser CreatedBy { get ; set ; }
+        public string CreatedById { get; set; }
+        
     }
 }

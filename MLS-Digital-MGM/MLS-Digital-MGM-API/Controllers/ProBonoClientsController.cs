@@ -106,7 +106,7 @@ namespace MLS_Digital_MGM_API.Controllers // Update with your actual namespace
             {
 
                 // Get paged list of identity types from repository
-                var probonoClients = await _repositoryManager.ProBonoClientRepository.GetAllAsync();
+                var probonoClients = await _repositoryManager.ProBonoClientRepository.GetAllAsync(p => p.Status == Lambda.Active);
 
                 // If no identity types found, return NotFound result
                 if (probonoClients == null || !probonoClients.Any())
@@ -139,6 +139,21 @@ namespace MLS_Digital_MGM_API.Controllers // Update with your actual namespace
                 }
 
                 var client = _mapper.Map<ProbonoClient>(clientDTO);
+
+               
+                //get user id from username
+                var user = await _repositoryManager.UserRepository.FindByEmailAsync(_httpContextAccessor.HttpContext.User.Identity.Name);
+
+                client.CreatedById = user.Id;
+                //get the current role of the user
+
+            
+                 string currentRole  = Lambda.GetCurrentUserRole(_repositoryManager,user.Id);
+
+
+                client.Status = Lambda.Active;
+                client.ApprovedDate = DateTime.UtcNow;
+               
 
                 var existingClient = await _repositoryManager.ProBonoClientRepository.GetAsync(c => c.Name.Trim().Equals(client.Name.Trim(), StringComparison.OrdinalIgnoreCase));
                 if (existingClient != null)
@@ -237,6 +252,35 @@ namespace MLS_Digital_MGM_API.Controllers // Update with your actual namespace
                 return StatusCode(500, "Internal server error");
             }
         }
+        [HttpGet("activate/{id}")]
+        public async Task<IActionResult> Activate(int id)
+        {
+             try
+            {
+                // Fetch  clients using the UserRepository
+                var client = await _repositoryManager.ProBonoClientRepository.GetByIdAsync(id);
+
+                if(client != null)
+                {
+                    client.Status = Lambda.Active;
+                    client.ApprovedDate = DateTime.UtcNow;
+                    await _repositoryManager.ProBonoClientRepository.UpdateAsync(client);
+                    await _unitOfWork.CommitAsync();
+                    return Ok();
+                }
+                return BadRequest("user not found");
+
+            }
+            catch (Exception ex)
+            {
+
+                // Log the exception using ErrorLogService
+                await _errorLogService.LogErrorAsync(ex);
+
+                // Return 500 Internal Server Error
+                return StatusCode(500, "Internal server error");
+            }
+        }
 
         [HttpGet("custom_select")]
         public async Task<JsonResult> GetClients(int page = 1, int pageSize = 20, string searchValue = "")
@@ -245,7 +289,7 @@ namespace MLS_Digital_MGM_API.Controllers // Update with your actual namespace
             
              var pagingParameters = new PagingParameters<ProbonoClient>
             {
-                Predicate = u => u.Status != Lambda.Deleted,
+                Predicate = u => u.Status == Lambda.Active,
                 PageNumber = page,
                 PageSize =  pageSize,
                 SearchTerm = searchValue,

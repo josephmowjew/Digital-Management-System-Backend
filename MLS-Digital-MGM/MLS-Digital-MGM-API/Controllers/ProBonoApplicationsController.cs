@@ -118,7 +118,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 var proBonoApplication = _mapper.Map<ProBonoApplication>(proBonoApplicationDTO);
 
-                //update the created by field
+                
                 string username = _httpContextAccessor.HttpContext.User.Identity.Name;
 
                 //get user id from username
@@ -128,9 +128,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 await _repositoryManager.ProBonoApplicationRepository.AddAsync(proBonoApplication);
 
-                //update status of the pro bono application to approved since it is created by the secretariat
-
-                proBonoApplication.ApplicationStatus = Lambda.Approved;
+               
 
                 // Check if a ProBonoApplication with the same nature of dispute already exists
                 var existingProBonoApplication = await _repositoryManager.ProBonoApplicationRepository.GetAsync(
@@ -159,8 +157,21 @@ namespace MLS_Digital_MGM_API.Controllers
                 {
                     proBonoApplication.Attachments = await SaveAttachmentsAsync(proBonoApplicationDTO.Attachments, attachmentType.Id);
                 }
-                //update the probono application approved date
-                proBonoApplication.ApprovedDate = DateTime.Now;
+
+                //get the current role of the user
+
+            
+                 string currentRole  = Lambda.GetCurrentUserRole(_repositoryManager,user.Id);
+
+
+                // Check if the user is secretariat and approve the application if so
+                if (string.Equals(currentRole, "secretariat", StringComparison.OrdinalIgnoreCase))
+                {
+                    proBonoApplication.ApplicationStatus = Lambda.Approved;
+                    proBonoApplication.ApprovedDate = DateTime.UtcNow;
+                }
+
+               
                 // Add ProBonoApplication to repository
                 await _repositoryManager.ProBonoApplicationRepository.AddAsync(proBonoApplication);
                 await _unitOfWork.CommitAsync();
@@ -306,6 +317,37 @@ namespace MLS_Digital_MGM_API.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+        [HttpGet("activate/{id}")]
+        public async Task<IActionResult> Activate(int id)
+        {
+             try
+            {
+                // Fetch  clients using the UserRepository
+                var application = await _repositoryManager.ProBonoApplicationRepository.GetByIdAsync(id);
+
+                if(application != null)
+                {
+                    application.ApplicationStatus = Lambda.Approved;
+                    application.ApprovedDate = DateTime.UtcNow;
+                    await _repositoryManager.ProBonoApplicationRepository.UpdateAsync(application);
+                    await _unitOfWork.CommitAsync();
+                    return Ok();
+                }
+                return BadRequest("user not found");
+
+            }
+            catch (Exception ex)
+            {
+
+                // Log the exception using ErrorLogService
+                await _errorLogService.LogErrorAsync(ex);
+
+                // Return 500 Internal Server Error
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+
     }
 
 }

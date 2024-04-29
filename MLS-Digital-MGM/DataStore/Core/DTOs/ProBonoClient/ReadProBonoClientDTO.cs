@@ -36,5 +36,6 @@ namespace DataStore.Core.DTOs.ProBonoClient
 
         [Required, Range(0, double.MaxValue)]
         public decimal AnnualIncome { get; set; }
+        public string Status { get; set; }
     }
 }
