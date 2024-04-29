@@ -1,6 +1,7 @@
 using DataStore.Core.Models;
 using DataStore.Data;
 using DataStore.Persistence.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,5 +20,7 @@ namespace DataStore.Persistence.SQLRepositories
             this._context = context;
             this._unitOfWork = unitOfWork;
         }
+
+       
     }
 }

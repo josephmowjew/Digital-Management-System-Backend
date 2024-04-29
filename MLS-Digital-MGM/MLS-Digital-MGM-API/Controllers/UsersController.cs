@@ -16,7 +16,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace MLS_Digital_MGM_API.Controllers
 {
     [Route("api/[controller]")]
-    //[Authorize(AuthenticationSchemes = "Bearer")]
+    [Authorize(AuthenticationSchemes = "Bearer")]
 
     //[Authorize]
     public class UsersController : Controller

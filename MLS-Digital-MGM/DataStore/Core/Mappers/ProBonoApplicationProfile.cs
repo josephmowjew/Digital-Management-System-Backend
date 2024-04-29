@@ -17,7 +17,8 @@ namespace DataStore.Core.Mappers
                 .ForMember(dest => dest.Attachments, opt => opt.Ignore());
             CreateMap<UpdateProBonoApplicationDTO, DataStore.Core.Models.ProBonoApplication>()
                 .ForMember(dest => dest.Attachments, opt => opt.Ignore());
-            CreateMap<DataStore.Core.Models.ProBonoApplication, ReadProBonoApplicationDTO>();
+            CreateMap<DataStore.Core.Models.ProBonoApplication, ReadProBonoApplicationDTO>()
+            .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(src => DateOnly.FromDateTime(src.CreatedDate)));
         }
     }
 }

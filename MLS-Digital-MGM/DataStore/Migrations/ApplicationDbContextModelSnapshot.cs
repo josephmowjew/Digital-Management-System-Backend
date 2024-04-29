@@ -877,7 +877,7 @@ namespace DataStore.Migrations
 
                     b.HasIndex("YearOfOperationId");
 
-                    b.ToTable("ProBono");
+                    b.ToTable("ProBonos");
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.ProBonoApplication", b =>
@@ -890,7 +890,7 @@ namespace DataStore.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<DateTime>("ApprovedDate")
+                    b.Property<DateTime?>("ApprovedDate")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("CaseDetails")
@@ -1012,6 +1012,11 @@ namespace DataStore.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50)");
+
+                    b.Property<string>("NationalId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
 
                     b.Property<string>("Occupation")
                         .IsRequired()

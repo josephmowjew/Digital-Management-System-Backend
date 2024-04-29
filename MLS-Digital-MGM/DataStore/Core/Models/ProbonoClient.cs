@@ -11,6 +11,9 @@ namespace DataStore.Core.Models
     {
         [Required, MaxLength(50)]
         public string Name { get; set; }
+        [Required]
+        [StringLength(maximumLength:200)]
+        public string NationalId { get; set; }
         [Required, MaxLength(250)]
         public string PostalAddress { get; set; }
         [Required, MaxLength(250)]

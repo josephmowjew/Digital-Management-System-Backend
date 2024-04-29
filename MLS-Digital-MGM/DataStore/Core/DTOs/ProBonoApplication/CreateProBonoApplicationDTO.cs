@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DataStore.Core.Models;
+using DataStore.Helpers;
 using Microsoft.AspNetCore.Http;
 
 namespace DataStore.Core.DTOs.ProBonoApplication
@@ -19,14 +20,15 @@ namespace DataStore.Core.DTOs.ProBonoApplication
 
         public int ProbonoClientId { get; set; }
 
-        public string ApplicationStatus { get; set; }
+        public string ApplicationStatus { get; set; } = Lambda.Pending;
 
-        public DateTime ApprovedDate { get; set; }
+        public DateTime? ApprovedDate { get; set; } = null;
 
-        [StringLength(200)]
-        public string DenialReason { get; set; }
+        [StringLength(maximumLength: 200)]
+        public string DenialReason { get; set; } = "";
 
         public string SummaryOfDispute { get; set; }
+
 
         public int YearOfOperationId { get; set; }
 

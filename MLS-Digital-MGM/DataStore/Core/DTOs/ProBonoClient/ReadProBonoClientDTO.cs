@@ -14,6 +14,7 @@ namespace DataStore.Core.DTOs.ProBonoClient
 
         [Required, MaxLength(50)]
         public string Name { get; set; }
+        public string NationalId { get; set; }
 
         [Required, MaxLength(250)]
         public string PostalAddress { get; set; }

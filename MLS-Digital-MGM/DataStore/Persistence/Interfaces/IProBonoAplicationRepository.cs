@@ -10,5 +10,7 @@ namespace DataStore.Persistence.Interfaces
     public interface IProBonoApplicationRepository : IRepository<ProBonoApplication>
     {
         // Additional methods specific to the ProBonoApplication entity, if needed
+
+       
     }
 }

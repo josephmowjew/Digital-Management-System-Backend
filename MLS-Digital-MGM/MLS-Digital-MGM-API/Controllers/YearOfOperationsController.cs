@@ -99,6 +99,34 @@ namespace MLS_Digital_MGM_API.Controllers
             }
         }
 
+        [HttpGet("getAll")]
+        public async Task<IActionResult> GetAllYearOfOperations()
+        {
+            try
+            {
+
+                // Get paged list of years of operation from repository
+                var yearOfOperations = await _repositoryManager.YearOfOperationRepository.GetAllAsync();
+
+                // If no years of operation  found, return NotFound result
+                if (yearOfOperations == null || !yearOfOperations.Any())
+                {
+                    return NotFound();
+                }
+
+                // Map pro bono clients types to DTOs and return as Ok result
+                var mappedYearOfOperations = _mapper.Map<IEnumerable<ReadYearOfOperationDTO>>(yearOfOperations);
+
+                return Ok(mappedYearOfOperations);
+            }
+            catch (Exception ex)
+            {
+                // Log error and return Internal Server Error result
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
         // HTTP POST to add year of operation
         [HttpPost]
         public async Task<IActionResult> AddYearOfOperation([FromBody] CreateYearOfOperationDTO yearOfOperationDTO)
@@ -208,5 +236,43 @@ namespace MLS_Digital_MGM_API.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+        
+        [HttpGet("custom_select")]
+        public async Task<JsonResult> GetYearOfOperations(int page = 1, int pageSize = 20, string searchValue = "")
+        {
+
+            
+             var pagingParameters = new PagingParameters<YearOfOperation>
+            {
+                Predicate = u => u.Status != Lambda.Deleted,
+                PageNumber = page,
+                PageSize =  pageSize,
+                SearchTerm = searchValue,
+               
+            };
+
+            var yearOfOperations = await _repositoryManager.YearOfOperationRepository.GetPagedAsync(pagingParameters);
+
+            var mappedYearOfOperations = _mapper.Map<List<ReadYearOfOperationDTO>>(yearOfOperations);
+
+            
+
+            List<DynamicSelect> dynamicSelect = new List<DynamicSelect>();
+
+            if (mappedYearOfOperations.Any())
+            {
+                foreach (var item in mappedYearOfOperations)
+                {
+                    dynamicSelect.Add(new DynamicSelect { Id = item.Id.ToString(), Name = item.StartDate.Year + " - " + item.EndDate.Year + "  (" + item.Id.ToString() + ")",
+                        
+                    });
+                }
+            }
+
+
+
+            return Json(dynamicSelect);
+        }
+    
     }
 }

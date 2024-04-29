@@ -50,7 +50,7 @@ namespace MLS_Digital_MGM_API.Controllers // Update with your actual namespace
                     PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
                     SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
                     SortColumn = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumn : null,
-                    SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null
+                    SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null,
                 };
 
                 var clients = await _repositoryManager.ProBonoClientRepository.GetPagedAsync(pagingParameters);
@@ -96,6 +96,35 @@ namespace MLS_Digital_MGM_API.Controllers // Update with your actual namespace
                 return StatusCode(500, "Internal server error");
             }
         }
+
+         [HttpGet("getAll")]
+        public async Task<IActionResult> GetAllProbonoClients()
+        {
+            try
+            {
+
+                // Get paged list of identity types from repository
+                var probonoClients = await _repositoryManager.ProBonoClientRepository.GetAllAsync();
+
+                // If no identity types found, return NotFound result
+                if (probonoClients == null || !probonoClients.Any())
+                {
+                    return NotFound();
+                }
+
+                // Map pro bono clients types to DTOs and return as Ok result
+                var mappedProbonoClients = _mapper.Map<IEnumerable<ReadProBonoClientDTO>>(probonoClients);
+
+                return Ok(mappedProbonoClients);
+            }
+            catch (Exception ex)
+            {
+                // Log error and return Internal Server Error result
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
 
         [HttpPost]
         public async Task<IActionResult> AddProBonoClient([FromBody] CreateProBonoClientDTO clientDTO)
@@ -206,5 +235,43 @@ namespace MLS_Digital_MGM_API.Controllers // Update with your actual namespace
                 return StatusCode(500, "Internal server error");
             }
         }
+
+        [HttpGet("custom_select")]
+        public async Task<JsonResult> GetClients(int page = 1, int pageSize = 20, string searchValue = "")
+        {
+
+            
+             var pagingParameters = new PagingParameters<ProbonoClient>
+            {
+                Predicate = u => u.Status != Lambda.Deleted,
+                PageNumber = page,
+                PageSize =  pageSize,
+                SearchTerm = searchValue,
+               
+            };
+
+            var clients = await _repositoryManager.ProBonoClientRepository.GetPagedAsync(pagingParameters);
+
+
+            
+
+            List<DynamicSelect> dynamicSelect = new List<DynamicSelect>();
+
+            if (clients.Any())
+            {
+                foreach (var item in clients)
+                {
+                    dynamicSelect.Add(new DynamicSelect { Id = item.Id.ToString(), Name = item.Name + " (" + item.NationalId +
+                    ")" + " -- " + item.Occupation,
+                        
+                    });
+                }
+            }
+
+
+
+            return Json(dynamicSelect);
+        }
+    
     }
 }

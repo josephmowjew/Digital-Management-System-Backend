@@ -140,6 +140,7 @@ namespace DataStore.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     Name = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
+                    NationalId = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false),
                     PostalAddress = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: false),
                     PermanentAddress = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: false),
                     ResidentialAddress = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: false),
@@ -559,7 +560,7 @@ namespace DataStore.Migrations
                     CreatedById = table.Column<string>(type: "varchar(200)", nullable: true),
                     ProbonoClientId = table.Column<int>(type: "int", nullable: false),
                     ApplicationStatus = table.Column<string>(type: "longtext", nullable: false),
-                    ApprovedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    ApprovedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     DenialReason = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false),
                     SummaryOfDispute = table.Column<string>(type: "longtext", nullable: false),
                     YearOfOperationId = table.Column<int>(type: "int", nullable: false),
@@ -810,7 +811,7 @@ namespace DataStore.Migrations
                 .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "ProBono",
+                name: "ProBonos",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -830,26 +831,26 @@ namespace DataStore.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ProBono", x => x.Id);
+                    table.PrimaryKey("PK_ProBonos", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ProBono_ProBonoApplications_ProBonoApplicationId",
+                        name: "FK_ProBonos_ProBonoApplications_ProBonoApplicationId",
                         column: x => x.ProBonoApplicationId,
                         principalTable: "ProBonoApplications",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ProBono_ProbonoClients_ProbonoClientId",
+                        name: "FK_ProBonos_ProbonoClients_ProbonoClientId",
                         column: x => x.ProbonoClientId,
                         principalTable: "ProbonoClients",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ProBono_Users_CreatedById",
+                        name: "FK_ProBonos_Users_CreatedById",
                         column: x => x.CreatedById,
                         principalTable: "Users",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_ProBono_YearOfOperations_YearOfOperationId",
+                        name: "FK_ProBonos_YearOfOperations_YearOfOperationId",
                         column: x => x.YearOfOperationId,
                         principalTable: "YearOfOperations",
                         principalColumn: "Id",
@@ -874,9 +875,9 @@ namespace DataStore.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_AttachmentProBono_ProBono_ProBonosId",
+                        name: "FK_AttachmentProBono_ProBonos_ProBonosId",
                         column: x => x.ProBonosId,
-                        principalTable: "ProBono",
+                        principalTable: "ProBonos",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 })
@@ -903,9 +904,9 @@ namespace DataStore.Migrations
                 {
                     table.PrimaryKey("PK_ProBonoReports", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ProBonoReports_ProBono_ProBonoId",
+                        name: "FK_ProBonoReports_ProBonos_ProBonoId",
                         column: x => x.ProBonoId,
-                        principalTable: "ProBono",
+                        principalTable: "ProBonos",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -1073,26 +1074,6 @@ namespace DataStore.Migrations
                 column: "QualificationTypesId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProBono_CreatedById",
-                table: "ProBono",
-                column: "CreatedById");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ProBono_ProBonoApplicationId",
-                table: "ProBono",
-                column: "ProBonoApplicationId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ProBono_ProbonoClientId",
-                table: "ProBono",
-                column: "ProbonoClientId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ProBono_YearOfOperationId",
-                table: "ProBono",
-                column: "YearOfOperationId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_ProBonoApplications_CreatedById",
                 table: "ProBonoApplications",
                 column: "CreatedById");
@@ -1116,6 +1097,26 @@ namespace DataStore.Migrations
                 name: "IX_ProBonoReports_ProBonoId",
                 table: "ProBonoReports",
                 column: "ProBonoId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProBonos_CreatedById",
+                table: "ProBonos",
+                column: "CreatedById");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProBonos_ProBonoApplicationId",
+                table: "ProBonos",
+                column: "ProBonoApplicationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProBonos_ProbonoClientId",
+                table: "ProBonos",
+                column: "ProbonoClientId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProBonos_YearOfOperationId",
+                table: "ProBonos",
+                column: "YearOfOperationId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PropBonoReportFeedbacks_FeedBackById",
@@ -1266,7 +1267,7 @@ namespace DataStore.Migrations
                 name: "Members");
 
             migrationBuilder.DropTable(
-                name: "ProBono");
+                name: "ProBonos");
 
             migrationBuilder.DropTable(
                 name: "ProBonoApplications");

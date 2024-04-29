@@ -133,5 +133,6 @@ namespace DataStore.Data
         public DbSet<LicenseApplication> LicenseApplications { get; set; }
         public DbSet<LicenseApplicationApproval> LicenseApplicationApprovals { get; set; }
         public DbSet<License> Licenses { get; set; }
+        public DbSet<ProBono> ProBonos { get; set; }
     }
 }

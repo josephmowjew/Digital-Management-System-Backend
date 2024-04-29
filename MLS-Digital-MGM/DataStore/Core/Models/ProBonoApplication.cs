@@ -24,7 +24,7 @@ namespace DataStore.Core.Models
         public int ProbonoClientId { get; set; }
         public ProbonoClient ProbonoClient { get; set; }
         public string ApplicationStatus { get; set; } = Lambda.Pending;
-        public DateTime ApprovedDate { get; set; }
+        public DateTime? ApprovedDate { get; set; }
         [StringLength(200)]
         public string DenialReason { get; set; }
         public string SummaryOfDispute { get; set; }
