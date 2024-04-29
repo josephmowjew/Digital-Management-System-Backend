@@ -13,6 +13,7 @@ namespace DataStore.Core.Models
        public Member()
        {
            this.QualificationTypes = new List<QualificationType>();
+           this.ProBonos = new List<ProBono>();
        }
         [Required, MaxLength(250)]
         public string PostalAddress { get; set; }
@@ -23,6 +24,7 @@ namespace DataStore.Core.Models
         [Required]
         public DateOnly DateOfAdmissionToPractice { get; set; }
         public virtual List<QualificationType> QualificationTypes { get; set; }
+        public ICollection<ProBono> ProBonos { get; set; }
 
     }
 }

@@ -13,6 +13,7 @@ namespace DataStore.Core.Models
         public ProBono()
         {
             Attachments = new List<Attachment>();
+            Members = new List<Member>();
         }
         [Required]
         [StringLength(maximumLength:100)]
@@ -31,5 +32,6 @@ namespace DataStore.Core.Models
         public ICollection<Attachment> Attachments { get; set; }
         public int YearOfOperationId { get; set; }
         public YearOfOperation YearOfOperation { get; set; }
+        public ICollection<Member> Members { get; set; }
     }
 }
