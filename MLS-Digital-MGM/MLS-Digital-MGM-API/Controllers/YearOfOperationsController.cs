@@ -1,6 +1,7 @@
 using AutoMapper;
 using DataStore.Core.DTOs.YearOfOperation;
 using DataStore.Core.DTOs.YearOfOperation;
+using DataStore.Core.DTOs.YearOfOperation;
 using DataStore.Core.Models;
 using DataStore.Core.Services.Interfaces;
 using DataStore.Helpers;
@@ -39,7 +40,6 @@ namespace MLS_Digital_MGM_API.Controllers
         {
             try
             {
-                // Create a new DataTablesParameters object
                 var dataTableParams = new DataTablesParameters();
 
                 var pagingParameters = new PagingParameters<YearOfOperation>
@@ -81,9 +81,13 @@ namespace MLS_Digital_MGM_API.Controllers
                     var draw = dataTableParams.Draw;
                     var resultTotalFiltred = mappedYearOfOperations.Count;
 
-                if (yearOfOperations == null || !yearOfOperations.Any())
-                {
-                    return NotFound();
+                    return Json(new
+                    {
+                        draw,
+                        recordsFiltered = resultTotalFiltred,
+                        recordsTotal = resultTotalFiltred,
+                        data = mappedYearOfOperations.ToList() // Materialize the enumerable
+                    });
                 }
 
 
