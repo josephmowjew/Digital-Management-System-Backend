@@ -43,9 +43,21 @@ namespace MLS_Digital_MGM_API.Controllers
             {   // Create a new DataTablesParameters object
                 var dataTableParams = new DataTablesParameters();
 
-                var pagingParameters = new PagingParameters<ProBonoApplication>
+                string username = _httpContextAccessor.HttpContext.User.Identity.Name;
+
+                //get user id from username
+                var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
+                string CreatedById = user.Id;
+
+
+                 string currentRole  = Lambda.GetCurrentUserRole(_repositoryManager,user.Id);
+                
+                var pagingParameters = new PagingParameters<ProBonoApplication>();
+
+                // Check if the user is secretariat and approve the application if so
+                pagingParameters = new PagingParameters<ProBonoApplication>
                 {
-                    Predicate = u => u.Status != Lambda.Deleted,
+                    Predicate = u => u.Status != Lambda.Deleted && (string.Equals(currentRole, "secretariat", StringComparison.OrdinalIgnoreCase) || u.CreatedById == user.Id),
                     PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
                     PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
                     SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
@@ -54,10 +66,13 @@ namespace MLS_Digital_MGM_API.Controllers
                     Includes = new Expression<Func<ProBonoApplication, object>>[] {
                         p => p.YearOfOperation,
                         p => p.ProbonoClient
-                    }
- 
-                };
+                    },
+                    CreatedById = string.Equals(currentRole, "secretariat", StringComparison.OrdinalIgnoreCase) ? null : CreatedById,
 
+                };
+                
+
+                
                 var proBonoApplicationspaged = await _repositoryManager.ProBonoApplicationRepository.GetPagedAsync(pagingParameters);
     
                 if (proBonoApplicationspaged == null || !proBonoApplicationspaged.Any())
