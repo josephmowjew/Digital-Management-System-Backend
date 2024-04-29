@@ -231,5 +231,30 @@ namespace MLS_Digital_MGM_API.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+
+        [HttpGet("getcountry/{id}")]
+        public async Task<IActionResult> GetCountryById(int id)
+        {
+            try
+            {
+                // Get the country from the data layer
+                var country = await _repositoryManager.CountryRepository.GetByIdAsync(id);
+                if (country == null)
+                {
+                    return NotFound();
+                }
+
+                // Map the country to a ReadCountryDTO
+                var mappedCountry = _mapper.Map<ReadCountryDTO>(country);
+
+                return Ok(mappedCountry);
+            }
+            catch (Exception ex)
+            {
+                // Log the error and return an error response
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
     }
 }

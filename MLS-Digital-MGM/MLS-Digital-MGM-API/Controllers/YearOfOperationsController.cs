@@ -6,6 +6,8 @@ using DataStore.Core.Services.Interfaces;
 using DataStore.Helpers;
 using DataStore.Persistence.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis.Elfie.Serialization;
+using MLS_Digital_MGM.DataStore.Helpers;
 using MLS_Digital_MGM.DataStore.Helpers;
 
 namespace MLS_Digital_MGM_API.Controllers
@@ -19,6 +21,7 @@ namespace MLS_Digital_MGM_API.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
+
 
         // Constructor
         public YearOfOperationsController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor)
@@ -78,13 +81,9 @@ namespace MLS_Digital_MGM_API.Controllers
                     var draw = dataTableParams.Draw;
                     var resultTotalFiltred = mappedYearOfOperations.Count;
 
-                    return Json(new
-                    {
-                        draw,
-                        recordsFiltered = resultTotalFiltred,
-                        recordsTotal = resultTotalFiltred,
-                        data = mappedYearOfOperations.ToList() // Materialize the enumerable
-                    });
+                if (yearOfOperations == null || !yearOfOperations.Any())
+                {
+                    return NotFound();
                 }
 
 
@@ -179,6 +178,28 @@ namespace MLS_Digital_MGM_API.Controllers
                 await _unitOfWork.CommitAsync();
 
                 return NoContent();
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpGet("getyearofoperation/{id}")]
+        public async Task<IActionResult> GetYearOfOperationById(int id)
+        {
+            try
+            {
+                var yearOfOperation = await _repositoryManager.YearOfOperationRepository.GetByIdAsync(id);
+                if (yearOfOperation == null)
+                {
+                    return NotFound();
+                }
+
+                var yearOfOperationDTO = _mapper.Map<ReadYearOfOperationDTO>(yearOfOperation);
+
+                return Ok(yearOfOperationDTO);
             }
             catch (Exception ex)
             {

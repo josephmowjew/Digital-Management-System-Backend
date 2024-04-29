@@ -221,5 +221,26 @@ namespace MLS_Digital_MGM_API.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+
+        [HttpGet("getdepartment/{id}")]
+        public async Task<IActionResult> GetDepartmentById(int id)
+        {
+            try
+            {
+                var department = await _repositoryManager.DepartmentRepository.GetByIdAsync(id);
+                if (department == null)
+                {
+                    return NotFound();
+                }
+
+                var mappedDepartment = _mapper.Map<ReadDepartmentDTO>(department);
+                return Ok(mappedDepartment);
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
     }
 }

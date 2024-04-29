@@ -16,8 +16,8 @@ using Microsoft.AspNetCore.Authorization;
 namespace MLS_Digital_MGM_API.Controllers
 {
     [Route("api/[controller]")]
-    [Authorize(AuthenticationSchemes = "Bearer")]
-    [Authorize]
+    //[Authorize(AuthenticationSchemes = "Bearer")]
+
     //[Authorize]
     public class UsersController : Controller
     {
@@ -38,7 +38,7 @@ namespace MLS_Digital_MGM_API.Controllers
         }
 
         [HttpGet("paged")]
-        public async Task<IActionResult> GetUsers(int pageNumber = 1, int pageSize = 10)
+        public async Task<IActionResult> GetActiveUsers(int pageNumber = 1, int pageSize = 10)
         {
             try
             {
@@ -118,37 +118,157 @@ namespace MLS_Digital_MGM_API.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
-
-        [HttpGet("unconfirmedUsers")]
-        public async Task<IActionResult> UnconfirmedUsers(int pageNumber = 1, int pageSize = 10)
+        [HttpGet("suspended")]
+        public async Task<IActionResult> GetSuspendedUsers(int pageNumber = 1, int pageSize = 10)
         {
             try
             {
-                
-                // Create PagingParameters object
-                var pagingParameters = new PagingParameters<ApplicationUser>{
-                    Predicate = u => u.Status != Lambda.Deleted && u.EmailConfirmed == false,
-                    PageNumber = pageNumber,
-                    PageSize = pageSize
-                    //SearchTerm = null
+                var dataTableParams = new DataTablesParameters();
+            
+                var pagingParameters = new PagingParameters<ApplicationUser>
+                {
+                    Predicate = u => u.Status == Lambda.Deleted,
+                    PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
+                    PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
+                    SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
+                    SortColumn = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumn : null,
+                    SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null
                 };
 
                 // Fetch paginated users using the UserRepository
                 var users = await _repositoryManager.UserRepository.GetPagedAsync(pagingParameters);
 
-        
-                // Check if users exist
+            
+               // Check if users exist
                 if (users == null || !users.Any())
                 {
-                    return Ok(); // Return 404 Not Found if no users are found
+                    if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                    {
+                        var draw = dataTableParams.Draw;
+                        return Json(new 
+                        { 
+                            draw, 
+                            recordsFiltered = 0, 
+                            recordsTotal = 0, 
+                            data = Enumerable.Empty<ReadUserDTO>()
+                        });
+                    }
+                    return Ok(Enumerable.Empty<ReadUserDTO>()); // Return empty list
                 }
         
                 // Map User entities to ReadUserDTOs
                 var mappedUsers = _mapper.Map<IEnumerable<ReadUserDTO>>(users);
 
                 //get the user role of the user
+                var usersWithRoles = new List<ReadUserDTO>();
+
+                mappedUsers.ToList().ForEach(user =>
+                {
+                   var userRole =  this._repositoryManager.UserRepository.GetUserRoleByUserId(user.Id);
+                   string roleName = this._repositoryManager.UserRepository.GetRoleName(userRole.RoleId);
+                   user.RoleName = FormatRoleName(roleName);
+                   usersWithRoles.Add(user);
+                
+                });
 
                
+                // Return datatable JSON if the request came from a datatable
+                if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                {
+                    var draw = dataTableParams.Draw;
+                    var resultTotalFiltred = usersWithRoles.Count;
+
+                    return Json(new 
+                    { 
+                        draw, 
+                        recordsFiltered = resultTotalFiltred, 
+                        recordsTotal = resultTotalFiltred, 
+                        data = usersWithRoles.ToList() // Materialize the enumerable
+                    });
+                }
+
+                return Ok(mappedUsers); // Return paginated users
+        
+            }
+            catch (Exception ex)
+            {
+                // Log the exception using ErrorLogService
+                await _errorLogService.LogErrorAsync(ex);
+        
+                // Return 500 Internal Server Error
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpGet("unconfirmedUsers")]
+        public async Task<IActionResult> UnconfirmedUsers(int pageNumber = 1, int pageSize = 10)
+        {
+            try
+            {
+                var dataTableParams = new DataTablesParameters();
+            
+                var pagingParameters = new PagingParameters<ApplicationUser>
+                {
+                    Predicate = u => u.Status != Lambda.Deleted && u.EmailConfirmed == false,
+                    PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
+                    PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
+                    SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
+                    SortColumn = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumn : null,
+                    SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null
+                };
+
+                // Fetch paginated users using the UserRepository
+                var users = await _repositoryManager.UserRepository.GetPagedAsync(pagingParameters);
+
+            
+               // Check if users exist
+                if (users == null || !users.Any())
+                {
+                    if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                    {
+                        var draw = dataTableParams.Draw;
+                        return Json(new 
+                        { 
+                            draw, 
+                            recordsFiltered = 0, 
+                            recordsTotal = 0, 
+                            data = Enumerable.Empty<ReadUserDTO>()
+                        });
+                    }
+                    return Ok(Enumerable.Empty<ReadUserDTO>()); // Return empty list
+                }
+        
+                // Map User entities to ReadUserDTOs
+                var mappedUsers = _mapper.Map<IEnumerable<ReadUserDTO>>(users);
+
+                //get the user role of the user
+                var usersWithRoles = new List<ReadUserDTO>();
+
+                mappedUsers.ToList().ForEach(user =>
+                {
+                   var userRole =  this._repositoryManager.UserRepository.GetUserRoleByUserId(user.Id);
+                   string roleName = this._repositoryManager.UserRepository.GetRoleName(userRole.RoleId);
+                   user.RoleName = FormatRoleName(roleName);
+                   usersWithRoles.Add(user);
+                
+                });
+
+               
+                // Return datatable JSON if the request came from a datatable
+                if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                {
+                    var draw = dataTableParams.Draw;
+                    var resultTotalFiltred = usersWithRoles.Count;
+
+                    return Json(new 
+                    { 
+                        draw, 
+                        recordsFiltered = resultTotalFiltred, 
+                        recordsTotal = resultTotalFiltred, 
+                        data = usersWithRoles.ToList() // Materialize the enumerable
+                    });
+                }
+
                 return Ok(mappedUsers); // Return paginated users
         
             }
@@ -182,7 +302,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 // Check if users exist
                 if (users == null || !users.Any())
                 {
-                    return Ok(); // Return 404 Not Found if no users are found
+                    return Ok(Enumerable.Empty<ReadUserDTO>()); 
                 }
         
                 // Map User entities to ReadUserDTOs
@@ -203,7 +323,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
-
+        
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUser(string id)
         {
@@ -237,6 +357,8 @@ namespace MLS_Digital_MGM_API.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+
+        
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(string id, [FromBody]UpdateUserDTO userDTO)
         {
@@ -255,6 +377,15 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 _mapper.Map(userDTO, user);
                 await _repositoryManager.UserRepository.UpdateAsync(user);
+
+                var roleResult = await _repositoryManager.UserRepository.AddUserToRoleAsync(user, userDTO.RoleName);
+
+                 if (!roleResult.Succeeded)
+                {
+                    ModelState.AddModelError("Role", "Failed to associate the user with the specified role.");
+                    return BadRequest(ModelState);
+                }
+
                 await _unitOfWork.CommitAsync();
 
                 return NoContent();
@@ -290,11 +421,11 @@ namespace MLS_Digital_MGM_API.Controllers
         }
 
         [HttpGet("activate/{userId}")]
-        public async Task<IActionResult> ActivateAccount(string userId)
+        public async Task<IActionResult> activate(string userId)
         {
             try
             {
-                var user = await _repositoryManager.UserRepository.GetSingleUser(userId);
+                var user = await _repositoryManager.UserRepository.GetSingleUserNoFilter(userId);
                 if (user == null)
                 {
                     return NotFound();

@@ -42,12 +42,22 @@ namespace DataStore.Persistence.SQLRepositories
 
         public async Task<IdentityResult> AddUserToRoleAsync(ApplicationUser applicationUser, string roleName)
         {
+            //remove user from all roles
+            await this._userManager.RemoveFromRolesAsync(applicationUser, await this._userManager.GetRolesAsync(applicationUser));
+
             //add user to role
             return await this._userManager.AddToRoleAsync(applicationUser, roleName);
         }
         public async Task<ApplicationUser> FindByEmailAsync(string email)
         {
            return await _context.Users.Where(x => x.Email == email && x.Status != Lambda.Deleted).FirstOrDefaultAsync();
+        }
+
+         public async Task<ApplicationUser?> GetSingleUserNoFilter(string id)
+        {
+
+            return await this._context.Users.FirstOrDefaultAsync(u => u.Id == id);
+
         }
 
         public async Task<ApplicationUser?> GetSingleUser(string id)
