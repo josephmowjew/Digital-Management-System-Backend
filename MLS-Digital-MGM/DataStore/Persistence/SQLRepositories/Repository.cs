@@ -99,11 +99,16 @@ namespace DataStore.Persistence.SQLRepositories
         }
 
         // Include the specified navigation properties
-        foreach (var include in pagingParameters.Includes)
+       foreach (var include in pagingParameters.Includes)
         {
-            query = query.Include(include);
+            var memberExpression = (MemberExpression)include.Body;
+            var propertyName = memberExpression.Member.Name; // Get the property name
+            query = query.Include(propertyName);
+            if (propertyName == "Attachments")
+            {
+                query = query.Include("Attachments.AttachmentType");
+            }
         }
-
         //query = query.Where(q => q.Status != Lambda.Deleted);
 
         // Apply sort ordering

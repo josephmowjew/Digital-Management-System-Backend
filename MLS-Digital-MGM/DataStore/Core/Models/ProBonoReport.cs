@@ -21,8 +21,10 @@ namespace DataStore.Core.Models
         public string ReportStatus { get; set; } = Lambda.Pending;
         public string? ApprovedById { get; set; }
         public ApplicationUser ApprovedBy { get; set; }
+        public string CreatedById { get; set; }
+        public ApplicationUser CreatedBy { get; set; }
         [StringLength(maximumLength: 250)]
         public string Description { get; set; }
-        public ICollection<Attachment> Attachments { get; set; }  
+        public List<Attachment> Attachments { get; set; }  
     }
 }

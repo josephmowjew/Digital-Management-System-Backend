@@ -9,7 +9,7 @@ namespace DataStore.Core.DTOs.ProBonoApplication
     {
         public ReadProBonoApplicationDTO()
         {
-            Attachments = new List<Attachment>();
+            Attachments = new List<DataStore.Core.Models.Attachment>();
         }
 
         public int Id { get; set; }
@@ -37,7 +37,7 @@ namespace DataStore.Core.DTOs.ProBonoApplication
         public string SummaryOfDispute { get; set; }
         public int YearOfOperationId { get; set; }
         public DataStore.Core.Models.YearOfOperation YearOfOperation { get; set; }
-        public ICollection<Attachment> Attachments { get; set; }
+        public ICollection<DataStore.Core.Models.Attachment> Attachments { get; set; }
         public DateOnly CreatedDate { get; set; }
     }
 }

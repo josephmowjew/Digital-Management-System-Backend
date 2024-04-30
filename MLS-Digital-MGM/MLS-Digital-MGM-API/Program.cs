@@ -95,7 +95,7 @@ builder.Services.AddIdentity<ApplicationUser, Role>()
 
 
 var app = builder.Build();
-
+app.UseStaticFiles();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -112,5 +112,6 @@ app.MapControllers();
 app.UseAuthentication();
 
 app.UseAuthorization();
+
 
 app.Run();

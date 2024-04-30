@@ -13,7 +13,7 @@ namespace DataStore.Core.DTOs.ProBonoReport
         public int Id { get; set; }
 
         public int ProBonoId { get; set; }
-
+        public DataStore.Core.Models.ProBono ProBono { get; set; }
         public double ProBonoProposedHours { get; set; }
 
         public double ProBonoHours { get; set; }
@@ -22,9 +22,11 @@ namespace DataStore.Core.DTOs.ProBonoReport
 
         public string ApprovedById { get; set; }
 
+        public ApplicationUser ApprovedBy { get; set; }
+
         [StringLength(250)]
         public string Description { get; set; }
 
-        public ICollection<Attachment> Attachments { get; set; }
+        public ICollection<DataStore.Core.Models.Attachment> Attachments { get; set; }
     }
 }

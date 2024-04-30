@@ -27,13 +27,16 @@ namespace MLS_Digital_MGM_API.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        public ProBonoApplicationsController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor)
+
+        private readonly IEmailService _emailService;
+        public ProBonoApplicationsController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor, IEmailService emailService)
         {
             _repositoryManager = repositoryManager;
             _errorLogService = errorLogService;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _httpContextAccessor = httpContextAccessor;
+            _emailService = emailService;
         }
     
         [HttpGet("paged")]
@@ -121,7 +124,38 @@ namespace MLS_Digital_MGM_API.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
-    
+
+        [HttpPost("denyApplication")]
+        public async Task<IActionResult> DenyProBonoApplication(DenyProBonoApplicationDTO denyProBonoApplicationDTO)
+        {
+            try
+            {
+                var proBonoApplication = await _repositoryManager.ProBonoApplicationRepository.GetByIdAsync(denyProBonoApplicationDTO.ProBonoApplicationId);
+                proBonoApplication.ApplicationStatus = Lambda.Denied;
+                proBonoApplication.DenialReason = denyProBonoApplicationDTO.Reason;
+
+                await _repositoryManager.ProBonoApplicationRepository.UpdateAsync(proBonoApplication);
+                await _unitOfWork.CommitAsync();
+
+                //send email to the user who created the probono application
+
+                string username = _httpContextAccessor.HttpContext.User.Identity.Name;
+
+                //get user id from username
+                var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
+                
+                 // Send status details email
+                string emailBody = $"Your application for the pro bono application has been denied. <br/> Reason: {denyProBonoApplicationDTO.Reason}";
+                var passwordEmailResult = await _emailService.SendMailWithKeyVarReturn(user.Email, "Pro Bono Application Status", emailBody);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
         [HttpPost]
         public async Task<IActionResult> AddProBonoApplication([FromForm] CreateProBonoApplicationDTO proBonoApplicationDTO)
         {
@@ -199,9 +233,16 @@ namespace MLS_Digital_MGM_API.Controllers
                 string fileNumber = await GenerateUniqueFileNumber();
                 probono.ProBonoApplicationId = proBonoApplication.Id;
                 probono.FileNumber = fileNumber;
+                
                
 
                 await _repositoryManager.ProBonoRepository.AddAsync(probono);
+
+               
+                
+                // Send status details email
+                string emailBody = $"Your application for the pro bono application has been accepted.";
+                var passwordEmailResult = await _emailService.SendMailWithKeyVarReturn(user.Email, "Pro Bono Application Status", emailBody);
                 await _unitOfWork.CommitAsync();
 
               
@@ -290,7 +331,7 @@ namespace MLS_Digital_MGM_API.Controllers
             var attachmentsList = new List<Attachment>();
             var hostEnvironment = HttpContext.RequestServices.GetRequiredService<IWebHostEnvironment>();
             var webRootPath = hostEnvironment.WebRootPath;
-            var proBonoApplicationAttachmentsPath = Path.Combine(webRootPath, "Uploads/ProBonoApplicationsAttachments");
+            var proBonoApplicationAttachmentsPath = Path.Combine(webRootPath, "Uploads/ProBonoAttachments");
 
             Directory.CreateDirectory(proBonoApplicationAttachmentsPath);
 
@@ -346,6 +387,30 @@ namespace MLS_Digital_MGM_API.Controllers
                     application.ApprovedDate = DateTime.UtcNow;
                     await _repositoryManager.ProBonoApplicationRepository.UpdateAsync(application);
                     await _unitOfWork.CommitAsync();
+
+                    //added a record of an actual pro bono itself as well once the application has been saved
+
+                    var probono = this._mapper.Map<ProBono>(application);
+
+                    //generate a unique file number
+                    string fileNumber = await GenerateUniqueFileNumber();
+                    probono.ProBonoApplicationId = application.Id;
+                    probono.FileNumber = fileNumber;
+
+                    await _repositoryManager.ProBonoRepository.AddAsync(probono);
+
+                     await _unitOfWork.CommitAsync();
+
+                    //send email to the user who created the probono application
+
+                    string username = _httpContextAccessor.HttpContext.User.Identity.Name;
+
+                    //get user id from username
+                    var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
+                    
+                    // Send status details email
+                    string emailBody = $"Your application for the pro bono application has been accepted. The file number is {fileNumber}";
+                    var passwordEmailResult = await _emailService.SendMailWithKeyVarReturn(user.Email, "Pro Bono Application Status", emailBody);
                     return Ok();
                 }
                 return BadRequest("user not found");

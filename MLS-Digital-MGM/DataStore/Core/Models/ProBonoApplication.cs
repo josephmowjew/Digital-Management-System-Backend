@@ -26,7 +26,7 @@ namespace DataStore.Core.Models
         public string ApplicationStatus { get; set; } = Lambda.Pending;
         public DateTime? ApprovedDate { get; set; }
         [StringLength(200)]
-        public string DenialReason { get; set; }
+        public string? DenialReason { get; set; }
         public string SummaryOfDispute { get; set; }
         public ICollection<Attachment> Attachments { get; set; }
         public int YearOfOperationId { get; set; }
