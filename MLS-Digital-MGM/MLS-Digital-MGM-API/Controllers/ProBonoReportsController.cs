@@ -28,8 +28,9 @@ public class ProBonoReportsController : Controller
     private readonly IMapper _mapper;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IWebHostEnvironment _hostingEnvironment;
+     private readonly IEmailService _emailService;
 
-    public ProBonoReportsController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor, IWebHostEnvironment hostingEnvironment)
+    public ProBonoReportsController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor, IWebHostEnvironment hostingEnvironment, IEmailService emailService)
     {
         _repositoryManager = repositoryManager;
         _errorLogService = errorLogService;
@@ -37,6 +38,7 @@ public class ProBonoReportsController : Controller
         _mapper = mapper;
         _httpContextAccessor = httpContextAccessor;
         _hostingEnvironment = hostingEnvironment;
+        _emailService = emailService;
     }
 
     [HttpGet("paged")]
@@ -297,6 +299,79 @@ public class ProBonoReportsController : Controller
             return StatusCode(500, "Internal server error");
         }
     }
+    [HttpPost("acceptReport")]
+    public async Task<IActionResult> AcceptReport(AcceptProBonoReportDTO acceptProBonoReportDTO)
+    {
+        try
+        {
+            ProBonoReport report = await _repositoryManager.ProBonoReportRepository.GetByIdAsync(acceptProBonoReportDTO.ProBonoReportId);
+            if (report == null)
+            {
+                return NotFound();
+            }
+
+            string username = _httpContextAccessor.HttpContext.User.Identity.Name;
+
+            //get user id from username
+            var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
+
+            report.ReportStatus = Lambda.Approved;
+            report.ProBonoHours = acceptProBonoReportDTO.ProBonoHours;
+            report.ApprovedById = user.Id;
+            await _repositoryManager.ProBonoReportRepository.UpdateAsync(report);
+            await _unitOfWork.CommitAsync();
+
+            //send email to the member who created the report
+
+            var reportCreator = await _repositoryManager.UserManager.FindByIdAsync(report.CreatedById);
+
+            string creatorEmail = reportCreator.Email;
+
+            // Send status details email
+            string emailBody = $"Congratulations {report.CreatedBy.FirstName} {report.CreatedBy.LastName},<br/>Your Pro Bono report has been approved. The total number of hours is {report.ProBonoHours}.";
+            var passwordEmailResult = await _emailService.SendMailWithKeyVarReturn(creatorEmail, "Pro Bono Application Status", emailBody);
+
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            await _errorLogService.LogErrorAsync(ex);
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+     [HttpPost("denyReport")]
+     public async Task<IActionResult> DenyReport(DenyProBonoReportDTO denyProBonoReportDTO)
+     {
+         try
+         {
+             ProBonoReport report = await _repositoryManager.ProBonoReportRepository.GetByIdAsync(denyProBonoReportDTO.ProBonoReportId);
+             if (report == null)
+             {
+                 return NotFound();
+             }
+
+             report.ReportStatus = Lambda.Denied;
+             await _repositoryManager.ProBonoReportRepository.UpdateAsync(report);
+             await _unitOfWork.CommitAsync();
+
+              //send email to the member who created the report
+
+            var reportCreator = await _repositoryManager.UserManager.FindByIdAsync(report.CreatedById);
+
+            string creatorEmail = reportCreator.Email;
+
+            // Send status details email
+            string emailBody = $"Sorry but your report has not been approved,<br/> Reason for denial: {denyProBonoReportDTO.Reason}.";
+            var passwordEmailResult = await _emailService.SendMailWithKeyVarReturn(creatorEmail, "Pro Bono Application Status", emailBody);
+             return NoContent();
+         }
+         catch (Exception ex)
+         {
+             await _errorLogService.LogErrorAsync(ex);
+             return StatusCode(500, "Internal server error");
+         }
+     }
 }
 
 }
