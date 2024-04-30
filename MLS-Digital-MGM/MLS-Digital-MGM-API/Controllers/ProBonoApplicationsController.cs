@@ -227,7 +227,7 @@ namespace MLS_Digital_MGM_API.Controllers
         }   
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateProBonoApplication(int id, [FromBody] UpdateProBonoApplicationDTO proBonoApplicationDTO, IEnumerable<IFormFile> attachments)
+        public async Task<IActionResult> UpdateProBonoApplication(int id, [FromBody] UpdateProBonoApplicationDTO proBonoApplicationDTO)
         {
             try
             {
@@ -245,9 +245,9 @@ namespace MLS_Digital_MGM_API.Controllers
                 var attachmentType = await _repositoryManager.AttachmentTypeRepository.GetAsync(d => d.Name == "ProBonoApplication") 
                                     ?? new AttachmentType { Name = "ProBonoApplication" };
 
-                if (attachments?.Any() == true)
+                if (proBonoApplicationDTO.Attachments?.Any() == true)
                 {
-                    proBonoApplication.Attachments = await SaveAttachmentsAsync(attachments, attachmentType.Id);
+                    proBonoApplication.Attachments = await SaveAttachmentsAsync(proBonoApplicationDTO.Attachments, attachmentType.Id);
                 }
 
                 _mapper.Map(proBonoApplicationDTO, proBonoApplication);

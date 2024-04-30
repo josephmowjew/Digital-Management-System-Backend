@@ -24,15 +24,13 @@ namespace DataStore.Core.DTOs.ProBonoApplication
 
         public DateTime? ApprovedDate { get; set; } = null;
 
-        [StringLength(maximumLength: 200)]
-        public string DenialReason { get; set; } = "";
-
+    
         public string SummaryOfDispute { get; set; }
 
 
         public int YearOfOperationId { get; set; }
 
-        public ICollection<IFormFile> Attachments { get; set; }  
+        public ICollection<IFormFile>? Attachments { get; set; }  
 
     }
 }

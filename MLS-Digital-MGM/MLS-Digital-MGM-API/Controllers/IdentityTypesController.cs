@@ -4,6 +4,7 @@ using DataStore.Core.Models;
 using DataStore.Core.Services.Interfaces;
 using DataStore.Helpers;
 using DataStore.Persistence.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -14,6 +15,7 @@ namespace MLS_Digital_MGM_API.Controllers
 {
     // Controller for handling requests related to identity types
     [Route("api/[controller]")]
+    //[Authorize(AuthenticationSchemes = "Bearer")]
     public class IdentityTypesController : Controller
     {
         // Dependency Injection of required services

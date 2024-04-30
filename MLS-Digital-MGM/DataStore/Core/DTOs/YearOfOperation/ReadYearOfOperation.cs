@@ -10,5 +10,10 @@ namespace DataStore.Core.DTOs.YearOfOperation
         public DateOnly StartDate { get; set; }
 
         public DateOnly EndDate { get; set; }
+
+        public string FormatedDate { get =>  $"{StartDate.Year} - {EndDate.Year}";
+     }
+
+       
     }
 }

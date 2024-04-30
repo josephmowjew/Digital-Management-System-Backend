@@ -5,11 +5,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DataStore.Core.DTOs.ProBonoClient;
+using DataStore.Core.DTOs.ProBonoReport;
 
 namespace DataStore.Core.DTOs.ProBono
 {
     public class ReadProBonoDTO
     {
+        public ReadProBonoDTO()
+        {
+            ProBonoReports = new List<ReadProBonoReportDTO>();
+        }
         public int Id { get; set; }
 
         [Required, StringLength(100)]
@@ -30,6 +35,9 @@ namespace DataStore.Core.DTOs.ProBono
         public int ProBonoApplicationId { get; set; }
         public DataStore.Core.Models.ProBonoApplication ProBonoApplication { get; set; }
         public int YearOfOperationId { get; set; }
-        public DataStore.Core.Models.YearOfOperation YearOfOperation { get; set; }
+        public DataStore.Core.DTOs.YearOfOperation.ReadYearOfOperationDTO YearOfOperation { get; set; }
+        public ICollection<ReadProBonoReportDTO> ProBonoReports { get; set; }
+
+        public double ProBonoHoursAccoumulated { get; set; }
     }
 }

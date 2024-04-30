@@ -12,48 +12,109 @@ using DataStore.Core.Models;
 using DataStore.Core.DTOs.ProBono;
 using DataStore.Helpers;
 using System.Linq.Expressions;
+using MLS_Digital_MGM.DataStore.Helpers;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace MLS_Digital_MGM_API.Controllers
 {
     [Route("api/[controller]")]
+    [Authorize(AuthenticationSchemes = "Bearer")]
     public class ProBonosController : Controller
     {
         private readonly IRepositoryManager _repositoryManager;
         private readonly IErrorLogService _errorLogService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-    
-        public ProBonosController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper)
+
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        public ProBonosController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor)
         {
             _repositoryManager = repositoryManager;
             _errorLogService = errorLogService;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _httpContextAccessor = httpContextAccessor;
         }
     
         [HttpGet("paged")]
         public async Task<IActionResult> GetProBonos(int pageNumber = 1, int pageSize = 10)
         {
             try
+            
             {
-                  // Create PagingParameters object
-                var pagingParameters = new PagingParameters<ProBono>{
-                    PageNumber = pageNumber,
-                    PageSize = pageSize,
-                    Includes = new Expression<Func<ProBono, object>>[] {
-                        p => p.ProBonoApplication
-                    }
+                string username = _httpContextAccessor.HttpContext.User.Identity.Name;
 
+                //get user id from username
+                var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
+                string CreatedById = user.Id;
+
+
+                 string currentRole  = Lambda.GetCurrentUserRole(_repositoryManager,user.Id);
+                 // Create a new DataTablesParameters object
+                var dataTableParams = new DataTablesParameters();
+            
+                var pagingParameters = new PagingParameters<ProBono>
+                {
+                    Predicate = u => u.Status != Lambda.Deleted && (string.Equals(currentRole, "secretariat", StringComparison.OrdinalIgnoreCase) || u.CreatedById == user.Id),
+                    PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
+                    PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
+                    SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
+                    SortColumn = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumn : null,
+                    SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null,
+                    Includes = new Expression<Func<ProBono, object>>[]{
+                        p => p.YearOfOperation,
+                        p => p.ProBonoApplication,
+                        p => p.ProbonoClient,
+                        p => p.ProBonoReports,
+                    },
+                     CreatedById = string.Equals(currentRole, "secretariat", StringComparison.OrdinalIgnoreCase) ? null : CreatedById,
                 };
+
+ 
                 var probonos = await _repositoryManager.ProBonoRepository.GetPagedAsync(pagingParameters);
                 if (probonos == null || !probonos.Any())
                 {
-                    return NotFound();
+                      if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                    {
+                        var draw = dataTableParams.Draw;
+                        return Json(new 
+                        { 
+                            draw, 
+                            recordsFiltered = 0, 
+                            recordsTotal = 0, 
+                            data = Enumerable.Empty<ReadProBonoDTO>()
+                        });
+                    }
+                    return Ok(Enumerable.Empty<ReadProBonoDTO>()); // Return empty list
                 }
     
-                var mappedProbonos = _mapper.Map<IEnumerable<ReadProBonoDTO>>(probonos);
-    
+                var mappedProbonos = _mapper.Map<List<ReadProBonoDTO>>(probonos);
+
+                mappedProbonos.ForEach(p => {
+                        //add all probono hours in each probono
+                        double hours = p.ProBonoReports.Sum(pr => pr.ProBonoHours);
+
+                        p.ProBonoHoursAccoumulated = hours;
+                    });
+        
+               // Return datatable JSON if the request came from a datatable
+                if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                {
+                    var draw = dataTableParams.Draw;
+                    var resultTotalFiltred = mappedProbonos.Count;
+
+                    return Json(new 
+                    { 
+                        draw, 
+                        recordsFiltered = resultTotalFiltred, 
+                        recordsTotal = resultTotalFiltred, 
+                        data = mappedProbonos.ToList() // Materialize the enumerable
+                    });
+                }
+
+
                 return Ok(mappedProbonos);
             }
             catch (Exception ex)
