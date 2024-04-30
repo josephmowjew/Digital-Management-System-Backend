@@ -133,55 +133,60 @@ public class ProBonoReportsController : Controller
         }
     }
 
- [HttpPost]
- public async Task<IActionResult> AddProBonoReport([FromForm] CreateProBonoReportDTO reportDTO)
- {
-     try
-     {
-         if (!ModelState.IsValid)
-         {
-             return BadRequest(ModelState);
-         }
- 
-         var report = _mapper.Map<ProBonoReport>(reportDTO);
- 
-         var existingReport = await _repositoryManager.ProBonoReportRepository.GetAsync(r => r.Description.Trim().Equals(report.Description.Trim(), StringComparison.OrdinalIgnoreCase) && r.ProBonoId == report.ProBonoId);
-         if (existingReport != null)
-         {
-             ModelState.AddModelError(nameof(reportDTO.Description), "A report with the same description and ProBono Report already exists");
-             return BadRequest(ModelState);
-         }
-
-        
-        // Get or create attachment type
-        var attachmentType = await _repositoryManager.AttachmentTypeRepository.GetAsync(d => d.Name == "ProBonoReport") 
-                            ?? new AttachmentType { Name = "ProBonoReport" };
-
-        // Add attachment type if it doesn't exist
-        if (attachmentType.Id == 0)
+    [HttpPost]
+    public async Task<IActionResult> AddProBonoReport([FromForm] CreateProBonoReportDTO reportDTO)
+    {
+        try
         {
-            await _repositoryManager.AttachmentTypeRepository.AddAsync(attachmentType);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+    
+            var report = _mapper.Map<ProBonoReport>(reportDTO);
+
+            string username = _httpContextAccessor.HttpContext.User.Identity.Name;
+
+            //get user id from username
+            var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
+            report.CreatedById = user.Id;
+
+    
+            var existingReport = await _repositoryManager.ProBonoReportRepository.GetAsync(r => r.Description.Trim().Equals(report.Description.Trim(), StringComparison.OrdinalIgnoreCase) && r.ProBonoId == report.ProBonoId);
+            if (existingReport != null)
+            {
+                ModelState.AddModelError(nameof(reportDTO.Description), "A report with the same description and ProBono Report already exists");
+                return BadRequest(ModelState);
+            }
+
+            
+            // Get or create attachment type
+            var attachmentType = await _repositoryManager.AttachmentTypeRepository.GetAsync(d => d.Name == "ProBonoReport") 
+                                ?? new AttachmentType { Name = "ProBonoReport" };
+
+            // Add attachment type if it doesn't exist
+            if (attachmentType.Id == 0)
+            {
+                await _repositoryManager.AttachmentTypeRepository.AddAsync(attachmentType);
+                await _unitOfWork.CommitAsync();
+            }
+            if (reportDTO.Attachments != null && reportDTO.Attachments.Count > 0)
+            {
+                report.Attachments = await SaveAttachmentsAsync(reportDTO.Attachments, attachmentType.Id);
+            }
+    
+            await _repositoryManager.ProBonoReportRepository.AddAsync(report);
             await _unitOfWork.CommitAsync();
+    
+            return CreatedAtAction("GetProBonoReports", new { id = report.Id }, report);
         }
-         if (reportDTO.Attachments != null && reportDTO.Attachments.Count > 0)
-         {
-             report.Attachments = await SaveAttachmentsAsync(reportDTO.Attachments, attachmentType.Id);
-         }
- 
-         await _repositoryManager.ProBonoReportRepository.AddAsync(report);
-         await _unitOfWork.CommitAsync();
- 
-         return CreatedAtAction("GetProBonoReports", new { id = report.Id }, report);
-     }
-     catch (Exception ex)
-     {
-         await _errorLogService.LogErrorAsync(ex);
-         return StatusCode(500, "Internal server error");
-     }
- }
- 
-
-
+        catch (Exception ex)
+        {
+            await _errorLogService.LogErrorAsync(ex);
+            return StatusCode(500, "Internal server error");
+        }
+    }
+    
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateProBonoReport(int id, [FromForm] UpdateProBonoReportDTO reportDTO)
     {
@@ -205,6 +210,9 @@ public class ProBonoReportsController : Controller
             {
                 report.Attachments = await SaveAttachmentsAsync(reportDTO.Attachments, attachmentType.Id);
             }
+
+            //keep the existing proposed hours
+            reportDTO.ReportStatus = report.ReportStatus;
     
             _mapper.Map(reportDTO, report);
             await _repositoryManager.ProBonoReportRepository.UpdateAsync(report);
@@ -243,33 +251,52 @@ public class ProBonoReportsController : Controller
     }
 
      private async Task<List<Attachment>> SaveAttachmentsAsync(IEnumerable<IFormFile> attachments, int attachmentTypeId)
- {
-     var attachmentsList = new List<Attachment>();
-     var hostEnvironment = HttpContext.RequestServices.GetRequiredService<IWebHostEnvironment>();
-     var webRootPath = hostEnvironment.WebRootPath;
-     var proBonoReportAttachmentsPath = Path.Combine(webRootPath, "Uploads/ProBonoReportAttachments");
+    {
+        var attachmentsList = new List<Attachment>();
+        var hostEnvironment = HttpContext.RequestServices.GetRequiredService<IWebHostEnvironment>();
+        var webRootPath = hostEnvironment.WebRootPath;
+        var proBonoReportAttachmentsPath = Path.Combine(webRootPath, "Uploads/ProBonoReportAttachments");
+    
+        Directory.CreateDirectory(proBonoReportAttachmentsPath);
+    
+        foreach (var attachment in attachments)
+        {
+            var filePath = Path.Combine(proBonoReportAttachmentsPath, attachment.FileName);
+            using (var stream = System.IO.File.Create(filePath))
+            {
+                await attachment.CopyToAsync(stream);
+            }
+    
+            attachmentsList.Add(new Attachment
+            {
+                FileName = attachment.FileName,
+                FilePath = filePath,
+                AttachmentTypeId = attachmentTypeId
+            });
+        }
  
-     Directory.CreateDirectory(proBonoReportAttachmentsPath);
- 
-     foreach (var attachment in attachments)
-     {
-         var filePath = Path.Combine(proBonoReportAttachmentsPath, attachment.FileName);
-         using (var stream = System.IO.File.Create(filePath))
-         {
-             await attachment.CopyToAsync(stream);
-         }
- 
-         attachmentsList.Add(new Attachment
-         {
-             FileName = attachment.FileName,
-             FilePath = filePath,
-             AttachmentTypeId = attachmentTypeId
-         });
-     }
- 
-     return attachmentsList;
- }
+        return attachmentsList;
+    }
 
+    [HttpGet("getprobonoreport/{id}")]
+    public async Task<IActionResult> GetProBonoReport(int id)
+    {
+        try
+        {
+            var report = await _repositoryManager.ProBonoReportRepository.GetByIdAsync(id);
+            if (report == null)
+            {
+                return NotFound();
+            }
+    
+            return Ok(report);
+        }
+        catch (Exception ex)
+        {
+            await _errorLogService.LogErrorAsync(ex);
+            return StatusCode(500, "Internal server error");
+        }
+    }
 }
 
 }

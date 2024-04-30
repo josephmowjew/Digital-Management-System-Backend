@@ -21,7 +21,7 @@ namespace DataStore.Core.DTOs.ProBonoReport
         [StringLength(250)]
         public string Description { get; set; }
 
-        public string ReportStatus { get; set; }
+        public string? ReportStatus { get; set; }
 
 
         public ICollection<IFormFile>? Attachments { get; set; }
