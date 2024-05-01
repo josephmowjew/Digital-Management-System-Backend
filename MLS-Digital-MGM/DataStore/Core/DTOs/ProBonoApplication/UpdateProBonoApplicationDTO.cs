@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using DataStore.Core.Models;
+using DataStore.Helpers;
 using Microsoft.AspNetCore.Http;
 
 namespace DataStore.Core.DTOs.ProBonoApplication
@@ -27,6 +28,8 @@ namespace DataStore.Core.DTOs.ProBonoApplication
         public int YearOfOperationId { get; set; }
 
         //[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        [AllowedFileTypes(new[] { ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".txt" })]
+        [FileSize(5242880)] // 5 MB
         public ICollection<IFormFile>? Attachments { get; set; } 
     }
 }

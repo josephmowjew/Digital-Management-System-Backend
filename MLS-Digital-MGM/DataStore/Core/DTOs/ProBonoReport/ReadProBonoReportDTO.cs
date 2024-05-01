@@ -26,7 +26,7 @@ namespace DataStore.Core.DTOs.ProBonoReport
 
         [StringLength(250)]
         public string Description { get; set; }
-
+        
         public ICollection<DataStore.Core.Models.Attachment> Attachments { get; set; }
     }
 }

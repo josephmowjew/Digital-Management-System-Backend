@@ -29,7 +29,8 @@ namespace DataStore.Core.DTOs.ProBonoApplication
 
 
         public int YearOfOperationId { get; set; }
-
+        [AllowedFileTypes(new[] { ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".txt" })]
+        [FileSize(5242880)] // 5 MB
         public ICollection<IFormFile>? Attachments { get; set; }  
 
     }

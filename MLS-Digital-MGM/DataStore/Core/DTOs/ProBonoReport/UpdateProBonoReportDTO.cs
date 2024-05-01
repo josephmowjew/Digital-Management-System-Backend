@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using DataStore.Core.Models;
+using DataStore.Helpers;
 using Microsoft.AspNetCore.Http;
 
 namespace DataStore.Core.DTOs.ProBonoReport
@@ -23,7 +24,8 @@ namespace DataStore.Core.DTOs.ProBonoReport
 
         public string? ReportStatus { get; set; }
 
-
+        [AllowedFileTypes(new[] { ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".txt" })]
+        [FileSize(5242880)] // 5 MB
         public ICollection<IFormFile>? Attachments { get; set; }
 
     }

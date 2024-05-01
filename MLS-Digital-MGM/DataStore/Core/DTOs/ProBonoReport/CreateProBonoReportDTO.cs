@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DataStore.Helpers;
 using Microsoft.AspNetCore.Http;
 
 namespace DataStore.Core.DTOs.ProBonoReport
@@ -20,7 +21,8 @@ namespace DataStore.Core.DTOs.ProBonoReport
         public string? Description { get; set; }
         
         //public string ReportStatus { get; set; } = "Pending";
-
+        [AllowedFileTypes(new[] { ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".txt" })]
+        [FileSize(5242880)] // 5 MB
         public ICollection<IFormFile> Attachments { get; set; }  
     }
 }
