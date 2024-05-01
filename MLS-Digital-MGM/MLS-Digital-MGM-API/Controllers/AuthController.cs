@@ -8,12 +8,16 @@ using DataStore.Persistence.Interfaces;
 using DataStore.Persistence.SQLRepositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.IdentityModel.Tokens;
+using Org.BouncyCastle.Asn1.Cmp;
 using System.Configuration;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Encodings.Web;
 
 namespace MLS_Digital_MGM_API.Controllers
 {
@@ -318,6 +322,90 @@ namespace MLS_Digital_MGM_API.Controllers
         }
 
 
+        //user password
+        [HttpPost]
+        [Route("PasswordReset")]
+        public async Task<IActionResult> PasswordReset(PasswordResetModel model)
+        {
+            // Check if the model state is valid
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            // Find the user based on the email provided
+            var user = await this._repositoryManager.UserRepository.FindByEmailAsync(model.Email);
+
+            // If the user is not found, return an error
+            if (user == null)
+            {
+                ModelState.AddModelError("Email", "Email not recognized");
+                return BadRequest(ModelState);
+            }
+
+            // Check if the provided code is valid
+            if (model.Code == null)
+            {
+                ModelState.AddModelError("Code", "Code is invalid");
+                return BadRequest(ModelState);
+            }
+
+            // Generate a password reset token for the user
+            var token = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(model.Code));
+
+            // Reset the user's password using the token and the new password
+            var result = await this._repositoryManager.UserManager.ResetPasswordAsync(user, token, model.Password);
+
+            // If the password reset is successful, return a success message
+            if (result.Succeeded)
+            {
+                return Ok("Password reset successfully");
+            }
+
+            // If the password reset fails, return an error
+            ModelState.AddModelError("GeneralError", "Failed to reset password");
+            return BadRequest(ModelState);
+        }
+
+        //generate forgot password link
+        //user password
+        [HttpPost]
+        [Route("ForgotPassword")]
+        public async Task<IActionResult> ForgotPassword(PasswordResetModel model)
+        {
+            // Check if the model state is valid
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            // Find the user based on the email provided
+            var user = await this._repositoryManager.UserRepository.FindByEmailAsync(model.Email);
+
+            // If the user is not found, return an error
+            if (user == null)
+            {
+                ModelState.AddModelError("Email", "Email not recognized");
+                return BadRequest(ModelState);
+            }
+
+            // generate link
+            var token = await this._repositoryManager.UserManager.GeneratePasswordResetTokenAsync(user);
+
+            var code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+            var callbackUrl = Url.Page(
+                "/ResetPassword",
+                pageHandler: null,
+                values: new { area = "", code },
+                protocol: Request.Scheme);
+
+            
+               var body = $"Please reset your password by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.";
+
+            var pinEmailResult = await _emailService.SendMailWithKeyVarReturn(user.Email, "Reset Password", body);
+
+            return Ok("Password reset link was sent to your email successfully");
+        }
 
     }
 }
