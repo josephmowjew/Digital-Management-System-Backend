@@ -753,8 +753,8 @@ namespace DataStore.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<DateOnly>("DateOfAdmissionToPractice")
-                        .HasColumnType("date");
+                    b.Property<DateTime>("DateOfAdmissionToPractice")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime(6)");
@@ -781,7 +781,13 @@ namespace DataStore.Migrations
                     b.Property<DateTime>("UpdatedDate")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("varchar(200)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Members");
                 });
@@ -792,8 +798,14 @@ namespace DataStore.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<DateOnly>("DateObtained")
-                        .HasColumnType("date");
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("DateObtained")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("IssuingInstitution")
                         .IsRequired()
@@ -803,19 +815,27 @@ namespace DataStore.Migrations
                     b.Property<int>("MemberId")
                         .HasColumnType("int");
 
-                    b.Property<int>("QualificationId")
-                        .HasColumnType("int");
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<int>("QualificationTypeId")
                         .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("MemberId");
 
-                    b.HasIndex("QualificationId");
+                    b.HasIndex("QualificationTypeId");
 
-                    b.ToTable("MemberQualification");
+                    b.ToTable("MemberQualifications");
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.ProBono", b =>
@@ -1631,6 +1651,17 @@ namespace DataStore.Migrations
                     b.Navigation("Department");
                 });
 
+            modelBuilder.Entity("DataStore.Core.Models.Member", b =>
+                {
+                    b.HasOne("DataStore.Core.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("DataStore.Core.Models.MemberQualification", b =>
                 {
                     b.HasOne("DataStore.Core.Models.Member", "Member")
@@ -1641,7 +1672,7 @@ namespace DataStore.Migrations
 
                     b.HasOne("DataStore.Core.Models.QualificationType", "QualificationType")
                         .WithMany()
-                        .HasForeignKey("QualificationId")
+                        .HasForeignKey("QualificationTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

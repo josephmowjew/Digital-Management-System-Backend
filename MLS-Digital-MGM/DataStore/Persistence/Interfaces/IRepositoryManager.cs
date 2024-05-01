@@ -43,5 +43,11 @@ namespace DataStore.Persistence.Interfaces
 
         IProBonoReportRepository ProBonoReportRepository { get; }
 
+        IQualificationTypeRepository QualificationTypeRepository { get; }
+
+        IMemberRepository MemberRepository { get; }
+
+        IMemberQualificationRepository MemberQualificationRepository { get; }
+
     }
 }

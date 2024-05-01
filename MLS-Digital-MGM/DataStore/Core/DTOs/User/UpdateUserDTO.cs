@@ -45,8 +45,7 @@ namespace DataStore.Core.DTOs.User
         public int CountryId { get; set; }
 
         [Display(Name = "Role")]
-        [Required]
-        public string RoleName { get; set; }
+        public string? RoleName { get; set; }
 
 
         [Required]

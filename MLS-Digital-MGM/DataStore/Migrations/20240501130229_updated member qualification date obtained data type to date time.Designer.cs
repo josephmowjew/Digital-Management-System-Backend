@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240429101503_added member pro bono linking entity")]
-    partial class addedmemberprobonolinkingentity
+    [Migration("20240501130229_updated member qualification date obtained data type to date time")]
+    partial class updatedmemberqualificationdateobtaineddatatypetodatetime
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -756,8 +756,8 @@ namespace DataStore.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<DateOnly>("DateOfAdmissionToPractice")
-                        .HasColumnType("date");
+                    b.Property<DateTime>("DateOfAdmissionToPractice")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime(6)");
@@ -784,7 +784,13 @@ namespace DataStore.Migrations
                     b.Property<DateTime>("UpdatedDate")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("varchar(200)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Members");
                 });
@@ -795,8 +801,14 @@ namespace DataStore.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<DateOnly>("DateObtained")
-                        .HasColumnType("date");
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("DateObtained")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("IssuingInstitution")
                         .IsRequired()
@@ -806,19 +818,27 @@ namespace DataStore.Migrations
                     b.Property<int>("MemberId")
                         .HasColumnType("int");
 
-                    b.Property<int>("QualificationId")
-                        .HasColumnType("int");
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<int>("QualificationTypeId")
                         .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("MemberId");
 
-                    b.HasIndex("QualificationId");
+                    b.HasIndex("QualificationTypeId");
 
-                    b.ToTable("MemberQualification");
+                    b.ToTable("MemberQualifications");
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.ProBono", b =>
@@ -910,7 +930,6 @@ namespace DataStore.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("DenialReason")
-                        .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("varchar(200)");
 
@@ -956,6 +975,10 @@ namespace DataStore.Migrations
                     b.Property<string>("ApprovedById")
                         .HasColumnType("varchar(200)");
 
+                    b.Property<string>("CreatedById")
+                        .IsRequired()
+                        .HasColumnType("varchar(200)");
+
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime(6)");
 
@@ -991,6 +1014,8 @@ namespace DataStore.Migrations
 
                     b.HasIndex("ApprovedById");
 
+                    b.HasIndex("CreatedById");
+
                     b.HasIndex("ProBonoId");
 
                     b.ToTable("ProBonoReports");
@@ -1004,6 +1029,13 @@ namespace DataStore.Migrations
 
                     b.Property<decimal>("AnnualIncome")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("ApprovedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("CreatedById")
+                        .IsRequired()
+                        .HasColumnType("varchar(200)");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime(6)");
@@ -1059,6 +1091,8 @@ namespace DataStore.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedById");
 
                     b.ToTable("ProbonoClients");
                 });
@@ -1620,6 +1654,17 @@ namespace DataStore.Migrations
                     b.Navigation("Department");
                 });
 
+            modelBuilder.Entity("DataStore.Core.Models.Member", b =>
+                {
+                    b.HasOne("DataStore.Core.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("DataStore.Core.Models.MemberQualification", b =>
                 {
                     b.HasOne("DataStore.Core.Models.Member", "Member")
@@ -1630,7 +1675,7 @@ namespace DataStore.Migrations
 
                     b.HasOne("DataStore.Core.Models.QualificationType", "QualificationType")
                         .WithMany()
-                        .HasForeignKey("QualificationId")
+                        .HasForeignKey("QualificationTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1703,15 +1748,34 @@ namespace DataStore.Migrations
                         .WithMany()
                         .HasForeignKey("ApprovedById");
 
-                    b.HasOne("DataStore.Core.Models.ProBono", "ProBono")
+                    b.HasOne("DataStore.Core.Models.ApplicationUser", "CreatedBy")
                         .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataStore.Core.Models.ProBono", "ProBono")
+                        .WithMany("ProBonoReports")
                         .HasForeignKey("ProBonoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("ApprovedBy");
 
+                    b.Navigation("CreatedBy");
+
                     b.Navigation("ProBono");
+                });
+
+            modelBuilder.Entity("DataStore.Core.Models.ProbonoClient", b =>
+                {
+                    b.HasOne("DataStore.Core.Models.ApplicationUser", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CreatedBy");
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.PropBonoReportFeedback", b =>
@@ -1820,6 +1884,11 @@ namespace DataStore.Migrations
             modelBuilder.Entity("DataStore.Core.Models.Firm", b =>
                 {
                     b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("DataStore.Core.Models.ProBono", b =>
+                {
+                    b.Navigation("ProBonoReports");
                 });
 #pragma warning restore 612, 618
         }

@@ -375,16 +375,26 @@ namespace MLS_Digital_MGM_API.Controllers
                     return NotFound();
                 }
 
+                if(userDTO.DepartmentId == 0 || userDTO.DepartmentId == null)
+                {
+                    //get the department of the user from the database
+                    userDTO.DepartmentId = user.DepartmentId;
+                }
                 _mapper.Map(userDTO, user);
                 await _repositoryManager.UserRepository.UpdateAsync(user);
 
-                var roleResult = await _repositoryManager.UserRepository.AddUserToRoleAsync(user, userDTO.RoleName);
-
-                 if (!roleResult.Succeeded)
+                if(userDTO.RoleName != null)
                 {
-                    ModelState.AddModelError("Role", "Failed to associate the user with the specified role.");
-                    return BadRequest(ModelState);
+                    var roleResult = await _repositoryManager.UserRepository.AddUserToRoleAsync(user, userDTO.RoleName);
+
+                      if (!roleResult.Succeeded)
+                    {
+                        ModelState.AddModelError("Role", "Failed to associate the user with the specified role.");
+                        return BadRequest(ModelState);
+                    }
+                    
                 }
+
 
                 await _unitOfWork.CommitAsync();
 

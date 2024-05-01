@@ -32,7 +32,9 @@ namespace DataStore.Persistence.SQLRepositories
         private IAttachmentTypeRepository _attachmentTypeRepository;
         private IProBonoRepository _proBonoRepository;
         private IProBonoReportRepository _proBonoReportRepository;
-
+        private IQualificationTypeRepository _qualificationTypeRepository;
+        private IMemberRepository _memberRepository;
+        private IMemberQualificationRepository _memberQualificationRepository;
 
         // Add other repository fields here, e.g., private IProductRepository _productRepository;
 
@@ -77,5 +79,11 @@ namespace DataStore.Persistence.SQLRepositories
         public IProBonoRepository ProBonoRepository => _proBonoRepository ??= new ProBonoRepository(_context, _unitOfWork);
 
         public IProBonoReportRepository ProBonoReportRepository => _proBonoReportRepository ??= new ProBonoReportRepository(_context, _unitOfWork);
+
+        public IQualificationTypeRepository QualificationTypeRepository => _qualificationTypeRepository ??= new QualificationTypeRepository(_context, _unitOfWork);
+
+        public IMemberRepository MemberRepository => _memberRepository ??= new MemberRepository(_context, _unitOfWork);
+
+        public IMemberQualificationRepository MemberQualificationRepository => _memberQualificationRepository ??= new MemberQualificationRepository(_context, _unitOfWork);
     }
 }

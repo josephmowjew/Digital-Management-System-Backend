@@ -113,53 +113,6 @@ namespace DataStore.Migrations
                 .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Members",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
-                    PostalAddress = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: false),
-                    PermanentAddress = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: false),
-                    ResidentialAddress = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: false),
-                    DateOfAdmissionToPractice = table.Column<DateOnly>(type: "date", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    Status = table.Column<string>(type: "longtext", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    DeletedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Members", x => x.Id);
-                })
-                .Annotation("MySQL:Charset", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "ProbonoClients",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
-                    Name = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
-                    NationalId = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false),
-                    PostalAddress = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: false),
-                    PermanentAddress = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: false),
-                    ResidentialAddress = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: false),
-                    PhoneNumber = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false),
-                    OtherContacts = table.Column<string>(type: "varchar(150)", maxLength: 150, nullable: false),
-                    Occupation = table.Column<string>(type: "varchar(150)", maxLength: 150, nullable: false),
-                    AnnualIncome = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    Status = table.Column<string>(type: "longtext", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    DeletedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ProbonoClients", x => x.Id);
-                })
-                .Annotation("MySQL:Charset", "utf8mb4");
-
-            migrationBuilder.CreateTable(
                 name: "QualificationTypes",
                 columns: table => new
                 {
@@ -287,61 +240,6 @@ namespace DataStore.Migrations
                 .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "MemberQualification",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
-                    MemberId = table.Column<int>(type: "int", nullable: false),
-                    IssuingInstitution = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: false),
-                    DateObtained = table.Column<DateOnly>(type: "date", nullable: false),
-                    QualificationTypeId = table.Column<int>(type: "int", nullable: false),
-                    QualificationId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_MemberQualification", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_MemberQualification_Members_MemberId",
-                        column: x => x.MemberId,
-                        principalTable: "Members",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_MemberQualification_QualificationTypes_QualificationId",
-                        column: x => x.QualificationId,
-                        principalTable: "QualificationTypes",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySQL:Charset", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "MemberQualificationType",
-                columns: table => new
-                {
-                    MembersId = table.Column<int>(type: "int", nullable: false),
-                    QualificationTypesId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_MemberQualificationType", x => new { x.MembersId, x.QualificationTypesId });
-                    table.ForeignKey(
-                        name: "FK_MemberQualificationType_Members_MembersId",
-                        column: x => x.MembersId,
-                        principalTable: "Members",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_MemberQualificationType_QualificationTypes_QualificationType~",
-                        column: x => x.QualificationTypesId,
-                        principalTable: "QualificationTypes",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySQL:Charset", "utf8mb4");
-
-            migrationBuilder.CreateTable(
                 name: "RoleClaims",
                 columns: table => new
                 {
@@ -438,92 +336,6 @@ namespace DataStore.Migrations
                 .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "LicenseApplications",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
-                    YearOfOperationId = table.Column<int>(type: "int", nullable: false),
-                    ApplicationStatus = table.Column<string>(type: "longtext", nullable: false),
-                    CurrentApprovalLevelID = table.Column<int>(type: "int", nullable: false),
-                    MemberId = table.Column<int>(type: "int", nullable: false),
-                    FirstApplicationForLicense = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    RenewedLicensePreviousYear = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    ObtainedLeaveToRenewLicenseOutOfTime = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    PaidAnnualSubscriptionToSociety = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    MadeContributionToFidelityFund = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    ExplanationForNoContributionToFidelityFund = table.Column<string>(type: "longtext", nullable: false),
-                    RemittedSocietysLevy = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    ExplanationForNoSocietysLevy = table.Column<string>(type: "longtext", nullable: false),
-                    MadeContributionToMLSBuildingProjectFund = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    ExplanationForNoContributionToMLSBuildingProjectFund = table.Column<string>(type: "longtext", nullable: false),
-                    PerformedFullMandatoryProBonoWork = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    ExplanationForNoFullMandatoryProBonoWork = table.Column<string>(type: "longtext", nullable: false),
-                    AttainedMinimumNumberOfCLEUnits = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    ExplanationForNoMinimumNumberOfCLEUnits = table.Column<string>(type: "longtext", nullable: false),
-                    HasValidAnnualProfessionalIndemnityInsuranceCover = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    ExplanationForNoProfessionalIndemnityInsuranceCover = table.Column<string>(type: "longtext", nullable: false),
-                    SubmittedValidTaxClearanceCertificate = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    ExplanationForNoValidTaxClearanceCertificate = table.Column<string>(type: "longtext", nullable: false),
-                    SubmittedAccountantsCertificate = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    ExplanationForNoAccountantsCertificate = table.Column<string>(type: "longtext", nullable: false),
-                    CompliedWithPenaltiesImposedUnderTheAct = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    ExplanationForNoComplianceWithPenalties = table.Column<string>(type: "longtext", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    Status = table.Column<string>(type: "longtext", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    DeletedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_LicenseApplications", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_LicenseApplications_LicenseApprovalLevels_CurrentApprovalLev~",
-                        column: x => x.CurrentApprovalLevelID,
-                        principalTable: "LicenseApprovalLevels",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_LicenseApplications_Members_MemberId",
-                        column: x => x.MemberId,
-                        principalTable: "Members",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_LicenseApplications_YearOfOperations_YearOfOperationId",
-                        column: x => x.YearOfOperationId,
-                        principalTable: "YearOfOperations",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySQL:Charset", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "AttachmentMemberQualification",
-                columns: table => new
-                {
-                    AttachmentsId = table.Column<int>(type: "int", nullable: false),
-                    MemberQualificationsId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AttachmentMemberQualification", x => new { x.AttachmentsId, x.MemberQualificationsId });
-                    table.ForeignKey(
-                        name: "FK_AttachmentMemberQualification_Attachments_AttachmentsId",
-                        column: x => x.AttachmentsId,
-                        principalTable: "Attachments",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_AttachmentMemberQualification_MemberQualification_MemberQual~",
-                        column: x => x.MemberQualificationsId,
-                        principalTable: "MemberQualification",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySQL:Charset", "utf8mb4");
-
-            migrationBuilder.CreateTable(
                 name: "ErrorLogs",
                 columns: table => new
                 {
@@ -550,20 +362,16 @@ namespace DataStore.Migrations
                 .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "ProBonoApplications",
+                name: "Members",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
-                    NatureOfDispute = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false),
-                    CaseDetails = table.Column<string>(type: "longtext", nullable: false),
-                    CreatedById = table.Column<string>(type: "varchar(200)", nullable: true),
-                    ProbonoClientId = table.Column<int>(type: "int", nullable: false),
-                    ApplicationStatus = table.Column<string>(type: "longtext", nullable: false),
-                    ApprovedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
-                    DenialReason = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false),
-                    SummaryOfDispute = table.Column<string>(type: "longtext", nullable: false),
-                    YearOfOperationId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<string>(type: "varchar(200)", nullable: false),
+                    PostalAddress = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: false),
+                    PermanentAddress = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: false),
+                    ResidentialAddress = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: false),
+                    DateOfAdmissionToPractice = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     Status = table.Column<string>(type: "longtext", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
@@ -571,22 +379,45 @@ namespace DataStore.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ProBonoApplications", x => x.Id);
+                    table.PrimaryKey("PK_Members", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ProBonoApplications_ProbonoClients_ProbonoClientId",
-                        column: x => x.ProbonoClientId,
-                        principalTable: "ProbonoClients",
+                        name: "FK_Members_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "ProbonoClients",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    Name = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
+                    NationalId = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false),
+                    PostalAddress = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: false),
+                    PermanentAddress = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: false),
+                    ResidentialAddress = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: false),
+                    PhoneNumber = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false),
+                    OtherContacts = table.Column<string>(type: "varchar(150)", maxLength: 150, nullable: false),
+                    ApprovedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    Occupation = table.Column<string>(type: "varchar(150)", maxLength: 150, nullable: false),
+                    AnnualIncome = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    CreatedById = table.Column<string>(type: "varchar(200)", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    Status = table.Column<string>(type: "longtext", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    DeletedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProbonoClients", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ProBonoApplications_Users_CreatedById",
+                        name: "FK_ProbonoClients_Users_CreatedById",
                         column: x => x.CreatedById,
                         principalTable: "Users",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_ProBonoApplications_YearOfOperations_YearOfOperationId",
-                        column: x => x.YearOfOperationId,
-                        principalTable: "YearOfOperations",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 })
@@ -676,6 +507,169 @@ namespace DataStore.Migrations
                         name: "FK_UserTokens_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "LicenseApplications",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    YearOfOperationId = table.Column<int>(type: "int", nullable: false),
+                    ApplicationStatus = table.Column<string>(type: "longtext", nullable: false),
+                    CurrentApprovalLevelID = table.Column<int>(type: "int", nullable: false),
+                    MemberId = table.Column<int>(type: "int", nullable: false),
+                    FirstApplicationForLicense = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    RenewedLicensePreviousYear = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    ObtainedLeaveToRenewLicenseOutOfTime = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    PaidAnnualSubscriptionToSociety = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    MadeContributionToFidelityFund = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    ExplanationForNoContributionToFidelityFund = table.Column<string>(type: "longtext", nullable: false),
+                    RemittedSocietysLevy = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    ExplanationForNoSocietysLevy = table.Column<string>(type: "longtext", nullable: false),
+                    MadeContributionToMLSBuildingProjectFund = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    ExplanationForNoContributionToMLSBuildingProjectFund = table.Column<string>(type: "longtext", nullable: false),
+                    PerformedFullMandatoryProBonoWork = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    ExplanationForNoFullMandatoryProBonoWork = table.Column<string>(type: "longtext", nullable: false),
+                    AttainedMinimumNumberOfCLEUnits = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    ExplanationForNoMinimumNumberOfCLEUnits = table.Column<string>(type: "longtext", nullable: false),
+                    HasValidAnnualProfessionalIndemnityInsuranceCover = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    ExplanationForNoProfessionalIndemnityInsuranceCover = table.Column<string>(type: "longtext", nullable: false),
+                    SubmittedValidTaxClearanceCertificate = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    ExplanationForNoValidTaxClearanceCertificate = table.Column<string>(type: "longtext", nullable: false),
+                    SubmittedAccountantsCertificate = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    ExplanationForNoAccountantsCertificate = table.Column<string>(type: "longtext", nullable: false),
+                    CompliedWithPenaltiesImposedUnderTheAct = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    ExplanationForNoComplianceWithPenalties = table.Column<string>(type: "longtext", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    Status = table.Column<string>(type: "longtext", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    DeletedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LicenseApplications", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_LicenseApplications_LicenseApprovalLevels_CurrentApprovalLev~",
+                        column: x => x.CurrentApprovalLevelID,
+                        principalTable: "LicenseApprovalLevels",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_LicenseApplications_Members_MemberId",
+                        column: x => x.MemberId,
+                        principalTable: "Members",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_LicenseApplications_YearOfOperations_YearOfOperationId",
+                        column: x => x.YearOfOperationId,
+                        principalTable: "YearOfOperations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "MemberQualifications",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    Name = table.Column<string>(type: "longtext", nullable: false),
+                    MemberId = table.Column<int>(type: "int", nullable: false),
+                    IssuingInstitution = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: false),
+                    DateObtained = table.Column<DateOnly>(type: "date", nullable: false),
+                    QualificationTypeId = table.Column<int>(type: "int", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    Status = table.Column<string>(type: "longtext", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    DeletedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MemberQualifications", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_MemberQualifications_Members_MemberId",
+                        column: x => x.MemberId,
+                        principalTable: "Members",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_MemberQualifications_QualificationTypes_QualificationTypeId",
+                        column: x => x.QualificationTypeId,
+                        principalTable: "QualificationTypes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "MemberQualificationType",
+                columns: table => new
+                {
+                    MembersId = table.Column<int>(type: "int", nullable: false),
+                    QualificationTypesId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MemberQualificationType", x => new { x.MembersId, x.QualificationTypesId });
+                    table.ForeignKey(
+                        name: "FK_MemberQualificationType_Members_MembersId",
+                        column: x => x.MembersId,
+                        principalTable: "Members",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_MemberQualificationType_QualificationTypes_QualificationType~",
+                        column: x => x.QualificationTypesId,
+                        principalTable: "QualificationTypes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "ProBonoApplications",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    NatureOfDispute = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false),
+                    CaseDetails = table.Column<string>(type: "longtext", nullable: false),
+                    CreatedById = table.Column<string>(type: "varchar(200)", nullable: true),
+                    ProbonoClientId = table.Column<int>(type: "int", nullable: false),
+                    ApplicationStatus = table.Column<string>(type: "longtext", nullable: false),
+                    ApprovedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    DenialReason = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: true),
+                    SummaryOfDispute = table.Column<string>(type: "longtext", nullable: false),
+                    YearOfOperationId = table.Column<int>(type: "int", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    Status = table.Column<string>(type: "longtext", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    DeletedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProBonoApplications", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProBonoApplications_ProbonoClients_ProbonoClientId",
+                        column: x => x.ProbonoClientId,
+                        principalTable: "ProbonoClients",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ProBonoApplications_Users_CreatedById",
+                        column: x => x.CreatedById,
+                        principalTable: "Users",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_ProBonoApplications_YearOfOperations_YearOfOperationId",
+                        column: x => x.YearOfOperationId,
+                        principalTable: "YearOfOperations",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 })
@@ -786,6 +780,31 @@ namespace DataStore.Migrations
                 .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "AttachmentMemberQualification",
+                columns: table => new
+                {
+                    AttachmentsId = table.Column<int>(type: "int", nullable: false),
+                    MemberQualificationsId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AttachmentMemberQualification", x => new { x.AttachmentsId, x.MemberQualificationsId });
+                    table.ForeignKey(
+                        name: "FK_AttachmentMemberQualification_Attachments_AttachmentsId",
+                        column: x => x.AttachmentsId,
+                        principalTable: "Attachments",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AttachmentMemberQualification_MemberQualifications_MemberQua~",
+                        column: x => x.MemberQualificationsId,
+                        principalTable: "MemberQualifications",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "AttachmentProBonoApplication",
                 columns: table => new
                 {
@@ -884,6 +903,31 @@ namespace DataStore.Migrations
                 .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "MemberProBono",
+                columns: table => new
+                {
+                    MembersId = table.Column<int>(type: "int", nullable: false),
+                    ProBonosId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MemberProBono", x => new { x.MembersId, x.ProBonosId });
+                    table.ForeignKey(
+                        name: "FK_MemberProBono_Members_MembersId",
+                        column: x => x.MembersId,
+                        principalTable: "Members",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_MemberProBono_ProBonos_ProBonosId",
+                        column: x => x.ProBonosId,
+                        principalTable: "ProBonos",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "ProBonoReports",
                 columns: table => new
                 {
@@ -894,6 +938,7 @@ namespace DataStore.Migrations
                     ProBonoHours = table.Column<double>(type: "double", nullable: false),
                     ReportStatus = table.Column<string>(type: "longtext", nullable: false),
                     ApprovedById = table.Column<string>(type: "varchar(200)", nullable: true),
+                    CreatedById = table.Column<string>(type: "varchar(200)", nullable: false),
                     Description = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     Status = table.Column<string>(type: "longtext", nullable: false),
@@ -914,6 +959,12 @@ namespace DataStore.Migrations
                         column: x => x.ApprovedById,
                         principalTable: "Users",
                         principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_ProBonoReports_Users_CreatedById",
+                        column: x => x.CreatedById,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
 
@@ -1059,19 +1110,29 @@ namespace DataStore.Migrations
                 column: "YearOfOperationId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MemberQualification_MemberId",
-                table: "MemberQualification",
+                name: "IX_MemberProBono_ProBonosId",
+                table: "MemberProBono",
+                column: "ProBonosId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MemberQualifications_MemberId",
+                table: "MemberQualifications",
                 column: "MemberId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MemberQualification_QualificationId",
-                table: "MemberQualification",
-                column: "QualificationId");
+                name: "IX_MemberQualifications_QualificationTypeId",
+                table: "MemberQualifications",
+                column: "QualificationTypeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_MemberQualificationType_QualificationTypesId",
                 table: "MemberQualificationType",
                 column: "QualificationTypesId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Members_UserId",
+                table: "Members",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProBonoApplications_CreatedById",
@@ -1089,9 +1150,19 @@ namespace DataStore.Migrations
                 column: "YearOfOperationId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ProbonoClients_CreatedById",
+                table: "ProbonoClients",
+                column: "CreatedById");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ProBonoReports_ApprovedById",
                 table: "ProBonoReports",
                 column: "ApprovedById");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProBonoReports_CreatedById",
+                table: "ProBonoReports",
+                column: "CreatedById");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProBonoReports_ProBonoId",
@@ -1219,6 +1290,9 @@ namespace DataStore.Migrations
                 name: "Licenses");
 
             migrationBuilder.DropTable(
+                name: "MemberProBono");
+
+            migrationBuilder.DropTable(
                 name: "MemberQualificationType");
 
             migrationBuilder.DropTable(
@@ -1240,7 +1314,7 @@ namespace DataStore.Migrations
                 name: "UserTokens");
 
             migrationBuilder.DropTable(
-                name: "MemberQualification");
+                name: "MemberQualifications");
 
             migrationBuilder.DropTable(
                 name: "Attachments");
@@ -1276,10 +1350,10 @@ namespace DataStore.Migrations
                 name: "ProbonoClients");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "YearOfOperations");
 
             migrationBuilder.DropTable(
-                name: "YearOfOperations");
+                name: "Users");
 
             migrationBuilder.DropTable(
                 name: "Countries");

@@ -128,7 +128,7 @@ namespace DataStore.Data
         public DbSet<ProBonoReport> ProBonoReports { get; set;}
         public DbSet<PropBonoReportFeedback> PropBonoReportFeedbacks { get; set; }
         public DbSet<QualificationType> QualificationTypes { get; set; }
-        //public DbSet<Qualification> Qualifications { get; set; }
+        public DbSet<MemberQualification> MemberQualifications { get; set; }
         public DbSet<Member> Members { get; set; }
         public DbSet<LicenseApplication> LicenseApplications { get; set; }
         public DbSet<LicenseApplicationApproval> LicenseApplicationApprovals { get; set; }

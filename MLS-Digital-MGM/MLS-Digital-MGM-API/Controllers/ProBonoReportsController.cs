@@ -53,8 +53,8 @@ public class ProBonoReportsController : Controller
             string CreatedById = user.Id;
 
 
-                string currentRole  = Lambda.GetCurrentUserRole(_repositoryManager,user.Id);
-                // Create a new DataTablesParameters object
+            string currentRole  = Lambda.GetCurrentUserRole(_repositoryManager,user.Id);
+            // Create a new DataTablesParameters object
             var dataTableParams = new DataTablesParameters();
             var pagingParameters = new PagingParameters<ProBonoReport>();
 
