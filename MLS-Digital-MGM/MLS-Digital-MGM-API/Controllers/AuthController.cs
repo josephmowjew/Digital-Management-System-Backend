@@ -47,31 +47,23 @@ namespace MLS_Digital_MGM_API.Controllers
 
             // Check if the user exists, is not deleted, and has confirmed their email
             if (user == null || user.DeletedDate != null || !user.EmailConfirmed)
-            {
-                // Return an error message based on the user's status
                 return BadRequest(GetErrorMessage(user));
-            }
 
-            // Check the password for the user
-            var signInResult = await _signInManager.CheckPasswordSignInAsync(user, loginViewModel.Password, false);
-
-            if (signInResult.Succeeded)
+            // Check the password for the user or handle Google authentication
+            var isGoogleAuth = loginViewModel.AuthProvider?.Equals("Google", StringComparison.CurrentCultureIgnoreCase) == true;
+            if (isGoogleAuth || (await _signInManager.CheckPasswordSignInAsync(user, loginViewModel.Password, false)).Succeeded)
             {
-                // Update the user's last login date
+                await _signInManager.SignInAsync(user, isPersistent: true);
                 user.LastLogin = DateTime.UtcNow;
                 await _repositoryManager.UnitOfWork.CommitAsync();
 
-                // Generate a token for the user
                 var token = await GenerateToken(user);
-
-                // Return the token
                 return Ok(new { TokenData = token });
             }
 
-            // Return an error message if the password is incorrect
+            // Return an error message if the credentials are invalid
             return BadRequest("Invalid login credentials");
         }
-
 
         // A function that takes an ApplicationUser object as a parameter and returns an error message based on the user's status.
         private string GetErrorMessage(ApplicationUser user)

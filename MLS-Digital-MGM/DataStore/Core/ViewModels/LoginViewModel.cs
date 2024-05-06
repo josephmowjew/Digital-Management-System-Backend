@@ -15,5 +15,6 @@ namespace DataStore.Core.ViewModels
         [StringLength(100, MinimumLength = 2)]
         [DataType(DataType.Password)]
         public string Password { get; set; }
+        public string AuthProvider { get; set; }
     }
 }
