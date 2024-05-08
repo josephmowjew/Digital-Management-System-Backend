@@ -25,6 +25,8 @@ namespace DataStore.Core.Models
         [Required]
         [StringLength(maximumLength:250)]
         public string FilePath { get; set; }
+        [StringLength(maximumLength:200)]
+        public string? PropertyName { get; set; }
 
         //add association to AttachmentType
 

@@ -17,6 +17,10 @@ namespace DataStore.Helpers
         public static string Approved = "Approved";
         public static string Denied = "Denied";
 
+        public static string ProBonoApplication = "Pro Bono Application";
+        public static string LicenseApplication = "License Application";
+        public static string LicenseApplicationFolderName = "LicenseApplication";
+
 
         private static Random _random = new Random(); // declaring it as static and initiating it once
 

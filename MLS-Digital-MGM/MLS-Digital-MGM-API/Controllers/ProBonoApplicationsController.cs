@@ -68,7 +68,8 @@ namespace MLS_Digital_MGM_API.Controllers
                     SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null,
                     Includes = new Expression<Func<ProBonoApplication, object>>[] {
                         p => p.YearOfOperation,
-                        p => p.ProbonoClient
+                        p => p.ProbonoClient,
+                        p => p.CreatedBy
                     },
                     CreatedById = string.Equals(currentRole, "secretariat", StringComparison.OrdinalIgnoreCase) ? null : CreatedById,
 
@@ -218,6 +219,26 @@ namespace MLS_Digital_MGM_API.Controllers
                 {
                     proBonoApplication.ApplicationStatus = Lambda.Approved;
                     proBonoApplication.ApprovedDate = DateTime.UtcNow;
+
+                    //added a record of an actual pro bono itself as well once the application has been saved
+
+                    var probono = this._mapper.Map<ProBono>(proBonoApplication);
+
+                    //generate a unique file number
+                    string fileNumber = await GenerateUniqueFileNumber();
+                    probono.ProBonoApplicationId = proBonoApplication.Id;
+                    probono.FileNumber = fileNumber;
+                    
+                
+
+                    await _repositoryManager.ProBonoRepository.AddAsync(probono);
+
+                
+                    
+                    // Send status details email
+                    string emailBody = $"Your application for the pro bono application has been accepted.";
+                    var passwordEmailResult = await _emailService.SendMailWithKeyVarReturn(user.Email, "Pro Bono Application Status", emailBody);
+                    await _unitOfWork.CommitAsync();
                 }
 
                
@@ -225,25 +246,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 await _repositoryManager.ProBonoApplicationRepository.AddAsync(proBonoApplication);
                 await _unitOfWork.CommitAsync();
 
-                //added a record of an actual pro bono itself as well once the application has been saved
-
-                var probono = this._mapper.Map<ProBono>(proBonoApplication);
-
-                //generate a unique file number
-                string fileNumber = await GenerateUniqueFileNumber();
-                probono.ProBonoApplicationId = proBonoApplication.Id;
-                probono.FileNumber = fileNumber;
                 
-               
-
-                await _repositoryManager.ProBonoRepository.AddAsync(probono);
-
-               
-                
-                // Send status details email
-                string emailBody = $"Your application for the pro bono application has been accepted.";
-                var passwordEmailResult = await _emailService.SendMailWithKeyVarReturn(user.Email, "Pro Bono Application Status", emailBody);
-                await _unitOfWork.CommitAsync();
 
               
 

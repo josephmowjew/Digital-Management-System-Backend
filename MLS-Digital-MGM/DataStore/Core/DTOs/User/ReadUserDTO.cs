@@ -27,6 +27,8 @@ namespace DataStore.Core.DTOs.User {
         public DateOnly LastLogin { get; set; }
         public DateOnly CreatedDate { get; set; }
 
+        public string FullName { get => this.FirstName + " " + this.LastName; }
+
 
   }
 

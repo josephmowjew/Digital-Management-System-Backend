@@ -10,5 +10,7 @@ namespace DataStore.Persistence.Interfaces
     public interface IYearOfOperationRepository : IRepository<YearOfOperation>
     {
         // Additional methods specific to the YearOfOperation entity, if needed
+
+        Task<YearOfOperation> GetCurrentYearOfOperation();
     }
 }

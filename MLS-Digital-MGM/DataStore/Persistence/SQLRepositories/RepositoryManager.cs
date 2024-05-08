@@ -35,6 +35,7 @@ namespace DataStore.Persistence.SQLRepositories
         private IQualificationTypeRepository _qualificationTypeRepository;
         private IMemberRepository _memberRepository;
         private IMemberQualificationRepository _memberQualificationRepository;
+        private ILicenseApplicationRepository _licenseApplicationRepository;
 
         // Add other repository fields here, e.g., private IProductRepository _productRepository;
 
@@ -85,5 +86,7 @@ namespace DataStore.Persistence.SQLRepositories
         public IMemberRepository MemberRepository => _memberRepository ??= new MemberRepository(_context, _unitOfWork);
 
         public IMemberQualificationRepository MemberQualificationRepository => _memberQualificationRepository ??= new MemberQualificationRepository(_context, _unitOfWork);
+
+        public ILicenseApplicationRepository LicenseApplicationRepository => _licenseApplicationRepository ??= new LicenseApplicationRepository(_context, _unitOfWork);
     }
 }

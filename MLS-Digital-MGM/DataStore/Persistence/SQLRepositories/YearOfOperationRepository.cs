@@ -1,6 +1,7 @@
 using DataStore.Core.Models;
 using DataStore.Data;
 using DataStore.Persistence.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +19,12 @@ namespace DataStore.Persistence.SQLRepositories
         {
             this._context = context;
             this._unitOfWork = unitOfWork;
+        }
+
+        public async Task<YearOfOperation> GetCurrentYearOfOperation()
+        {
+            // get current year of operation based on the current date
+            return await _context.YearOfOperations.FirstOrDefaultAsync(x => x.StartDate <= DateTime.Now && x.EndDate >= DateTime.Now);
         }
     }
 }

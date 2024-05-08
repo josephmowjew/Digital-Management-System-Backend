@@ -1,3 +1,4 @@
+using DataStore.Core.DTOs.User;
 using DataStore.Core.Models;
 using System;
 using System.Collections.Generic;
@@ -22,7 +23,7 @@ namespace DataStore.Core.DTOs.ProBonoApplication
 
         public string CreatedById { get; set; }
 
-        public ApplicationUser CreatedBy { get; set; }
+        public ReadUserDTO CreatedBy { get; set; }
 
         public int ProbonoClientId { get; set; }
 

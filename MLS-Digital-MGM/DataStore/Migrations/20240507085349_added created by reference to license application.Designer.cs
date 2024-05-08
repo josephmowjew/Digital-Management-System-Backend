@@ -3,6 +3,7 @@ using System;
 using DataStore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240507085349_added created by reference to license application")]
+    partial class addedcreatedbyreferencetolicenseapplication
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -266,10 +269,6 @@ namespace DataStore.Migrations
                         .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("varchar(250)");
-
-                    b.Property<string>("PropertyName")
-                        .HasMaxLength(200)
-                        .HasColumnType("varchar(200)");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -581,41 +580,46 @@ namespace DataStore.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("ExplanationForNoAccountantsCertificate")
+                        .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("varchar(250)");
-
-                    b.Property<string>("ExplanationForNoAnnualSubscriptionToSociety")
-                        .HasColumnType("longtext");
 
                     b.Property<string>("ExplanationForNoComplianceWithPenalties")
-                        .HasMaxLength(250)
-                        .HasColumnType("varchar(250)");
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ExplanationForNoContributionToFidelityFund")
+                        .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("varchar(250)");
 
                     b.Property<string>("ExplanationForNoContributionToMLSBuildingProjectFund")
+                        .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("varchar(250)");
 
                     b.Property<string>("ExplanationForNoFullMandatoryProBonoWork")
+                        .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("varchar(250)");
 
                     b.Property<string>("ExplanationForNoMinimumNumberOfCLEUnits")
+                        .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("varchar(250)");
 
                     b.Property<string>("ExplanationForNoProfessionalIndemnityInsuranceCover")
+                        .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("varchar(250)");
 
                     b.Property<string>("ExplanationForNoSocietysLevy")
+                        .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("varchar(250)");
 
                     b.Property<string>("ExplanationForNoValidTaxClearanceCertificate")
+                        .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("varchar(250)");
 
