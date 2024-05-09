@@ -22,7 +22,7 @@ namespace DataStore.Core.DTOs.LicenseApplication
         public bool MadeContributionToFidelityFund { get; set; }
         public IFormFile? MadeContributionToFidelityFundAttachment { get; set; }
         [StringLength(maximumLength: 250)]
-        public string ExplanationForNoContributionToFidelityFund { get; set; }
+        public string? ExplanationForNoContributionToFidelityFund { get; set; }
         public bool RemittedSocietysLevy { get; set; }
         public IFormFile? RemittedSocietysLevyAttachment { get; set; }
         [StringLength(maximumLength: 250)]
@@ -30,7 +30,7 @@ namespace DataStore.Core.DTOs.LicenseApplication
         public bool MadeContributionToMLSBuildingProjectFund { get; set; }
         public IFormFile? MadeContributionToMLSBuildingProjectFundAttachment { get; set; }
         [StringLength(maximumLength: 250)]
-        public string ExplanationForNoContributionToMLSBuildingProjectFund { get; set; }
+        public string? ExplanationForNoContributionToMLSBuildingProjectFund { get; set; }
         public bool PerformedFullMandatoryProBonoWork { get; set; }
         [StringLength(maximumLength: 250)]
         public string? ExplanationForNoFullMandatoryProBonoWork { get; set; }
