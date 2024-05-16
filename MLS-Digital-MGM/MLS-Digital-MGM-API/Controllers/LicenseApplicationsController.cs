@@ -127,9 +127,19 @@ namespace MLS_Digital_MGM_API.Controllers
     {
             try
             {
+              
 
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
+              if (!licenseApplicationDTO.ActionType.Equals(Lambda.Draft,StringComparison.CurrentCultureIgnoreCase))
+                {
+                    if (!ModelState.IsValid)
+                        return BadRequest(ModelState);
+
+                    licenseApplicationDTO.ApplicationStatus = Lambda.Pending;
+                }
+                else
+                {
+                    licenseApplicationDTO.ApplicationStatus = Lambda.Draft;
+                }
 
                 var application = _mapper.Map<LicenseApplication>(licenseApplicationDTO);
 
@@ -146,8 +156,8 @@ namespace MLS_Digital_MGM_API.Controllers
                 if(currentYearOfOperation != null)
                 {
                     application.YearOfOperationId = currentYearOfOperation.Id;
-                    //set the licence approval level to level zero 
-                    application.CurrentApprovalLevelID = 1;
+                   
+                    
                 }
                 else
                 {
@@ -155,12 +165,23 @@ namespace MLS_Digital_MGM_API.Controllers
                     return BadRequest(ModelState);
                 }
 
+                 //set the licence approval level to level zero 
+                application.CurrentApprovalLevelID = 1;
                 //get the id of the current member
                 var currentMember = await _repositoryManager.MemberRepository.GetMemberByUserId(user.Id);
 
                 if(currentMember != null)
                 {
                     application.MemberId = currentMember.Id;
+                   
+                }
+
+                //check if this is first application 
+                var hasPreviousApplication = await _repositoryManager.LicenseApplicationRepository.HasPreviousApplicationsAsync(currentMember.Id);
+                //set first application to true
+                if(hasPreviousApplication is  false)
+                {
+                    application.FirstApplicationForLicense = true;
                 }
 
                 //create TODO code to check and set if the application has been created outside the allowed window
@@ -171,6 +192,8 @@ namespace MLS_Digital_MGM_API.Controllers
                     a => a.YearOfOperationId == currentYearOfOperation.Id &&
                     (a.ApplicationStatus == Lambda.Pending || a.ApplicationStatus == Lambda.Approved)
                 );
+
+
 
                 if (existingApplication != null)
                 {
@@ -193,23 +216,71 @@ namespace MLS_Digital_MGM_API.Controllers
                 //get all the IForm File properties from the DTO
                 var formFileProperties = GetFormFileProperties(licenseApplicationDTO);
 
-             
+            //check if it is a new application or an existing one
+            if (application.Id == 0)
+            {
+                // Save attachments if any
+                application.Attachments = formFileProperties.Any()
+                    ? await SaveAttachmentsAsync((IEnumerable<IFormFile>)formFileProperties, attachmentType.Id)
+                    : null;
+
+                // Add license application to repository
+                await _repositoryManager.LicenseApplicationRepository.AddAsync(application);
+            }
+            else
+            {
                 // Save attachments if any
                 if (formFileProperties.Any())
                 {
-                    application.Attachments = await SaveAttachmentsAsync((IEnumerable<IFormFile>)formFileProperties, attachmentType.Id);
-                }
-             
+                    var attachmentsList = await SaveAttachmentsAsync((IEnumerable<IFormFile>)formFileProperties, attachmentType.Id);
 
+                    existingApplication = await this._repositoryManager.LicenseApplicationRepository.GetByIdAsync(application.Id);
+
+                  if (existingApplication != null)
+                    {
+                        // Remove old attachments with the same name as the new ones
+                        existingApplication.Attachments.RemoveAll(a => attachmentsList.Any(b => b.PropertyName == a.PropertyName));
+
+                        // Add fresh list of attachments
+                        existingApplication.Attachments.AddRange(attachmentsList);
+
+                        //map update to existing application
+                        _mapper.Map(licenseApplicationDTO, existingApplication);
+
+
+                        // Update the application
+                        await _repositoryManager.LicenseApplicationRepository.UpdateAsync(existingApplication);
+
+                   }
+
+                  
+                }
+
+              
+            }
+
+
+           // Update member firm details if the firmId is not null or 0
+            if (licenseApplicationDTO.FirmId is not null && licenseApplicationDTO.FirmId != 0)
+            {
                
-                // Add ProBonoApplication to repository
-                await _repositoryManager.LicenseApplicationRepository.AddAsync(application);
-                await _unitOfWork.CommitAsync();
-               
-                
+                if (currentMember is not null && currentMember.FirmId != licenseApplicationDTO.FirmId)
+                {
+                    currentMember.FirmId = licenseApplicationDTO.FirmId;
+                    await _repositoryManager.MemberRepository.UpdateAsync(currentMember);
+                }
+            }
+            await _unitOfWork.CommitAsync();
+            
+            if(!application.ApplicationStatus.Equals(Lambda.Draft, StringComparison.CurrentCultureIgnoreCase))
+            {
                 // Send status details email
                 string emailBody = $"Your have made a license application for {currentYearOfOperation.StartDate.Year} - {currentYearOfOperation.EndDate.Year} year of operation. You can view the status of your application by clicking the link below.";
                 var passwordEmailResult = await _emailService.SendMailWithKeyVarReturn(user.Email, "Annual Membership Application Status", emailBody);
+            }
+
+            
+            
                 await _unitOfWork.CommitAsync();
 
 
@@ -237,6 +308,24 @@ namespace MLS_Digital_MGM_API.Controllers
                 return NotFound();
             }
             var licenseApplicationDTO = _mapper.Map<ReadLicenseApplicationDTO>(licenseApplication);
+
+             
+            foreach (var attachment in licenseApplicationDTO.Attachments)
+            {
+                string attachmentTypeName = attachment.AttachmentType.Name;
+
+                string newFilePath = Path.Combine($"http://{HttpContext.Request.Host}/uploads/{Lambda.LicenseApplicationFolderName}", attachment.FileName);
+
+                attachment.FilePath = newFilePath;
+                //get the property with the same as the attachment property name
+               // var property = licenseApplicationDTO.GetType().GetProperty(attachment.PropertyName);
+
+                //set the new file path to the property
+                //property.SetValue(licenseApplicationDTO, newFilePath);
+
+                
+            }
+                
             return Ok(licenseApplicationDTO);
         }
         catch (Exception ex)
@@ -274,77 +363,77 @@ namespace MLS_Digital_MGM_API.Controllers
     }
 
     // DELETE api/licenseapplications/{id}// DELETE api/licenseapplications/{id}
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteLicenseApplication(int id)
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteLicenseApplication(int id)
+    {
+        try
         {
-            try
+            var licenseApplication = await _repositoryManager.LicenseApplicationRepository.GetByIdAsync(id);
+            if (licenseApplication == null)
             {
-                var licenseApplication = await _repositoryManager.LicenseApplicationRepository.GetByIdAsync(id);
-                if (licenseApplication == null)
-                {
-                    return NotFound();
-                }
-
-                await _repositoryManager.LicenseApplicationRepository.DeleteAsync(licenseApplication);
-                await _unitOfWork.CommitAsync();
-
-                return Ok();
+                return NotFound();
             }
-            catch (Exception ex)
+
+            await _repositoryManager.LicenseApplicationRepository.DeleteAsync(licenseApplication);
+            await _unitOfWork.CommitAsync();
+
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            await _errorLogService.LogErrorAsync(ex);
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    private static List<IFormFile> GetFormFileProperties(object obj)
+    {
+        var formFileProperties = new List<IFormFile>();
+        var properties = obj.GetType().GetProperties().Where(p => p.PropertyType == typeof(IFormFile));
+
+        foreach (var property in properties)
+        {
+            var value = property.GetValue(obj);
+            if (value != null)
             {
-                await _errorLogService.LogErrorAsync(ex);
-                return StatusCode(500, "Internal server error");
+                var formFile = (IFormFile)value;
+                formFileProperties.Add(formFile);
             }
         }
 
-        private static List<IFormFile> GetFormFileProperties(object obj)
-        {
-            var formFileProperties = new List<IFormFile>();
-            var properties = obj.GetType().GetProperties().Where(p => p.PropertyType == typeof(IFormFile));
+        return formFileProperties;
+    }
 
-            foreach (var property in properties)
+    private async Task<List<Attachment>> SaveAttachmentsAsync(IEnumerable<IFormFile> attachments, int attachmentTypeId)
+    {
+        var attachmentsList = new List<Attachment>();
+        var hostEnvironment = HttpContext.RequestServices.GetRequiredService<IWebHostEnvironment>();
+        var webRootPath = hostEnvironment.WebRootPath;
+        var applicationAttachmentsPath = Path.Combine(webRootPath, "Uploads/"+Lambda.LicenseApplicationFolderName);
+
+        Directory.CreateDirectory(applicationAttachmentsPath);
+
+        foreach (var attachment in attachments)
+        {
+
+            var propertyName = attachment.Name;
+            var filePath = Path.Combine(applicationAttachmentsPath, attachment.FileName);
+            using (var stream = System.IO.File.Create(filePath))
             {
-                var value = property.GetValue(obj);
-                if (value != null)
-                {
-                    var formFile = (IFormFile)value;
-                    formFileProperties.Add(formFile);
-                }
+                await attachment.CopyToAsync(stream);
             }
 
-            return formFileProperties;
-        }
-
-         private async Task<List<Attachment>> SaveAttachmentsAsync(IEnumerable<IFormFile> attachments, int attachmentTypeId)
-        {
-            var attachmentsList = new List<Attachment>();
-            var hostEnvironment = HttpContext.RequestServices.GetRequiredService<IWebHostEnvironment>();
-            var webRootPath = hostEnvironment.WebRootPath;
-            var applicationAttachmentsPath = Path.Combine(webRootPath, "Uploads/"+Lambda.LicenseApplicationFolderName);
-
-            Directory.CreateDirectory(applicationAttachmentsPath);
-
-            foreach (var attachment in attachments)
+            attachmentsList.Add(new Attachment
             {
-
-                var propertyName = attachment.Name;
-                var filePath = Path.Combine(applicationAttachmentsPath, attachment.FileName);
-                using (var stream = System.IO.File.Create(filePath))
-                {
-                    await attachment.CopyToAsync(stream);
-                }
-
-                attachmentsList.Add(new Attachment
-                {
-                    FileName = attachment.FileName,
-                    FilePath = filePath,
-                    AttachmentTypeId = attachmentTypeId,
-                    PropertyName = attachment.Name
-                });
-            }
-
-            return attachmentsList;
+                FileName = attachment.FileName,
+                FilePath = filePath,
+                AttachmentTypeId = attachmentTypeId,
+                PropertyName = attachment.Name
+            });
         }
+
+        return attachmentsList;
+    }
 
 
     // POST api/licenseapplications/deny// POST api/licenseapplications/deny
@@ -377,7 +466,37 @@ namespace MLS_Digital_MGM_API.Controllers
     //         return StatusCode(500, "Internal server error");
     //     }
     // }
+    [HttpGet("HasMemberMadePreviousApplications/{userId}")]
+    public async Task<IActionResult> CheckIfMemberHasPreviousApplications(string userId)
+    {
+        try
+        {
+            var user = await _repositoryManager.UserRepository.GetSingleUser(userId);
 
+            if(user is not null)
+            {
+                //get member record based on user id
+
+                var member = await this._repositoryManager.MemberRepository.GetMemberByUserId(userId);
+
+                if(member is not null)
+                {
+                    //check if the member has made successfuly licence applications in the past
+                    var hasPreviousApplications = await this._repositoryManager.LicenseApplicationRepository.HasPreviousApplicationsAsync(member.Id);
+
+                    return Ok(hasPreviousApplications);
+                }
+                return Ok(false);
+            }
+
+             return Ok(false);
+        }
+        catch (Exception ex)
+        {
+            await _errorLogService.LogErrorAsync(ex);
+            return StatusCode(500, "Internal server error");
+        }
+    }
     // GET api/licenseapplications/activate/{id}
     [HttpGet("accept/{id}")]
     public async Task<IActionResult> AcceptLicenseApplication(int id)

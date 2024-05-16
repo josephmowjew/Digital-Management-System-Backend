@@ -95,6 +95,7 @@ builder.Services.AddIdentity<ApplicationUser, Role>()
 
 
 var app = builder.Build();
+app.UseCors("AllowAllOrigins");
 app.UseStaticFiles();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -103,7 +104,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors("AllowAllOrigins");
+
 
 app.UseHttpsRedirection();
 

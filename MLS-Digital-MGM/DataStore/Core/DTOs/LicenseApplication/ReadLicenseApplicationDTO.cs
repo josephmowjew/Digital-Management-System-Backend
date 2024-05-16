@@ -15,6 +15,9 @@ namespace DataStore.Core.DTOs.LicenseApplication
         public DataStore.Core.Models.Member Member { get; set; }
         public DataStore.Core.DTOs.YearOfOperation.ReadYearOfOperationDTO YearOfOperation { get; set; } 
         public ICollection<DataStore.Core.Models.Attachment> Attachments { get; set; } = new List<DataStore.Core.Models.Attachment>();
+        public int? FirmId { get; set; }
+        public Firm Firm { get; set; }
+
 
         // Extra properties
         public bool FirstApplicationForLicense { get; set; }
@@ -39,5 +42,6 @@ namespace DataStore.Core.DTOs.LicenseApplication
         public string ExplanationForNoAccountantsCertificate { get; set; }
         public bool CompliedWithPenaltiesImposedUnderTheAct { get; set; }
         public string ExplanationForNoComplianceWithPenalties { get; set; }
+        
     }
 }

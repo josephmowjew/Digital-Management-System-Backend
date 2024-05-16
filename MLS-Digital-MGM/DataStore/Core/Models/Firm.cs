@@ -33,7 +33,10 @@ namespace DataStore.Core.Models
        public string SecondaryContactPerson { get; set; }
        [StringLength(maximumLength: 15)]
        public string SecondaryPhoneNumber { get; set; }
-       
+       public string? CreatedById { get; set; }
+       public ApplicationUser CreatedBy { get; set; }
        public virtual List<ApplicationUser> Users {get; set;}
+       [StringLength(maximumLength:250)]
+       public string? DenialReason { get; set; }
     }
 }

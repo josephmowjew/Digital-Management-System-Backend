@@ -16,6 +16,9 @@ namespace DataStore.Helpers
         public static string Rejected = "Rejected";
         public static string Approved = "Approved";
         public static string Denied = "Denied";
+        public static string Incomplete = "Incomplete";
+        public static string Draft = "Draft";
+        public static string Submit = "Submit";
 
         public static string ProBonoApplication = "Pro Bono Application";
         public static string LicenseApplication = "License Application";

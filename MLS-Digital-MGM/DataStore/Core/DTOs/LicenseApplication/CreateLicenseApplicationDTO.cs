@@ -8,14 +8,17 @@ namespace DataStore.Core.DTOs.LicenseApplication
 {
     public class CreateLicenseApplicationDTO
     {
-        public int YearOfOperationId { get; set; }
+
+        public int Id { get; set; } = 0;
+        
         [Required]
         public string ApplicationStatus { get; set; } = Lambda.Pending;
         public int CurrentApprovalLevelID { get; set; }
-        public int MemberId { get; set; }
+       
         public bool FirstApplicationForLicense { get; set; }
         public bool RenewedLicensePreviousYear { get; set; }
         public bool ObtainedLeaveToRenewLicenseOutOfTime { get; set; }
+        public IFormFile? ObtainedLeaveToRenewLicenseOutOfTimeAttachment {get; set;}
         public bool PaidAnnualSubscriptionToSociety { get; set; }
         public string? ExplanationForNoAnnualSubscriptionToSociety { get; set; }
         public IFormFile? PaidAnnualSubscriptionToSocietyAttachment { get; set; }  
@@ -32,9 +35,11 @@ namespace DataStore.Core.DTOs.LicenseApplication
         [StringLength(maximumLength: 250)]
         public string? ExplanationForNoContributionToMLSBuildingProjectFund { get; set; }
         public bool PerformedFullMandatoryProBonoWork { get; set; }
+         public IFormFile? PerformedFullMandatoryProBonoWorkAttachment { get; set; }
         [StringLength(maximumLength: 250)]
         public string? ExplanationForNoFullMandatoryProBonoWork { get; set; }
         public bool AttainedMinimumNumberOfCLEUnits { get; set; }
+        public IFormFile? AttainedMinimumNumberOfCLEUnitsAttachment { get; set; }
         [StringLength(maximumLength: 250)]
         public string? ExplanationForNoMinimumNumberOfCLEUnits { get; set; }
         public bool HasValidAnnualProfessionalIndemnityInsuranceCover { get; set; }
@@ -53,6 +58,15 @@ namespace DataStore.Core.DTOs.LicenseApplication
         public IFormFile? CompliedWithPenaltiesImposedUnderTheActAttachment { get; set; }
         [StringLength(maximumLength: 250)]
         public string? ExplanationForNoComplianceWithPenalties { get; set; }
+        public string ActionType { get; set; }
+        public int? FirmId { get; set; }
+        public bool CertificateOfAdmission {get; set;}
+         public IFormFile? CertificateOfAdmissionAttachment {get; set;}
+        public string? ExplanationForNotSubmittingCertificateOfAdmission {get; set;}
+
+        public bool HasPreviousLicenseApplication {get; set;}
+
+       
 
     }
 }

@@ -31,5 +31,6 @@ namespace DataStore.Core.DTOs.Firms
         public string SecondaryPhoneNumber { get; set; }
 
         public ICollection<ApplicationUser> Users { get; set; }
+        public string Status {get; set;}
     }
 }

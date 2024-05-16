@@ -1,6 +1,7 @@
 using DataStore.Core.Models;
 using DataStore.Data;
 using DataStore.Persistence.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +19,11 @@ namespace DataStore.Persistence.SQLRepositories
         {
             this._context = context;
             this._unitOfWork = unitOfWork;
+        }
+
+        public async Task<Firm> GetByIdAsync(int id)
+        {
+            return await _context.Firms.Include(f => f.CreatedBy).FirstOrDefaultAsync(f => f.Id == id);
         }
     }
 }

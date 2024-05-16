@@ -3,6 +3,7 @@ using System;
 using DataStore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240515113544_added created by reference to firm")]
+    partial class addedcreatedbyreferencetofirm
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -432,10 +435,6 @@ namespace DataStore.Migrations
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<string>("DenialReason")
-                        .HasMaxLength(250)
-                        .HasColumnType("varchar(250)");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -781,9 +780,6 @@ namespace DataStore.Migrations
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int?>("FirmId")
-                        .HasColumnType("int");
-
                     b.Property<string>("PermanentAddress")
                         .IsRequired()
                         .HasMaxLength(250)
@@ -811,8 +807,6 @@ namespace DataStore.Migrations
                         .HasColumnType("varchar(200)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("FirmId");
 
                     b.HasIndex("UserId");
 
@@ -1697,17 +1691,11 @@ namespace DataStore.Migrations
 
             modelBuilder.Entity("DataStore.Core.Models.Member", b =>
                 {
-                    b.HasOne("DataStore.Core.Models.Firm", "Firm")
-                        .WithMany()
-                        .HasForeignKey("FirmId");
-
                     b.HasOne("DataStore.Core.Models.ApplicationUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Firm");
 
                     b.Navigation("User");
                 });

@@ -27,6 +27,8 @@ namespace DataStore.Core.Models
         public DateTime DateOfAdmissionToPractice { get; set; }
         public virtual List<QualificationType> QualificationTypes { get; set; }
         public ICollection<ProBono> ProBonos { get; set; }
+        public int? FirmId { get; set; }
+        public Firm Firm { get; set; }
 
     }
 }
