@@ -134,5 +134,7 @@ namespace DataStore.Data
         public DbSet<LicenseApplicationApproval> LicenseApplicationApprovals { get; set; }
         public DbSet<License> Licenses { get; set; }
         public DbSet<ProBono> ProBonos { get; set; }
+        public DbSet<LicenseApprovalHistory> LicenseApprovalHistories { get; set; }
+        public DbSet<LicenseApprovalComment> LicenseApprovalComments { get; set; }
     }
 }

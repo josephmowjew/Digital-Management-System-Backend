@@ -27,6 +27,8 @@ namespace DataStore.Helpers
 
         private static Random _random = new Random(); // declaring it as static and initiating it once
 
+        public static string Accepted = "Accepted";
+
         public static int RandomNumber()
         {
             // generating a random number

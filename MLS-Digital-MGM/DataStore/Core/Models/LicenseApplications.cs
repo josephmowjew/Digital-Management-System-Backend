@@ -14,6 +14,7 @@ namespace DataStore.Core.Models
         public LicenseApplication()
         {
             Attachments = new List<Attachment>();
+            LicenseApprovalHistories = new List<LicenseApprovalHistory>();
         }
 
         public int YearOfOperationId { get; set; }
@@ -59,6 +60,7 @@ namespace DataStore.Core.Models
         public bool CompliedWithPenaltiesImposedUnderTheAct { get; set; }
          [StringLength(maximumLength:250)]
         public string? ExplanationForNoComplianceWithPenalties { get; set; }
+        public virtual List<LicenseApprovalHistory> LicenseApprovalHistories { get; set; }
 
     }
 
