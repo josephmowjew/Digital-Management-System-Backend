@@ -71,6 +71,7 @@ namespace MLS_Digital_MGM_API.Controllers
                     Includes = new Expression<Func<LicenseApplication, object>>[] {
                         p => p.YearOfOperation,
                         p => p.Member,
+                        p => p.CurrentApprovalLevel,
                     },
                     CreatedById = string.Equals(currentRole, "secretariat", StringComparison.OrdinalIgnoreCase) ? null : CreatedById,
                 };
@@ -135,6 +136,8 @@ namespace MLS_Digital_MGM_API.Controllers
                         return BadRequest(ModelState);
 
                     licenseApplicationDTO.ApplicationStatus = Lambda.Pending;
+                    
+                    
                 }
                 else
                 {
@@ -165,8 +168,16 @@ namespace MLS_Digital_MGM_API.Controllers
                     return BadRequest(ModelState);
                 }
 
-                 //set the licence approval level to level zero 
-                application.CurrentApprovalLevelID = 1;
+                //get license approval level record by passing level
+                var licenseApprovalLevel = await _repositoryManager.LicenseApprovalLevelRepository.GetLicenseApprovalLevelByLevel(1);
+
+                if(licenseApprovalLevel is not null)
+                {
+                    application.CurrentApprovalLevelID = licenseApprovalLevel.Id;
+
+                }
+                 
+                
                 //get the id of the current member
                 var currentMember = await _repositoryManager.MemberRepository.GetMemberByUserId(user.Id);
 
@@ -251,6 +262,7 @@ namespace MLS_Digital_MGM_API.Controllers
                         // Update the application
                         await _repositoryManager.LicenseApplicationRepository.UpdateAsync(existingApplication);
 
+                       
                    }
 
                   
@@ -270,6 +282,8 @@ namespace MLS_Digital_MGM_API.Controllers
                     await _repositoryManager.MemberRepository.UpdateAsync(currentMember);
                 }
             }
+
+            
             await _unitOfWork.CommitAsync();
             
             if(!application.ApplicationStatus.Equals(Lambda.Draft, StringComparison.CurrentCultureIgnoreCase))
@@ -279,9 +293,29 @@ namespace MLS_Digital_MGM_API.Controllers
                 var passwordEmailResult = await _emailService.SendMailWithKeyVarReturn(user.Email, "Annual Membership Application Status", emailBody);
             }
 
-            
+                //only add application approval history if the application is not a draft
+                if (!application.ApplicationStatus.Equals(Lambda.Draft, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    //add application approval history
+                    var applicationApprovalHistory = new LicenseApprovalHistory
+                    {
+                        LicenseApplicationId = application.Id,
+                        ApprovalLevelId = licenseApprovalLevel.Id,
+                        Status = application.ApplicationStatus,
+                        ChangedById = user.Id,
+                        CreatedDate = DateTime.Now
+                    };
+
+                    await _repositoryManager.LicenseApprovalHistoryRepository.AddAsync(applicationApprovalHistory);
+                }
+
+
+
+                // Return created ProBonoApplication
             
                 await _unitOfWork.CommitAsync();
+
+                
 
 
                 // Return created ProBonoApplication
@@ -294,7 +328,6 @@ namespace MLS_Digital_MGM_API.Controllers
                 return StatusCode(500, "Internal server error");
             }
     }
-
 
     // GET api/licenseapplications/{id}
     [HttpGet("{id}")]
@@ -437,35 +470,80 @@ namespace MLS_Digital_MGM_API.Controllers
 
 
     // POST api/licenseapplications/deny// POST api/licenseapplications/deny
-    // [HttpPost("deny")]
-    // public async Task<IActionResult> DenyLicenseApplication(DenyLicenseApplicationDTO denyLicenseApplicationDTO)
-    // {
-    //     try
-    //     {
-    //         var licenseApplication = await _repositoryManager.LicenseApplicationRepository.GetByIdAsync(denyLicenseApplicationDTO.Id);
-    //         if (licenseApplication == null)
-    //         {
-    //             return NotFound();
-    //         }
+    [HttpPost("deny")]
+    public async Task<IActionResult> DenyLicenseApplication(DenyLicenseApplicationDTO denyLicenseApplicationDTO)
+    {
+        try
+        {
+            var licenseApplication = await _repositoryManager.LicenseApplicationRepository.GetByIdAsync(denyLicenseApplicationDTO.LicenseApplicationId);
+            if (licenseApplication == null)
+                return NotFound();
 
-    //         licenseApplication.ApplicationStatus = Lambda.Denied;
-    //         licenseApplication.DenialReason = denyLicenseApplicationDTO.DenialReason;
+            licenseApplication.ApplicationStatus = Lambda.Denied;
 
-    //         await _repositoryManager.LicenseApplicationRepository.UpdateAsync(licenseApplication);
-    //         await _unitOfWork.CommitAsync();
+            string username = _httpContextAccessor.HttpContext.User.Identity.Name;
+            var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
 
-    //         // Send email notification to the applicant
-    //         var emailBody = $"Your license application has been denied. Reason: {denyLicenseApplicationDTO.DenialReason}";
-    //         await _emailService.SendMailWithKeyVarReturn(licenseApplication.ApplicantEmail, "License Application Status", emailBody);
+            
+            LicenseApprovalHistory appHistory = CreateLicenseApprovalHistory(licenseApplication, user, denyLicenseApplicationDTO.Reason);
+            await _repositoryManager.LicenseApprovalHistoryRepository.AddAsync(appHistory);
 
-    //         return Ok();
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         await _errorLogService.LogErrorAsync(ex);
-    //         return StatusCode(500, "Internal server error");
-    //     }
-    // }
+             await _unitOfWork.CommitAsync();
+
+            var currentApprovalLevel = await _repositoryManager.LicenseApprovalLevelRepository.GetLicenseApprovalLevelByLevel(1);
+            licenseApplication.CurrentApprovalLevelID = currentApprovalLevel.Id;
+
+            await _repositoryManager.LicenseApplicationRepository.UpdateAsync(licenseApplication);
+            await _unitOfWork.CommitAsync();
+
+            var appHistoryList = await _repositoryManager.LicenseApprovalHistoryRepository.GetLicenseApprovalHistoryByLicenseApplication(licenseApplication.Id);
+            await NotifyUsersAsync(licenseApplication, user, denyLicenseApplicationDTO.Reason, appHistoryList);
+
+            await _emailService.SendMailWithKeyVarReturn(licenseApplication.CreatedBy.Email, "License Application Status", $"Member please note that your license application has been denied.<br/> Reason: {denyLicenseApplicationDTO.Reason}");
+
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            await _errorLogService.LogErrorAsync(ex);
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    private LicenseApprovalHistory CreateLicenseApprovalHistory(LicenseApplication licenseApplication, ApplicationUser user, string reason)
+    {
+        return new LicenseApprovalHistory
+        {
+            ApprovalLevelId = licenseApplication.CurrentApprovalLevel.Id,
+            LicenseApplicationId = licenseApplication.Id,
+            ChangedById = user.Id,
+            ChangeDate = DateTime.UtcNow,
+            Status = licenseApplication.ApplicationStatus,
+            Comments = new List<LicenseApprovalComment>
+            {
+                new LicenseApprovalComment
+                {
+                    Comment = reason,
+                    CommentedById = user.Id,
+                    CommentDate = DateTime.UtcNow,
+                }
+            }
+        };
+    }
+
+    private async Task NotifyUsersAsync(LicenseApplication licenseApplication, ApplicationUser user, string reason, IEnumerable<LicenseApprovalHistory> appHistoryList)
+    {
+        if (appHistoryList != null)
+        {
+            var distinctUsers = appHistoryList.Where(x => x.ChangedById != licenseApplication.CreatedBy.Id).Select(x => x.ChangedById).Distinct();
+            foreach (var userId in distinctUsers)
+            {
+                var userToNotify = await _repositoryManager.UserRepository.GetSingleUser(userId);
+                string emailBody = $"Member license application has been denied. <br/>Reason: {reason}  <br/>Action Taken by:{user.Email}";
+                await _emailService.SendMailWithKeyVarReturn(userToNotify.Email, "License Application Status", emailBody);
+            }
+        }
+    }
     [HttpGet("HasMemberMadePreviousApplications/{userId}")]
     public async Task<IActionResult> CheckIfMemberHasPreviousApplications(string userId)
     {
@@ -503,26 +581,75 @@ namespace MLS_Digital_MGM_API.Controllers
     {
         try
         {
-            var licenseApplication = await _repositoryManager.LicenseApplicationRepository.GetByIdAsync(id);
-            if (licenseApplication == null)
-            {
-                return NotFound();
-            }
+            string username = _httpContextAccessor.HttpContext.User.Identity.Name;
+            var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
+            string currentRole = Lambda.GetCurrentUserRole(_repositoryManager, user.Id);
 
-            licenseApplication.Status = Lambda.Approved;
+               var licenseApplication = await _repositoryManager.LicenseApplicationRepository.GetByIdAsync(id);
+            if (licenseApplication == null)
+                return NotFound();
+
+            licenseApplication.ApplicationStatus = Lambda.UnderReview;
+            var currentLicenseApprovalLevel = licenseApplication.CurrentApprovalLevel;
+            var currentLicenseApprovalLevelBeforeChanges = currentLicenseApprovalLevel.Id;
+            var currentDepartment = currentLicenseApprovalLevel.Department;
+            string licenseNumber = string.Empty;
+
+            if (currentDepartment.Name.Equals("Executive", StringComparison.OrdinalIgnoreCase))
+            {
+                licenseApplication.ApplicationStatus = Lambda.Approved;
+                licenseNumber = await GenerateLicenseNumber(licenseApplication);
+            }
+            else
+            {
+                var nextApprovalLevel = await _repositoryManager.LicenseApprovalLevelRepository.GetNextApprovalLevel(currentLicenseApprovalLevel);
+                if (nextApprovalLevel != null)
+                    {
+                        licenseApplication.CurrentApprovalLevelID = nextApprovalLevel.Id;
+                        licenseApplication.CurrentApprovalLevel = nextApprovalLevel;
+
+                    }
+                }
+
             await _repositoryManager.LicenseApplicationRepository.UpdateAsync(licenseApplication);
+            //add licence approval history record
+            LicenseApprovalHistory appHistory = new LicenseApprovalHistory()
+            {
+                ApprovalLevelId = currentLicenseApprovalLevel.Id,
+                LicenseApplicationId = licenseApplication.Id,
+                ChangedById = user.Id,
+                ChangeDate = DateTime.UtcNow,
+                Status = licenseApplication.ApplicationStatus,
+            };
+
+            //add a record of license history to the datastore
+            await _repositoryManager.LicenseApprovalHistoryRepository.AddAsync(appHistory);
+
             await _unitOfWork.CommitAsync();
 
-              //send email to the user who created the probono application
 
-            string username = _httpContextAccessor.HttpContext.User.Identity.Name;
+          
+            if (licenseApplication.ApplicationStatus == Lambda.Approved)
+            {
+                await SendApprovedNotifications(licenseApplication, user);
+                //create a new licence record
+                var license = this._mapper.Map<License>(licenseApplication);
+                license.LicenseNumber = licenseNumber;
 
-            //get user id from username
-            var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
-
-            // Send email notification to the applicant
-            var emailBody = "Your license application has been approved.";
-            await _emailService.SendMailWithKeyVarReturn(user.Email, "License Application Status", emailBody);
+                //save to data store
+                await _repositoryManager.LicenseRepository.AddAsync(license);
+                await _unitOfWork.CommitAsync();
+            }
+            else
+            {
+                //check if the current approval level changed
+                if(licenseApplication.CurrentApprovalLevel.Id != currentLicenseApprovalLevelBeforeChanges)
+                {
+                    //send notification to the current approver
+                    await SendReviewNotification(licenseApplication, user);
+                }
+                
+            }
 
             return Ok();
         }
@@ -533,5 +660,59 @@ namespace MLS_Digital_MGM_API.Controllers
         }
     }
 
+    private async Task<string> GenerateLicenseNumber(LicenseApplication licenseApplication)
+    {
+        string licenseNumber = string.Empty;
+        var activeYear = await _repositoryManager.YearOfOperationRepository.GetCurrentYearOfOperation();
+        var lastLicenseNumber = await _repositoryManager.LicenseRepository.GetLastLicenseNumber(activeYear.Id);
+
+        if (lastLicenseNumber != null)
+        {
+            string lastLicenseNumberString = lastLicenseNumber.LicenseNumber;
+            int indexOfMLS = lastLicenseNumberString.IndexOf("MLS");
+
+            if (indexOfMLS != -1)
+            {
+                int startIndex = indexOfMLS + 3;
+                string numberAfterMLS = lastLicenseNumberString.Substring(startIndex);
+                int newNumber = int.Parse(numberAfterMLS) + 1;
+                licenseNumber = $"{activeYear.StartDate.Year}{activeYear.EndDate.Year}MLS{newNumber.ToString("D4")}";
+            }
+            else
+            {
+                licenseNumber = $"{activeYear.StartDate.Year}{activeYear.EndDate.Year}MLS0001";
+            }
+        }
+        else
+        {
+            licenseNumber = $"{activeYear.StartDate.Year}{activeYear.EndDate.Year}MLS0001";
+        }
+
+        return licenseNumber;
+
+    }
+
+    private async Task SendApprovedNotifications(LicenseApplication licenseApplication, ApplicationUser user)
+    {
+        string emailTo = licenseApplication.CreatedBy.Email;
+        string emailBody = "Your license has been approved in the system. Please visit the system to get your license number.";
+        await _emailService.SendMailWithKeyVarReturn(emailTo, "License Application Status", emailBody);
+
+        emailTo = user.Email;
+        emailBody = $"You have approved a license application for a member {licenseApplication.CreatedBy.FirstName} {licenseApplication.CreatedBy.LastName}.";
+        await _emailService.SendMailWithKeyVarReturn(emailTo, "License Application Status", emailBody);
+    }
+
+    private async Task SendReviewNotification(LicenseApplication licenseApplication, ApplicationUser user)
+    {
+        string emailTo = user.Email;
+        string emailBody = $"You have approved a license application for a member {licenseApplication.CreatedBy.FirstName} {licenseApplication.CreatedBy.LastName}. It has been sent to {licenseApplication.CurrentApprovalLevel.Department.Name} department for further review.";
+        await _emailService.SendMailWithKeyVarReturn(emailTo, "License Application Status", emailBody);
+
+        emailBody = $"You license application is under review and currently it has been sent to {licenseApplication.CurrentApprovalLevel.Department.Name} department for review.";
+        await _emailService.SendMailWithKeyVarReturn(licenseApplication.CreatedBy.Email, "License Application Status", emailBody);
+
+
+        }
     }
 }

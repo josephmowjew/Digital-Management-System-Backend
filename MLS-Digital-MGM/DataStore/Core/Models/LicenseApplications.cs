@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DataStore.Core.DTOs.User;
 using DataStore.Helpers;
 
 namespace DataStore.Core.Models

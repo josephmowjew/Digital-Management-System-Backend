@@ -29,6 +29,8 @@ namespace DataStore.Helpers
 
         public static string Accepted = "Accepted";
 
+        public static string UnderReview = "Under Review";
+
         public static int RandomNumber()
         {
             // generating a random number

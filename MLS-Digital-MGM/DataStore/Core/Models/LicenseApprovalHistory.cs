@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DataStore.Core.Models
 {
-    public class LicenseApprovalHistory
+    public class LicenseApprovalHistory: Meta
     {
         public LicenseApprovalHistory()
         {

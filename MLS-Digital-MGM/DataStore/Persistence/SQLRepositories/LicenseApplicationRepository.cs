@@ -24,7 +24,18 @@ namespace DataStore.Persistence.SQLRepositories
 
         public async Task<LicenseApplication> GetByIdAsync(int id)
         {
-           return await this._context.LicenseApplications.Include(l => l.Member).Include(l => l.Attachments).ThenInclude(a => a.AttachmentType).Where(l => l.Id == id && l.Status != Lambda.Deleted).FirstOrDefaultAsync();
+           return await this._context.LicenseApplications
+           .Include(l => l.Member)
+           .ThenInclude(m => m.User)
+           .Include(m => m.Member.Firm)
+           .Include(l => l.CurrentApprovalLevel)
+           .Include(l => l.CurrentApprovalLevel.Department)
+           .Include(l => l.YearOfOperation)
+           .Include(l => l.Attachments)
+           .ThenInclude(a => a.AttachmentType)
+           .Include(l => l.CreatedBy)
+           .Where(l => l.Id == id && l.Status != Lambda.Deleted)
+           .FirstOrDefaultAsync();
         }
 
         public async Task<bool> HasPreviousApplicationsAsync(int memberId)

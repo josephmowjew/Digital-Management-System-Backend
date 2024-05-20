@@ -50,6 +50,8 @@ namespace DataStore.Persistence.Interfaces
         IMemberQualificationRepository MemberQualificationRepository { get; }
 
         ILicenseApplicationRepository LicenseApplicationRepository { get; }
+        ILicenseRepository LicenseRepository { get; }
+        ILicenseApprovalHistoryRepository LicenseApprovalHistoryRepository { get; }
 
     }
 }

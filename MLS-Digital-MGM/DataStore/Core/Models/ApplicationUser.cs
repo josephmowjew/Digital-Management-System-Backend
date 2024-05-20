@@ -59,6 +59,8 @@ namespace DataStore.Core.Models
         public DateTime LastLogin { get; set; }
         public int? Pin { get; set; }
 
+        [NotMapped]
+        public string FullName => $"{FirstName} {LastName}";
         
         
 

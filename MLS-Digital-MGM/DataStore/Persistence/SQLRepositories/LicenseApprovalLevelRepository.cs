@@ -3,6 +3,8 @@ using DataStore.Data;
 using DataStore.Persistence.Interfaces;
 using System;
 using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace DataStore.Persistence.SQLRepositories
 {
@@ -15,6 +17,17 @@ namespace DataStore.Persistence.SQLRepositories
         {
             this._context = context;
             this._unitOfWork = unitOfWork;
+        }
+
+        public async Task<LicenseApprovalLevel?> GetLicenseApprovalLevelByLevel(int level)
+        {
+           return await this._context.LicenseApprovalLevels.FirstOrDefaultAsync(l => l.Level == level);
+        }
+
+        public Task<LicenseApprovalLevel> GetNextApprovalLevel(LicenseApprovalLevel licenseApprovalLevel)
+        {
+            // get license approval level that is higher than the approval level with the id passed in
+            return _context.LicenseApprovalLevels.Include(l => l.Department).OrderBy(x => x.Level).Where(x => x.Level > licenseApprovalLevel.Level).FirstOrDefaultAsync();
         }
     }
 }

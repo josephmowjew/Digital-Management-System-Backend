@@ -108,6 +108,11 @@ namespace DataStore.Persistence.SQLRepositories
             {
                 query = query.Include("Attachments.AttachmentType");
             }
+
+            if(propertyName == "Member")
+            {
+                query = query.Include("Member.User");
+            }
         }
         //query = query.Where(q => q.Status != Lambda.Deleted);
 

@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using DataStore.Core.DTOs.Firms;
+using DataStore.Core.DTOs.User;
 
 namespace DataStore.Core.DTOs.Member
 {
@@ -25,5 +27,10 @@ namespace DataStore.Core.DTOs.Member
         public List<DataStore.Core.DTOs.QualificationType.ReadQualificationTypeDTO> QualificationTypes { get; set; }
 
         public List<DataStore.Core.DTOs.ProBono.ReadProBonoDTO> ProBonos { get; set; }
+
+        public ReadUserDTO User { get; set; }
+
+        public int FirmId { get; set; }
+        public ReadFirmDTO Firm { get; set; }
     }
 }
