@@ -43,7 +43,8 @@ namespace DataStore.Persistence.SQLRepositories
             return await this._context.LicenseApplications
                 .Where(l => l.MemberId == memberId &&
                             l.ApplicationStatus != Lambda.Pending &&
-                            l.ApplicationStatus != Lambda.Draft)
+                            l.ApplicationStatus != Lambda.Draft &&
+                            l.ApplicationStatus != Lambda.Denied)
                 .AnyAsync();
         }
     }

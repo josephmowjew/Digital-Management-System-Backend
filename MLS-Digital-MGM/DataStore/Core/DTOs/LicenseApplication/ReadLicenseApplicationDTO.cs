@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using DataStore.Core.DTOs.Attachment;
 using DataStore.Core.DTOs.Firms;
+using DataStore.Core.DTOs.License;
 using DataStore.Core.DTOs.LicenseApprovalLevelDTO;
 using DataStore.Core.DTOs.Member;
 using DataStore.Core.Models;
@@ -16,6 +17,7 @@ namespace DataStore.Core.DTOs.LicenseApplication
         public string ApplicationStatus { get; set; } = Lambda.Pending;
         public int CurrentApprovalLevelID { get; set; }
         public  ReadLicenseApprovalLevelDTO CurrentApprovalLevel { get; set; }
+        public ReadLicenseDTO License { get; set; }
         public int MemberId { get; set; }
         public ReadMemberDTO Member { get; set; }
         public DataStore.Core.DTOs.YearOfOperation.ReadYearOfOperationDTO YearOfOperation { get; set; } 

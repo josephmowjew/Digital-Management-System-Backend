@@ -27,6 +27,7 @@ namespace DataStore.Core.Models
         public  LicenseApprovalLevel CurrentApprovalLevel { get; set; }
         public int MemberId { get; set; }
         public  Member Member { get; set; }
+        public License License { get; set; }
         public virtual List<Attachment> Attachments { get; set; }
         // Extra properties
         public bool FirstApplicationForLicense { get; set; }

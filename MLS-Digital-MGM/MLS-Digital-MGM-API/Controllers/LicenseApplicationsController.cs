@@ -58,11 +58,15 @@ namespace MLS_Digital_MGM_API.Controllers
                 string currentRole = Lambda.GetCurrentUserRole(_repositoryManager, (user.Id));
 
                 var pagingParameters = new PagingParameters<LicenseApplication>();
+                
+               
 
                 // Check if the user is secretariat and approve the application if so
                 pagingParameters = new PagingParameters<LicenseApplication>
                 {
-                    Predicate = u => u.Status != Lambda.Deleted && (string.Equals(currentRole, "secretariat", StringComparison.OrdinalIgnoreCase) || u.CreatedById == user.Id),
+                  
+
+                    Predicate = u => u.Status != Lambda.Deleted && (!string.Equals(currentRole, "member", StringComparison.OrdinalIgnoreCase) || u.CreatedById == user.Id),
                     PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
                     PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
                     SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
@@ -72,8 +76,9 @@ namespace MLS_Digital_MGM_API.Controllers
                         p => p.YearOfOperation,
                         p => p.Member,
                         p => p.CurrentApprovalLevel,
+                        p => p.License
                     },
-                    CreatedById = string.Equals(currentRole, "secretariat", StringComparison.OrdinalIgnoreCase) ? null : CreatedById,
+                    CreatedById = string.Equals(currentRole, "member", StringComparison.OrdinalIgnoreCase) ? CreatedById : null,
                 };
 
                 var licenseApplicationsPaged = await _repositoryManager.LicenseApplicationRepository.GetPagedAsync(pagingParameters);
@@ -174,6 +179,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 if(licenseApprovalLevel is not null)
                 {
                     application.CurrentApprovalLevelID = licenseApprovalLevel.Id;
+                    licenseApplicationDTO.CurrentApprovalLevelID = licenseApprovalLevel.Id;
 
                 }
                  
@@ -193,6 +199,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 if(hasPreviousApplication is  false)
                 {
                     application.FirstApplicationForLicense = true;
+                    licenseApplicationDTO.FirstApplicationForLicense = true;
                 }
 
                 //create TODO code to check and set if the application has been created outside the allowed window
@@ -254,6 +261,11 @@ namespace MLS_Digital_MGM_API.Controllers
 
                         // Add fresh list of attachments
                         existingApplication.Attachments.AddRange(attachmentsList);
+
+                        if(hasPreviousApplication is  false)
+                        {
+                            existingApplication.FirstApplicationForLicense = true;
+                        }
 
                         //map update to existing application
                         _mapper.Map(licenseApplicationDTO, existingApplication);
@@ -633,7 +645,15 @@ namespace MLS_Digital_MGM_API.Controllers
             {
                 await SendApprovedNotifications(licenseApplication, user);
                 //create a new licence record
-                var license = this._mapper.Map<License>(licenseApplication);
+                var license = new License(){
+                    LicenseApplicationId = licenseApplication.Id,
+                    MemberId = licenseApplication.MemberId,
+                    LicenseNumber = licenseNumber,
+                    ExpiryDate = licenseApplication.YearOfOperation.EndDate,
+                    YearOfOperationId = licenseApplication.YearOfOperationId,
+                    
+                };
+
                 license.LicenseNumber = licenseNumber;
 
                 //save to data store
