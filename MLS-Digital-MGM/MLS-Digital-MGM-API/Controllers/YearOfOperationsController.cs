@@ -276,6 +276,15 @@ namespace MLS_Digital_MGM_API.Controllers
 
             return Json(dynamicSelect);
         }
-    
+
+        [HttpGet("currentOperatingYear")]
+        public async Task<JsonResult> GetCurrentOperatingYear()
+        {
+            var yearOfOperation = await _repositoryManager.YearOfOperationRepository.GetCurrentYearOfOperation();
+
+            var mappedYearOfOperation = _mapper.Map<ReadYearOfOperationDTO>(yearOfOperation);
+
+            return Json(mappedYearOfOperation);
+        }
     }
 }

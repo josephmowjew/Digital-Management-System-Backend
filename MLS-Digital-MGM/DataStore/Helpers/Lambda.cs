@@ -31,6 +31,11 @@ namespace DataStore.Helpers
 
         public static string UnderReview = "Under Review";
 
+        //CPD Units section
+        public static string Registered = "Registered";
+        public static string Cancelled = "Cancelled";
+        public static string Attended = "Attended";
+
         public static int RandomNumber()
         {
             // generating a random number

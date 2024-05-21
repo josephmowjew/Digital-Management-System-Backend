@@ -52,6 +52,9 @@ namespace DataStore.Persistence.Interfaces
         ILicenseApplicationRepository LicenseApplicationRepository { get; }
         ILicenseRepository LicenseRepository { get; }
         ILicenseApprovalHistoryRepository LicenseApprovalHistoryRepository { get; }
+        ICPDTrainingRegistrationRepository CPDTrainingRegistrationRepository {get;}
+        ICPDTrainingRepository CPDTrainingRepository {get;}
+        ICPDUnitsEarnedRepository CPDUnitsEarnedRepository {get;}
 
     }
 }

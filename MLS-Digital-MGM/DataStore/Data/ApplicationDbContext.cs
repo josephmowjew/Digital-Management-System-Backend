@@ -136,5 +136,8 @@ namespace DataStore.Data
         public DbSet<ProBono> ProBonos { get; set; }
         public DbSet<LicenseApprovalHistory> LicenseApprovalHistories { get; set; }
         public DbSet<LicenseApprovalComment> LicenseApprovalComments { get; set; }
+        public DbSet<CPDTraining> CPDTrainings { get; set; }
+        public DbSet<CPDTrainingRegistration> CPDTrainingRegistrations { get; set; }
+        public DbSet<CPDUnitsEarned> CPDUnitsEarned { get; set; }
     }
 }

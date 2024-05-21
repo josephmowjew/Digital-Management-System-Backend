@@ -37,6 +37,7 @@ namespace DataStore.Core.Models
         public ICollection<MemberQualification> MemberQualifications { get; set; } 
         public ICollection<LicenseApplication> LicenseApplications { get; set; }
         public ICollection<ProBonoReport> ProBonoReports { get; set; }
+        public ICollection<CPDTraining> CPDTrainings { get; set; }
 
 
     }
