@@ -263,7 +263,8 @@ public class ProBonoReportsController : Controller
     
         foreach (var attachment in attachments)
         {
-            var filePath = Path.Combine(proBonoReportAttachmentsPath, attachment.FileName);
+            var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(attachment.FileName)}";
+            var filePath = Path.Combine(proBonoReportAttachmentsPath, uniqueFileName);
             using (var stream = System.IO.File.Create(filePath))
             {
                 await attachment.CopyToAsync(stream);
@@ -271,7 +272,7 @@ public class ProBonoReportsController : Controller
     
             attachmentsList.Add(new Attachment
             {
-                FileName = attachment.FileName,
+                FileName = uniqueFileName,
                 FilePath = filePath,
                 AttachmentTypeId = attachmentTypeId
             });

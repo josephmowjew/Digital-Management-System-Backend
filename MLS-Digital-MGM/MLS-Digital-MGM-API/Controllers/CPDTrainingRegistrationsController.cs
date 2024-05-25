@@ -158,7 +158,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 if (member == null)
                 {
-                    ModelState.AddModelError(nameof(cpdTrainingRegistrationDTO.CPDTrainingId), "You are not a member of this organization");
+                    ModelState.AddModelError(nameof(cpdTrainingRegistrationDTO.CPDTrainingId), "Your membership application is incomplete. Please complete it but filling details in your profile to proceed");
                     return BadRequest(ModelState);
                 }
 
@@ -193,6 +193,15 @@ namespace MLS_Digital_MGM_API.Controllers
                 {
                     //set the status of the registration to pending
                     cpdTrainingRegistration.RegistrationStatus = Lambda.Pending;
+
+                    //check if proof of payment was submitted
+
+                    if(!cpdTrainingRegistrationDTO.Attachments.Any())
+                    {
+                        ModelState.AddModelError(nameof(cpdTrainingRegistrationDTO.Attachments), "Please upload proof of payment");
+                        return BadRequest(ModelState);
+                    }  
+                    
                 }
                 else
                 {
@@ -311,8 +320,8 @@ namespace MLS_Digital_MGM_API.Controllers
 
             foreach (var formFile in attachments)
             {
-                //var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(formFile.FileName)}";
-                var filePath = Path.Combine(cpdTrainingAttachmentsPath, formFile.FileName);
+                var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(formFile.FileName)}";
+                var filePath = Path.Combine(cpdTrainingAttachmentsPath, uniqueFileName);
 
                 await using (var fileStream = new FileStream(filePath, FileMode.Create))
                 {
@@ -321,7 +330,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 var attachment = new Attachment
                 {
-                    FileName = formFile.FileName,
+                    FileName = uniqueFileName,
                     FilePath = filePath,
                     AttachmentTypeId = attachmentTypeId,
                     PropertyName = formFile.Name

@@ -29,7 +29,7 @@ namespace DataStore.Core.DTOs.CPDTraining
         public int CPDUnitsAwarded { get; set; }
 
         [StringLength(maximumLength: 200)]
-        public string AccreditingInstitution { get; set; }
+        public string? AccreditingInstitution { get; set; }
 
         [AllowedFileTypes(new[] { ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".txt",".jpg",".png",".jpeg" })]
         [FileSize(5242880)] // 5 MB

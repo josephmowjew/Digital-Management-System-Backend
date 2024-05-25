@@ -18,7 +18,7 @@ namespace DataStore.Core.DTOs.CPDTraining
         public int ProposedUnits { get; set; }
         public int CPDUnitsAwarded { get; set; }
         [StringLength(200)]
-        public string AccreditingInstitution { get; set; }
+        public string? AccreditingInstitution { get; set; }
 
         public List<IFormFile> Attachments = new List<IFormFile>();
     }

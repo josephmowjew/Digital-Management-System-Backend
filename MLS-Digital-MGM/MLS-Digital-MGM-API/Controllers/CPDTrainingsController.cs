@@ -90,6 +90,19 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 var cpdTrainingDTOs = _mapper.Map<List<ReadCPDTrainingDTO>>(cpdTrainingsPaged);
 
+                foreach (var report in cpdTrainingDTOs)
+                {
+                    foreach (var attachment in report.Attachments)
+                    {
+                        string attachmentTypeName = attachment.AttachmentType.Name;
+
+
+                        string newfilePath = Path.Combine("/uploads/CPDTrainings/", attachment.FileName);
+
+                        attachment.FilePath = newfilePath;
+                    }
+                }
+
                 if (dataTableParams.LoadFromRequest(_httpContextAccessor))
                 {
                     var draw = dataTableParams.Draw;
@@ -121,6 +134,12 @@ namespace MLS_Digital_MGM_API.Controllers
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
 
+
+                if(string.IsNullOrEmpty(cpdTrainingDTO.AccreditingInstitution))
+                {
+                    cpdTrainingDTO.AccreditingInstitution = "MLS";
+                }
+                
                 var cpdTraining = _mapper.Map<CPDTraining>(cpdTrainingDTO);
                 string username = _httpContextAccessor.HttpContext.User.Identity.Name;
                 var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
@@ -248,6 +267,11 @@ namespace MLS_Digital_MGM_API.Controllers
                         cpdTraining.Attachments.ToList().AddRange(attachmentsList);
                 }
 
+                if(string.IsNullOrEmpty(cpdTrainingDTO.AccreditingInstitution))
+                {
+                    cpdTrainingDTO.AccreditingInstitution = "MLS";
+                }
+
                 _mapper.Map(cpdTrainingDTO, cpdTraining);
                 await _repositoryManager.CPDTrainingRepository.UpdateAsync(cpdTraining);
                 await _unitOfWork.CommitAsync();
@@ -304,7 +328,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 var attachment = new Attachment
                 {
-                    FileName = formFile.FileName,
+                    FileName = uniqueFileName,
                     FilePath = filePath,
                     AttachmentTypeId = attachmentTypeId,
                     PropertyName = formFile.Name

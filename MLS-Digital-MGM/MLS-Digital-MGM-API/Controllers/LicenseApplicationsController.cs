@@ -461,8 +461,9 @@ namespace MLS_Digital_MGM_API.Controllers
         foreach (var attachment in attachments)
         {
 
+            var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(attachment.FileName)}";
             var propertyName = attachment.Name;
-            var filePath = Path.Combine(applicationAttachmentsPath, attachment.FileName);
+            var filePath = Path.Combine(applicationAttachmentsPath, uniqueFileName);
             using (var stream = System.IO.File.Create(filePath))
             {
                 await attachment.CopyToAsync(stream);
@@ -470,7 +471,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
             attachmentsList.Add(new Attachment
             {
-                FileName = attachment.FileName,
+                FileName = uniqueFileName,
                 FilePath = filePath,
                 AttachmentTypeId = attachmentTypeId,
                 PropertyName = attachment.Name

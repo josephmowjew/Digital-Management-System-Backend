@@ -20,9 +20,9 @@ namespace DataStore.Core.Models
         [Required]
         [StringLength(maximumLength: 100)]
         public string LastName { get; set; }
-        [Required]
+       
         [StringLength(maximumLength: 100)]
-        public string OtherName { get; set; }
+        public string? OtherName { get; set; }
         [Required]
         [StringLength(maximumLength: 15)]
         public string Gender { get; set; }
@@ -59,9 +59,7 @@ namespace DataStore.Core.Models
         public DateTime LastLogin { get; set; }
         public int? Pin { get; set; }
 
-        [NotMapped]
-        public string FullName => $"{FirstName} {LastName}";
-        
+       
         
 
 
