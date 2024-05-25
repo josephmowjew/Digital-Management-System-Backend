@@ -21,7 +21,8 @@ namespace DataStore.Core.Models
         public int CPDTrainingId { get; set; }
         public string CreatedById { get; set; }
         public ApplicationUser CreatedBy { get; set; }
-
+        [StringLength(250)]
+        public string? DeniedReason { get; set; }
         public virtual List<Attachment> Attachments { get; set; }
 
        

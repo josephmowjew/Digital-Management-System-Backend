@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Http;
 using MLS_Digital_MGM.DataStore.Helpers;
 using DataStore.Core.DTOs.CPDTrainingRegistration;
 using DataStore.Core.DTOs.License;
+using Newtonsoft.Json;
 
 namespace MLS_Digital_MGM_API.Controllers
 {
@@ -29,14 +30,16 @@ namespace MLS_Digital_MGM_API.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IEmailService _emailService;
 
-        public CPDTrainingRegistrationsController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor)
+        public CPDTrainingRegistrationsController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor, IEmailService emailService)
         {
             _repositoryManager = repositoryManager;
             _errorLogService = errorLogService;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _httpContextAccessor = httpContextAccessor;
+            _emailService = emailService;
         }
 
         [HttpGet("paged")]
@@ -328,5 +331,98 @@ namespace MLS_Digital_MGM_API.Controllers
 
             return attachmentsList;
         }
+
+        //method to accept cpd training registration taking the id of the cpd training registration
+        [HttpGet("AcceptCPDTrainingRegistration/{id}")]
+        public async Task<IActionResult> AcceptCPDTrainingRegistration(int id)
+        {
+            try
+            {
+                var cpdTrainingRegistration = await _repositoryManager.CPDTrainingRegistrationRepository.GetByIdAsync(id);
+                if (cpdTrainingRegistration == null)
+                    return NotFound();
+                    //set the status of the registration to accepted
+                    cpdTrainingRegistration.RegistrationStatus = Lambda.Registered;
+                await _repositoryManager.CPDTrainingRegistrationRepository.UpdateAsync(cpdTrainingRegistration);
+                await _unitOfWork.CommitAsync();
+
+                //send email to the user
+                 string emailTo = cpdTrainingRegistration.CreatedBy.Email;
+                 string emailBody = "Congratulation, Your CPD registration has been approved in MLS.";
+                 await _emailService.SendMailWithKeyVarReturn(emailTo, "CPD Registration Status", emailBody);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        //method to reject cpd training registration taking the id of the cpd training registration
+        [HttpPut("RejectCPDTrainingRegistration/{id}")]
+        public async Task<IActionResult> RejectCPDTrainingRegistration([FromForm] CPDRejectionDTO cPDRejectionDTO, int id)
+        {
+            try
+            {
+                var cpdTrainingRegistration = await _repositoryManager.CPDTrainingRegistrationRepository.GetByIdAsync(id);
+                if (cpdTrainingRegistration == null)
+                    return NotFound();
+                    //set the status of the registration to rejected
+                    cpdTrainingRegistration.RegistrationStatus = Lambda.Denied;
+                    cpdTrainingRegistration.DeniedReason = cPDRejectionDTO.Reason;
+                await _repositoryManager.CPDTrainingRegistrationRepository.UpdateAsync(cpdTrainingRegistration);
+                await _unitOfWork.CommitAsync();
+
+                //send email to the user
+                 string emailTo = cpdTrainingRegistration.CreatedBy.Email;
+                 string emailBody = "Your CPD registration has been rejected in MLS-Digital-MGM. <br>" + cPDRejectionDTO.Reason;
+                 await _emailService.SendMailWithKeyVarReturn(emailTo, "CPD Registration Status", emailBody);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpPost("MarkAttendance")]
+        public async Task<IActionResult> MarkAttendance([FromForm] string ids)
+        {
+            try{
+                var idArray = JsonConvert.DeserializeObject<int[]>(ids);
+                // Use the idArray to mark attendance
+            
+            //get the cpd training registration from the database whose ids are in the idArray
+                var cpdTrainingRegistrations = await _repositoryManager.CPDTrainingRegistrationRepository.GetAll(d => idArray.Contains(d.Id));
+
+                //loop through the cpd training registrations and mark attendance
+                foreach (var cpdTrainingRegistration in cpdTrainingRegistrations)
+                {
+                    cpdTrainingRegistration.RegistrationStatus = Lambda.Attended;
+
+                    await _repositoryManager.CPDTrainingRegistrationRepository.UpdateAsync(cpdTrainingRegistration);
+                }
+                await _unitOfWork.CommitAsync();
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+            
+        }
+
+    }
+
+    public class CPDRejectionDTO
+    {
+        public string Reason { get; set; }
+        public int Id { get; set; }
     }
 }

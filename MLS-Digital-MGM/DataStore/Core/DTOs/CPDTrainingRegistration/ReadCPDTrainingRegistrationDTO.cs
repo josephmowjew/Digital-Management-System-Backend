@@ -22,6 +22,7 @@ namespace DataStore.Core.DTOs.CPDTrainingRegistration
         public ReadCPDTrainingDTO CPDTraining { get; set; }
         public string CreatedById { get; set; }
         public ApplicationUser CreatedBy { get; set; }
+        public string? DeniedReason { get; set; }
         public virtual List<ReadAttachmentDTO> Attachments { get; set; }
     }
 }
