@@ -2,13 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using DataStore.Core.DTOs.Firms;
+using DataStore.Core.DTOs.License;
 using DataStore.Core.DTOs.User;
 
 namespace DataStore.Core.DTOs.Member
 {
     public class ReadMemberDTO
     {
-        public string Id { get; set; }
+        public int Id { get; set; }
 
         public string UserId { get; set; }
 
@@ -32,5 +33,8 @@ namespace DataStore.Core.DTOs.Member
 
         public int FirmId { get; set; }
         public ReadFirmDTO Firm { get; set; }
+        public List<ReadLicenseDTO> Licenses { get; set; }
+
+        public ReadLicenseDTO CurrentLicense { get; set; }
     }
 }

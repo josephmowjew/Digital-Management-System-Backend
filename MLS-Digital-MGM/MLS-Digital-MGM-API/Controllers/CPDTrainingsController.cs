@@ -54,7 +54,9 @@ namespace MLS_Digital_MGM_API.Controllers
                 
                 var pagingParameters = new PagingParameters<CPDTraining>
                 {
-                    Predicate = u => u.Status != Lambda.Deleted && u.ApprovalStatus == Lambda.Approved && (!string.Equals(currentRole, "member", StringComparison.OrdinalIgnoreCase) || u.CreatedById == user.Id),
+                    Predicate = u => u.Status != Lambda.Deleted,
+
+                    //Predicate = u => u.Status != Lambda.Deleted && u.ApprovalStatus == Lambda.Approved && (!string.Equals(currentRole, "member", StringComparison.OrdinalIgnoreCase) || u.CreatedById == user.Id),
                     PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
                     PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
                     SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
@@ -62,9 +64,10 @@ namespace MLS_Digital_MGM_API.Controllers
                     SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null,
                     Includes = new Expression<Func<CPDTraining, object>>[] {
                         p => p.Attachments,
-                        p => p.CreatedBy
+                        p => p.CreatedBy,
+                        p => p.CPDTrainingRegistration
                     },
-                    CreatedById = string.Equals(currentRole, "member", StringComparison.OrdinalIgnoreCase) ? CreatedById: null ,
+                    //CreatedById = string.Equals(currentRole, "member", StringComparison.OrdinalIgnoreCase) ? CreatedById: null ,
                 };
 
                 var cpdTrainingsPaged = await _repositoryManager.CPDTrainingRepository.GetPagedAsync(pagingParameters);
@@ -270,7 +273,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 await _repositoryManager.CPDTrainingRepository.DeleteAsync(cpdTraining);
                 await _unitOfWork.CommitAsync();
 
-                return NoContent();
+                return Ok();
             }
             catch (Exception ex)
             {

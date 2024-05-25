@@ -26,6 +26,7 @@ namespace DataStore.Core.Models
         public DateTime DateToBeConducted { get; set; }
         public string ApprovalStatus { get; set; }
         public int ProposedUnits { get; set; }
+        public double? TrainingFee { get; set; }
         public int CPDUnitsAwarded { get; set; }
         [StringLength(maximumLength:200)]
         public string AccreditingInstitution { get; set; }

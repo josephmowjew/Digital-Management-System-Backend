@@ -15,6 +15,7 @@ namespace DataStore.Core.Models
            this.QualificationTypes = new List<QualificationType>();
            this.ProBonos = new List<ProBono>();
            this.CPDTrainingRegistrations = new List<CPDTrainingRegistration>();
+           this.Licenses = new List<License>();
        }
         public string UserId { get; set; }
         public ApplicationUser User { get; set; }
@@ -31,6 +32,8 @@ namespace DataStore.Core.Models
         public int? FirmId { get; set; }
         public Firm Firm { get; set; }
         public virtual List<CPDTrainingRegistration> CPDTrainingRegistrations { get; set; }
+        public List<License> Licenses { get; set; }
+
 
     }
 }

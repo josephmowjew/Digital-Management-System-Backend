@@ -11,7 +11,7 @@ namespace DataStore.Core.Models
     {
         public CPDTrainingRegistration()
         {
-            
+            Attachments = new List<Attachment>();
         }
         public int MemberId { get; set; }
         public Member Member { get; set; }
@@ -21,6 +21,8 @@ namespace DataStore.Core.Models
         public int CPDTrainingId { get; set; }
         public string CreatedById { get; set; }
         public ApplicationUser CreatedBy { get; set; }
+
+        public virtual List<Attachment> Attachments { get; set; }
 
        
     }

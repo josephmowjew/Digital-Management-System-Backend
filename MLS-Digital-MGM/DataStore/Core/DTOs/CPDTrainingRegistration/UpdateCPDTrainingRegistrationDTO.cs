@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
 
 namespace DataStore.Core.DTOs.CPDTrainingRegistration
 {
@@ -12,5 +13,6 @@ namespace DataStore.Core.DTOs.CPDTrainingRegistration
         public int CPDTrainingId { get; set; }
         [Required]
         public string CreatedById { get; set; }
+        public List<IFormFile?> Attachments { get; set; }
     }
 }

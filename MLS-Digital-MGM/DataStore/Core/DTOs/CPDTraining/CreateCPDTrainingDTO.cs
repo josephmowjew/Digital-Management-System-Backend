@@ -23,6 +23,8 @@ namespace DataStore.Core.DTOs.CPDTraining
         [Required]
         public int ProposedUnits { get; set; }
 
+        public double? TrainingFee { get; set; }
+
         [Required]
         public int CPDUnitsAwarded { get; set; }
 

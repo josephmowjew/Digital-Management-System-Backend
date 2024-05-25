@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using DataStore.Core.DTOs.Attachment;
 using DataStore.Core.DTOs.CPDTraining;
 using DataStore.Core.DTOs.Member;
 using DataStore.Core.Models;
@@ -10,7 +11,7 @@ namespace DataStore.Core.DTOs.CPDTrainingRegistration
     {
         public ReadCPDTrainingRegistrationDTO()
         {
-
+            Attachments = new List<ReadAttachmentDTO>();
         }
 
         public int Id { get; set; }
@@ -21,5 +22,6 @@ namespace DataStore.Core.DTOs.CPDTrainingRegistration
         public ReadCPDTrainingDTO CPDTraining { get; set; }
         public string CreatedById { get; set; }
         public ApplicationUser CreatedBy { get; set; }
+        public virtual List<ReadAttachmentDTO> Attachments { get; set; }
     }
 }

@@ -1,0 +1,332 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using AutoMapper;
+using DataStore.Core.DTOs;
+using DataStore.Core.Services;
+using DataStore.Persistence.Interfaces;
+using DataStore.Core.Services.Interfaces;
+using DataStore.Core.Models;
+using Microsoft.Extensions.Hosting;
+using DataStore.Helpers;
+using System.Linq.Expressions;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using MLS_Digital_MGM.DataStore.Helpers;
+using DataStore.Core.DTOs.CPDTrainingRegistration;
+using DataStore.Core.DTOs.License;
+
+namespace MLS_Digital_MGM_API.Controllers
+{
+    [Route("api/[controller]")]
+    [Authorize(AuthenticationSchemes = "Bearer")]
+    public class CPDTrainingRegistrationsController : Controller
+    {
+        private readonly IRepositoryManager _repositoryManager;
+        private readonly IErrorLogService _errorLogService;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        public CPDTrainingRegistrationsController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor)
+        {
+            _repositoryManager = repositoryManager;
+            _errorLogService = errorLogService;
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
+            _httpContextAccessor = httpContextAccessor;
+        }
+
+        [HttpGet("paged")]
+        public async Task<IActionResult> GetCPDTrainingRegistrations(int pageNumber = 1, int pageSize = 10,int cpdTrainingId = 0)
+        {
+            try
+            {
+                var dataTableParams = new DataTablesParameters();
+                string username = _httpContextAccessor.HttpContext.User.Identity.Name;
+                var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
+                string CreatedById = user.Id;
+
+                string currentRole = Lambda.GetCurrentUserRole(_repositoryManager, user.Id);
+
+                var pagingParameters = new PagingParameters<CPDTrainingRegistration>
+                {
+                    Predicate = u => u.Status != Lambda.Deleted && u.CPDTrainingId == cpdTrainingId,
+                    PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
+                    PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
+                    SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
+                    SortColumn = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumn : null,
+                    SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null,
+                    Includes = new Expression<Func<CPDTrainingRegistration, object>>[] {
+                        p => p.CPDTraining,
+                        p => p.CreatedBy,
+                        p => p.Member,
+                        p => p.Attachments
+                    },
+                   
+                };
+
+                var cpdTrainingRegistrationsPaged = await _repositoryManager.CPDTrainingRegistrationRepository.GetPagedAsync(pagingParameters);
+
+                if (cpdTrainingRegistrationsPaged == null || !cpdTrainingRegistrationsPaged.Any())
+                {
+                    if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                    {
+                        var draw = dataTableParams.Draw;
+                        return Json(new
+                        {
+                            draw,
+                            recordsFiltered = 0,
+                            recordsTotal = 0,
+                            data = Enumerable.Empty<ReadCPDTrainingRegistrationDTO>()
+                        });
+                    }
+                    return Ok(Enumerable.Empty<ReadCPDTrainingRegistrationDTO>());
+                }
+
+                var cpdTrainingRegistrationDTOs = _mapper.Map<List<ReadCPDTrainingRegistrationDTO>>(cpdTrainingRegistrationsPaged);
+                
+                //get the current year of operation
+                var currentYearOfOperation = await _repositoryManager.YearOfOperationRepository.GetCurrentYearOfOperation();
+
+                foreach (var cpdTrainingRegistration in cpdTrainingRegistrationDTOs)
+                {
+                    //get license with member id and current year of operation
+                    var license = await _repositoryManager.LicenseRepository.GetSingleAsync(p => p.MemberId == cpdTrainingRegistration.MemberId && p.YearOfOperationId == currentYearOfOperation.Id);
+
+                    if(license  != null)
+                    {
+                        cpdTrainingRegistration.Member.CurrentLicense = this._mapper.Map<ReadLicenseDTO>(license);
+                    
+                    }
+
+                    //include attachments
+                     foreach (var attachment in cpdTrainingRegistration.Attachments)
+                    {
+                        string attachmentTypeName = attachment.AttachmentType.Name;
+
+
+                        string newfilePath = Path.Combine("/uploads/CPDTrainingRegistration/", attachment.FileName);
+
+                        attachment.FilePath = newfilePath;
+                    }
+                }
+
+                //get the current cu
+
+                if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                {
+                    var draw = dataTableParams.Draw;
+                    var resultTotalFiltered = cpdTrainingRegistrationDTOs.Count;
+
+                    return Json(new
+                    {
+                        draw,
+                        recordsFiltered = resultTotalFiltered,
+                        recordsTotal = resultTotalFiltered,
+                        data = cpdTrainingRegistrationDTOs.ToList()
+                    });
+                }
+
+                return Ok(cpdTrainingRegistrationDTOs);
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddCPDTrainingRegistration([FromForm] CreateCPDTrainingRegistrationDTO cpdTrainingRegistrationDTO)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
+
+                var cpdTrainingRegistration = _mapper.Map<CPDTrainingRegistration>(cpdTrainingRegistrationDTO);
+                string username = _httpContextAccessor.HttpContext.User.Identity.Name;
+                var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
+                cpdTrainingRegistration.CreatedById = user.Id;
+                var member = await _repositoryManager.MemberRepository.GetMemberByUserId(user.Id);
+
+                if (member == null)
+                {
+                    ModelState.AddModelError(nameof(cpdTrainingRegistrationDTO.CPDTrainingId), "You are not a member of this organization");
+                    return BadRequest(ModelState);
+                }
+
+                
+
+                var existingCPDTrainingRegistration = await _repositoryManager.CPDTrainingRegistrationRepository.GetAsync(
+                    d => d.CPDTrainingId == cpdTrainingRegistration.CPDTrainingId && d.MemberId == member.Id);
+
+                if (existingCPDTrainingRegistration != null)
+                {
+                    ModelState.AddModelError(nameof(cpdTrainingRegistrationDTO.CPDTrainingId), "You have already registered for this CPD training");
+                    return BadRequest(ModelState);
+                }
+
+                //get the cpd training from the database
+                var cpdTraining = await _repositoryManager.CPDTrainingRepository.GetAsync(d => d.Id == int.Parse(cpdTrainingRegistrationDTO.CPDTrainingId));
+
+                if(cpdTraining == null)
+                {
+                    ModelState.AddModelError(nameof(cpdTrainingRegistrationDTO.CPDTrainingId), "CPD training not found");
+                    return BadRequest(ModelState);
+                }
+
+
+                //set member id
+                cpdTrainingRegistration.MemberId = member.Id;
+                cpdTrainingRegistration.Member = member;
+
+                //check if it is a paid event/training or not
+
+                if(cpdTraining.TrainingFee != null && cpdTraining.TrainingFee > 0)
+                {
+                    //set the status of the registration to pending
+                    cpdTrainingRegistration.RegistrationStatus = Lambda.Pending;
+                }
+                else
+                {
+                     cpdTrainingRegistration.RegistrationStatus = Lambda.Registered;
+                }
+
+
+                //set cpd training id
+                cpdTrainingRegistration.CPDTrainingId = int.Parse(cpdTrainingRegistrationDTO.CPDTrainingId);
+                //set cpd training registration created by
+                cpdTrainingRegistration.CreatedById = user.Id;
+                cpdTrainingRegistration.CreatedBy = user;
+
+                  var attachmentType = await _repositoryManager.AttachmentTypeRepository.GetAsync(d => d.Name == "CPDTrainingRegistration") 
+                                    ?? new AttachmentType { Name = "CPDTrainingRegistration" };
+
+                if (attachmentType.Id == 0)
+                {
+                    await _repositoryManager.AttachmentTypeRepository.AddAsync(attachmentType);
+                    await _unitOfWork.CommitAsync();
+                }
+
+                 if (cpdTrainingRegistrationDTO.Attachments?.Any() == true)
+                {
+                    cpdTrainingRegistration.Attachments = await SaveAttachmentsAsync(cpdTrainingRegistrationDTO.Attachments, attachmentType.Id);
+                }
+
+                await _repositoryManager.CPDTrainingRegistrationRepository.AddAsync(cpdTrainingRegistration);
+                await _unitOfWork.CommitAsync();
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpGet("GetCPDTrainingRegistrationById/{id}")]
+        public async Task<IActionResult> GetCPDTrainingRegistrationById(int id)
+        {
+            try
+            {
+                var cpdTrainingRegistration = await _repositoryManager.CPDTrainingRegistrationRepository.GetByIdAsync(id);
+                if (cpdTrainingRegistration == null)
+                {
+                    return NotFound();
+                }
+
+                var mappedCPDTrainingRegistration = _mapper.Map<ReadCPDTrainingRegistrationDTO>(cpdTrainingRegistration);
+                return Ok(mappedCPDTrainingRegistration);
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateCPDTrainingRegistration(int id, [FromForm] UpdateCPDTrainingRegistrationDTO cpdTrainingRegistrationDTO)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
+
+                var cpdTrainingRegistration = await _repositoryManager.CPDTrainingRegistrationRepository.GetByIdAsync(id);
+                if (cpdTrainingRegistration == null)
+                    return NotFound();
+
+                _mapper.Map(cpdTrainingRegistrationDTO, cpdTrainingRegistration);
+                await _repositoryManager.CPDTrainingRegistrationRepository.UpdateAsync(cpdTrainingRegistration);
+                await _unitOfWork.CommitAsync();
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteCPDTrainingRegistration(int id)
+        {
+            try
+            {
+                var cpdTrainingRegistration = await _repositoryManager.CPDTrainingRegistrationRepository.GetByIdAsync(id);
+                if (cpdTrainingRegistration == null)
+                    return NotFound();
+
+                await _repositoryManager.CPDTrainingRegistrationRepository.DeleteAsync(cpdTrainingRegistration);
+                await _unitOfWork.CommitAsync();
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        private async Task<List<Attachment>> SaveAttachmentsAsync(IEnumerable<IFormFile> attachments, int attachmentTypeId)
+        {
+            var attachmentsList = new List<Attachment>();
+            var hostEnvironment = HttpContext.RequestServices.GetRequiredService<IWebHostEnvironment>();
+            var webRootPath = hostEnvironment.WebRootPath;
+            var cpdTrainingAttachmentsPath = Path.Combine(webRootPath, "Uploads", "CPDTrainingRegistration");
+
+            if (!Directory.Exists(cpdTrainingAttachmentsPath))
+                Directory.CreateDirectory(cpdTrainingAttachmentsPath);
+
+            foreach (var formFile in attachments)
+            {
+                //var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(formFile.FileName)}";
+                var filePath = Path.Combine(cpdTrainingAttachmentsPath, formFile.FileName);
+
+                await using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await formFile.CopyToAsync(fileStream);
+                }
+
+                var attachment = new Attachment
+                {
+                    FileName = formFile.FileName,
+                    FilePath = filePath,
+                    AttachmentTypeId = attachmentTypeId,
+                    PropertyName = formFile.Name
+                };
+                attachmentsList.Add(attachment);
+            }
+
+            return attachmentsList;
+        }
+    }
+}

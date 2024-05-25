@@ -9,8 +9,10 @@ namespace DataStore.Core.Mappers
         public CPDTrainingRegistrationProfile()
         {
             CreateMap<CPDTrainingRegistration, ReadCPDTrainingRegistrationDTO>();
-            CreateMap<CreateCPDTrainingRegistrationDTO, CPDTrainingRegistration>();
-            CreateMap<UpdateCPDTrainingRegistrationDTO, CPDTrainingRegistration>();
+            CreateMap<CreateCPDTrainingRegistrationDTO, CPDTrainingRegistration>()
+             .ForMember(dest => dest.Attachments, opt => opt.Ignore());
+            CreateMap<UpdateCPDTrainingRegistrationDTO, CPDTrainingRegistration>()
+             .ForMember(dest => dest.Attachments, opt => opt.Ignore());;
         }
     }
 }

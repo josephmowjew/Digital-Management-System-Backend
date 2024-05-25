@@ -26,6 +26,7 @@ namespace DataStore.Core.DTOs.CPDTraining
         public int CPDUnitsAwarded { get; set; }
         public string AccreditingInstitution { get; set; }
         public string CreatedById { get; set; }
+        public double? TrainingFee { get; set; }
         public ReadUserDTO CreatedBy { get; set; }
         public int YearOfOperationId { get; set; }
         public ReadYearOfOperationDTO YearOfOperation { get; set; }

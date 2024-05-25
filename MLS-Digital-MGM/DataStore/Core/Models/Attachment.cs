@@ -17,6 +17,7 @@ namespace DataStore.Core.Models
             MemberQualifications = new List<MemberQualification>();
             LicenseApplications = new List<LicenseApplication>();
             ProBonoReports = new List<ProBonoReport>();
+            CPDTrainingRegistrations = new List<CPDTrainingRegistration>();
         }
         
         [Required]
@@ -38,6 +39,7 @@ namespace DataStore.Core.Models
         public ICollection<LicenseApplication> LicenseApplications { get; set; }
         public ICollection<ProBonoReport> ProBonoReports { get; set; }
         public ICollection<CPDTraining> CPDTrainings { get; set; }
+        public ICollection<CPDTrainingRegistration> CPDTrainingRegistrations { get; set; }
 
 
     }

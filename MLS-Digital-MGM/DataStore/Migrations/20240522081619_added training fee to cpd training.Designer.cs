@@ -3,6 +3,7 @@ using System;
 using DataStore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240522081619_added training fee to cpd training")]
+    partial class addedtrainingfeetocpdtraining
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -32,21 +35,6 @@ namespace DataStore.Migrations
                     b.HasIndex("CPDTrainingsId");
 
                     b.ToTable("AttachmentCPDTraining");
-                });
-
-            modelBuilder.Entity("AttachmentCPDTrainingRegistration", b =>
-                {
-                    b.Property<int>("AttachmentsId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CPDTrainingRegistrationsId")
-                        .HasColumnType("int");
-
-                    b.HasKey("AttachmentsId", "CPDTrainingRegistrationsId");
-
-                    b.HasIndex("CPDTrainingRegistrationsId");
-
-                    b.ToTable("AttachmentCPDTrainingRegistration");
                 });
 
             modelBuilder.Entity("AttachmentLicenseApplication", b =>
@@ -419,6 +407,9 @@ namespace DataStore.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    b.Property<int?>("AttachmentId")
+                        .HasColumnType("int");
+
                     b.Property<int>("CPDTrainingId")
                         .HasColumnType("int");
 
@@ -448,6 +439,8 @@ namespace DataStore.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AttachmentId");
 
                     b.HasIndex("CPDTrainingId");
 
@@ -1727,21 +1720,6 @@ namespace DataStore.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("AttachmentCPDTrainingRegistration", b =>
-                {
-                    b.HasOne("DataStore.Core.Models.Attachment", null)
-                        .WithMany()
-                        .HasForeignKey("AttachmentsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DataStore.Core.Models.CPDTrainingRegistration", null)
-                        .WithMany()
-                        .HasForeignKey("CPDTrainingRegistrationsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("AttachmentLicenseApplication", b =>
                 {
                     b.HasOne("DataStore.Core.Models.Attachment", null)
@@ -1888,6 +1866,10 @@ namespace DataStore.Migrations
 
             modelBuilder.Entity("DataStore.Core.Models.CPDTrainingRegistration", b =>
                 {
+                    b.HasOne("DataStore.Core.Models.Attachment", null)
+                        .WithMany("CPDTrainingRegistrations")
+                        .HasForeignKey("AttachmentId");
+
                     b.HasOne("DataStore.Core.Models.CPDTraining", "CPDTraining")
                         .WithMany("CPDTrainingRegistration")
                         .HasForeignKey("CPDTrainingId")
@@ -2320,6 +2302,11 @@ namespace DataStore.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("DataStore.Core.Models.Attachment", b =>
+                {
+                    b.Navigation("CPDTrainingRegistrations");
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.CPDTraining", b =>

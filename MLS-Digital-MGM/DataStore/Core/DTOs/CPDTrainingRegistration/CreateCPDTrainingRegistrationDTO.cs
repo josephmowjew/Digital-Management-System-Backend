@@ -1,13 +1,13 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
 
 namespace DataStore.Core.DTOs.CPDTrainingRegistration
 {
     public class CreateCPDTrainingRegistrationDTO
     {
-        public int MemberId { get; set; }
+
         [StringLength(100)]
-        public string RegistrationStatus { get; set; }
-        public int CPDTrainingId { get; set; }
-        public string CreatedById { get; set; }
+        public string CPDTrainingId { get; set; }
+        public List<IFormFile?> Attachments { get; set; }
     }
 }

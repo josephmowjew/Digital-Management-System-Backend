@@ -17,6 +17,11 @@ namespace DataStore.Persistence.SQLRepositories
             this._unitOfWork = unitOfWork;
         }
 
+        public  List<LicenseApprovalHistory> FindByConditionAsync(Func<LicenseApprovalHistory, bool> value)
+        {
+            return this._context.LicenseApprovalHistories.Include(l => l.ChangedBy).Include(l =>l.ApprovalLevel).ThenInclude(ap => ap.Department).Where(value).ToList();
+        }
+
         public async Task<List<LicenseApprovalHistory>?> GetLicenseApprovalHistoryByLicenseApplication(int applicationId)
         {
            return await this._context.LicenseApprovalHistories.Include(lh => lh.ChangedBy).Where(l => l.LicenseApplicationId == applicationId).ToListAsync();

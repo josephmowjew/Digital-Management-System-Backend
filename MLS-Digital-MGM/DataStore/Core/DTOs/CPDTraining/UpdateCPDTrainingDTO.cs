@@ -13,6 +13,7 @@ namespace DataStore.Core.DTOs.CPDTraining
         [StringLength(250)]
         public string Description { get; set; }
         public double Duration { get; set; }
+        public double? TrainingFee { get; set; }
         public DateTime DateToBeConducted { get; set; }
         public int ProposedUnits { get; set; }
         public int CPDUnitsAwarded { get; set; }
