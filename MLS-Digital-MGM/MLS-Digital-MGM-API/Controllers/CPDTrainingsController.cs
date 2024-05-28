@@ -90,9 +90,9 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 var cpdTrainingDTOs = _mapper.Map<List<ReadCPDTrainingDTO>>(cpdTrainingsPaged);
 
-                foreach (var report in cpdTrainingDTOs)
+                foreach (var training in cpdTrainingDTOs)
                 {
-                    foreach (var attachment in report.Attachments)
+                    foreach (var attachment in training.Attachments)
                     {
                         string attachmentTypeName = attachment.AttachmentType.Name;
 
@@ -101,6 +101,16 @@ namespace MLS_Digital_MGM_API.Controllers
 
                         attachment.FilePath = newfilePath;
                     }
+
+                    //count the number of pending registrations on each training
+
+                    if (training.CPDTrainingRegistration != null)
+                    {
+                        training.NumberOfPendingRegistrations = training.CPDTrainingRegistration.Count(r => r.RegistrationStatus == Lambda.Pending);
+                    }
+
+
+
                 }
 
                 if (dataTableParams.LoadFromRequest(_httpContextAccessor))

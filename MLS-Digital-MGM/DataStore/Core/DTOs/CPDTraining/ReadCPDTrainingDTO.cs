@@ -33,5 +33,6 @@ namespace DataStore.Core.DTOs.CPDTraining
         public ICollection<ReadCPDUnitsEarnedDTO> CPDUnitsEarned { get; set; }
         public ICollection<ReadCPDTrainingRegistrationDTO> CPDTrainingRegistration { get; set; }
         public List<DataStore.Core.DTOs.Attachment.ReadAttachmentDTO> Attachments { get; set; }
+        public int NumberOfPendingRegistrations { get; set; }
     }
 }

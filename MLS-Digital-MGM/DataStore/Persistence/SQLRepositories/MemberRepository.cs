@@ -23,7 +23,7 @@ namespace DataStore.Persistence.SQLRepositories
 
         public async Task<Member?> GetMemberByUserId(string userId)
         {
-            return await _context.Members.FirstOrDefaultAsync(x => x.UserId == userId);
+            return await _context.Members.Include(m => m.User).FirstOrDefaultAsync(x => x.UserId == userId);
         }
     }
 }

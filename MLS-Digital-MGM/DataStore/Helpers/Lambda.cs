@@ -35,6 +35,7 @@ namespace DataStore.Helpers
         public static string Registered = "Registered";
         public static string Cancelled = "Cancelled";
         public static string Attended = "Attended";
+        public static string Finance = "Finance Officer";
 
         public static int RandomNumber()
         {

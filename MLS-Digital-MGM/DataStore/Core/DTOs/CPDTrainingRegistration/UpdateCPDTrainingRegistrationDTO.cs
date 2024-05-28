@@ -14,5 +14,6 @@ namespace DataStore.Core.DTOs.CPDTrainingRegistration
         [Required]
         public string CreatedById { get; set; }
         public List<IFormFile?> Attachments { get; set; }
+        public DateTime? DateOfPayment { get; set; }
     }
 }

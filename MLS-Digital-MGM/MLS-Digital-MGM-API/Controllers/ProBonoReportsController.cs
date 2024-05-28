@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MLS_Digital_MGM.DataStore.Helpers;
 using System.Web;
+using Hangfire;
 
 namespace MLS_Digital_MGM_API.Controllers
 {
@@ -330,7 +331,9 @@ public class ProBonoReportsController : Controller
 
             // Send status details email
             string emailBody = $"Congratulations {report.CreatedBy.FirstName} {report.CreatedBy.LastName},<br/>Your Pro Bono report has been approved. The total number of hours is {report.ProBonoHours}.";
-            var passwordEmailResult = await _emailService.SendMailWithKeyVarReturn(creatorEmail, "Pro Bono Application Status", emailBody);
+            
+            BackgroundJob.Enqueue(() => this._emailService.SendCPDStatusEmailsAsync(new List<string>{creatorEmail},emailBody,"Pro Bono Application Status"));
+
 
             return NoContent();
         }
@@ -364,7 +367,9 @@ public class ProBonoReportsController : Controller
 
             // Send status details email
             string emailBody = $"Sorry but your report has not been approved,<br/> Reason for denial: {denyProBonoReportDTO.Reason}.";
-            var passwordEmailResult = await _emailService.SendMailWithKeyVarReturn(creatorEmail, "Pro Bono Application Status", emailBody);
+           
+            BackgroundJob.Enqueue(() => this._emailService.SendCPDStatusEmailsAsync(new List<string>{creatorEmail},emailBody,"Pro Bono Application Status"));
+
              return NoContent();
          }
          catch (Exception ex)

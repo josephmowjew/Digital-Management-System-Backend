@@ -15,6 +15,7 @@ using DataStore.Helpers;
 using MLS_Digital_MGM.DataStore.Helpers;
 using System.Linq.Expressions;
 using Microsoft.AspNetCore.Authorization;
+using Hangfire;
 
 namespace MLS_Digital_MGM_API.Controllers 
 {
@@ -146,7 +147,10 @@ namespace MLS_Digital_MGM_API.Controllers
                 
                  // Send status details email
                 string emailBody = $"Your application for the pro bono application has been denied. <br/> Reason: {denyProBonoApplicationDTO.Reason}";
-                var passwordEmailResult = await _emailService.SendMailWithKeyVarReturn(user.Email, "Pro Bono Application Status", emailBody);
+                
+
+                BackgroundJob.Enqueue(() => this._emailService.SendCPDStatusEmailsAsync(new List<string>{user.Email},emailBody,"Pro Bono Application Status"));
+
 
                 return Ok();
             }
@@ -236,7 +240,10 @@ namespace MLS_Digital_MGM_API.Controllers
                     
                     // Send status details email
                     string emailBody = $"Your application for the pro bono application has been accepted.";
-                    var passwordEmailResult = await _emailService.SendMailWithKeyVarReturn(user.Email, "Pro Bono Application Status", emailBody);
+                   
+
+                    BackgroundJob.Enqueue(() => this._emailService.SendCPDStatusEmailsAsync(new List<string>{user.Email},emailBody,"Pro Bono Application Status"));
+                    
                     await _unitOfWork.CommitAsync();
                 }
 
@@ -413,7 +420,12 @@ namespace MLS_Digital_MGM_API.Controllers
                     
                     // Send status details email
                     string emailBody = $"Your application for the pro bono application has been accepted. The file number is {fileNumber}";
-                    var passwordEmailResult = await _emailService.SendMailWithKeyVarReturn(user.Email, "Pro Bono Application Status", emailBody);
+                   
+
+                    BackgroundJob.Enqueue(() => this._emailService.SendCPDStatusEmailsAsync(new List<string>{user.Email},emailBody,"Pro Bono Application Status"));
+
+
+                    
                     return Ok();
                 }
                 return BadRequest("user not found");

@@ -24,5 +24,6 @@ namespace DataStore.Core.DTOs.CPDTrainingRegistration
         public ApplicationUser CreatedBy { get; set; }
         public string? DeniedReason { get; set; }
         public virtual List<ReadAttachmentDTO> Attachments { get; set; }
+        public DateTime? DateOfPayment { get; set; }
     }
 }

@@ -68,9 +68,20 @@ namespace DataStore.Core.Services
             }
         }
 
+         public async Task SendCPDStatusEmailsAsync(List<string> memberEmails,string emailBody,string subject)
+        {
+            foreach (var memberEmail in memberEmails)
+            {
+               
+                await this.SendMailWithKeyVarReturn(subject, "CPD Attendance Status", emailBody);
+            }
+        }
+
         public Task LogErrorAsync(Exception ex)
         {
             throw new NotImplementedException();
         }
+
+
     }
 }

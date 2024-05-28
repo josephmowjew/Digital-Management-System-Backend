@@ -5,11 +5,14 @@ using DataStore.Data;
 using DataStore.Middleware;
 using DataStore.Persistence.Interfaces;
 using DataStore.Persistence.SQLRepositories;
+using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Hangfire;
+using Hangfire.MemoryStorage;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -92,6 +95,11 @@ builder.Services.AddIdentity<ApplicationUser, Role>()
                    .AddEntityFrameworkStores<ApplicationDbContext>()
                    .AddDefaultUI()
                    .AddDefaultTokenProviders();
+builder.Services.AddHangfire(config =>
+           config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+           .UseSimpleAssemblyNameTypeSerializer()
+           .UseDefaultTypeSerializer()
+           .UseMemoryStorage());
 
 
 var app = builder.Build();
@@ -113,6 +121,9 @@ app.MapControllers();
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+app.UseHangfireServer();
+app.UseHangfireDashboard();
 
 
 app.Run();

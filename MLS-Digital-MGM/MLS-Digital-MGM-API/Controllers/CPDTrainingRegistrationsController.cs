@@ -18,6 +18,8 @@ using MLS_Digital_MGM.DataStore.Helpers;
 using DataStore.Core.DTOs.CPDTrainingRegistration;
 using DataStore.Core.DTOs.License;
 using Newtonsoft.Json;
+using Hangfire;
+
 
 namespace MLS_Digital_MGM_API.Controllers
 {
@@ -232,6 +234,17 @@ namespace MLS_Digital_MGM_API.Controllers
                 await _repositoryManager.CPDTrainingRegistrationRepository.AddAsync(cpdTrainingRegistration);
                 await _unitOfWork.CommitAsync();
 
+                //send email to finance team
+                var financeTeam = await _repositoryManager.UserRepository.GetUsersByRoleAsync(Lambda.Finance);
+                if(financeTeam.Any())
+                {
+                    List<string> emailTo = financeTeam.Select(u => u.Email).ToList();
+                    string emailBody = $"New CPD training registration has been submitted by {member.User.FirstName} {member.User.LastName}. kindly review the attached proof of payment";
+            
+                    BackgroundJob.Enqueue(() => this._emailService.SendCPDStatusEmailsAsync(emailTo,emailBody,"CPD Training Registration Status"));
+
+                }
+
                 return Ok();
             }
             catch (Exception ex)
@@ -358,7 +371,8 @@ namespace MLS_Digital_MGM_API.Controllers
                 //send email to the user
                  string emailTo = cpdTrainingRegistration.CreatedBy.Email;
                  string emailBody = "Congratulation, Your CPD registration has been approved in MLS.";
-                 await _emailService.SendMailWithKeyVarReturn(emailTo, "CPD Registration Status", emailBody);
+                 BackgroundJob.Enqueue(() => this._emailService.SendCPDStatusEmailsAsync(new List<string>{emailTo},emailBody,"CPD Training Registration Status"));
+
 
                 return Ok();
             }
@@ -389,6 +403,9 @@ namespace MLS_Digital_MGM_API.Controllers
                  string emailBody = "Your CPD registration has been rejected in MLS-Digital-MGM. <br>" + cPDRejectionDTO.Reason;
                  await _emailService.SendMailWithKeyVarReturn(emailTo, "CPD Registration Status", emailBody);
 
+                BackgroundJob.Enqueue(() => this._emailService.SendCPDStatusEmailsAsync(new List<string>{emailTo},emailBody,"CPD Training Registration Status"));
+
+
                 return Ok();
             }
             catch (Exception ex)
@@ -405,17 +422,32 @@ namespace MLS_Digital_MGM_API.Controllers
                 var idArray = JsonConvert.DeserializeObject<int[]>(ids);
                 // Use the idArray to mark attendance
             
-            //get the cpd training registration from the database whose ids are in the idArray
+                //get the cpd training registration from the database whose ids are in the idArray
                 var cpdTrainingRegistrations = await _repositoryManager.CPDTrainingRegistrationRepository.GetAll(d => idArray.Contains(d.Id));
-
+                List<string> memberEmails = new List<string>();
                 //loop through the cpd training registrations and mark attendance
                 foreach (var cpdTrainingRegistration in cpdTrainingRegistrations)
                 {
                     cpdTrainingRegistration.RegistrationStatus = Lambda.Attended;
 
                     await _repositoryManager.CPDTrainingRegistrationRepository.UpdateAsync(cpdTrainingRegistration);
+
+                    //assign the cpd units to the member 
+                    CPDUnitsEarned cPDUnitsEarned = new CPDUnitsEarned(){
+                        CPDTrainingId = cpdTrainingRegistration.CPDTrainingId,
+                        MemberId = cpdTrainingRegistration.MemberId,
+                        UnitsEarned = cpdTrainingRegistration.CPDTraining.CPDUnitsAwarded,
+                        YearOfOperationId = cpdTrainingRegistration.CPDTraining.YearOfOperationId
+                    };
+
+                    await _repositoryManager.CPDUnitsEarnedRepository.AddAsync(cPDUnitsEarned);
+
+                    memberEmails.Add(cpdTrainingRegistration.Member.User.Email);
+                    
                 }
                 await _unitOfWork.CommitAsync();
+
+                BackgroundJob.Enqueue(() => this._emailService.SendCPDStatusEmailsAsync(memberEmails,"Your attendance has been marked in MLS-Digital-MGM and you have been awarded with CPD units. Kindnly visit the system for more details. Thank you.","CPD Training Status"));
 
                 return Ok();
             }
@@ -427,6 +459,7 @@ namespace MLS_Digital_MGM_API.Controllers
             
         }
 
+        
     }
 
     public class CPDRejectionDTO

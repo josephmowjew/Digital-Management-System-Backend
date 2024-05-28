@@ -17,9 +17,11 @@ namespace DataStore.Persistence.SQLRepositories
             this._unitOfWork = unitOfWork;
         }
 
-        // public async Task<CPDUnitsEarned> GetByIdAsync(int id)
-        // {
-        //     return await _context.CPDUnitsEarned.Include(c => c.CreatedBy).FirstOrDefaultAsync(c => c.Id == id);
-        // }
+        public Task<int> GetSummedCPDUnitsEarnedByMemberId(int memberId)
+        {
+            return _context.CPDUnitsEarned.Include(c => c.Member).Include(c => c.CPDTraining).Include(c => c.YearOfOperation)
+               .Where(c => c.MemberId == memberId).SumAsync(c => c.UnitsEarned);
+        }
+
     }
 }

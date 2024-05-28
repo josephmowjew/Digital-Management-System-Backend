@@ -20,7 +20,7 @@ namespace DataStore.Persistence.SQLRepositories
 
         public async Task<List<CPDTrainingRegistration>> GetAll(Expression<Func<CPDTrainingRegistration, bool>> value)
         {
-            return await _context.CPDTrainingRegistrations.Include(t => t.CPDTraining).Include(t => t.Member).Include(t => t.Attachments).Include(r => r.CreatedBy).Where(value).ToListAsync();
+            return await _context.CPDTrainingRegistrations.Include(t => t.CPDTraining).Include(t => t.Member).ThenInclude(m => m.User).Include(t => t.Attachments).Include(r => r.CreatedBy).Where(value).ToListAsync();
         }
 
         public async Task<CPDTrainingRegistration> GetByIdAsync(int id)

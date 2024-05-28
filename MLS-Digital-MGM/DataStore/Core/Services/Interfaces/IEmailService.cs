@@ -9,5 +9,6 @@ namespace DataStore.Core.Services.Interfaces
     public interface IEmailService
     {
         Task<KeyValuePair<bool, string>> SendMailWithKeyVarReturn(string email, string subject, string HtmlMessage);
+        Task SendCPDStatusEmailsAsync(List<string> memberEmails,string emailBody, string subject);
     }
 }

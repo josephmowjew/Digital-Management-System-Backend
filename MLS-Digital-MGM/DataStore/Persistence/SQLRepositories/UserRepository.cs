@@ -98,13 +98,9 @@ namespace DataStore.Persistence.SQLRepositories
             }
         }
 
-        
-
-      
-
-
-
-       
-
+        public async Task<List<ApplicationUser>> GetUsersByRoleAsync(string finance)
+        {
+            return (List<ApplicationUser>)await this._userManager.GetUsersInRoleAsync(finance);
+        }
     }
 }

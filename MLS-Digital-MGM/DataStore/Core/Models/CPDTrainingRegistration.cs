@@ -24,6 +24,7 @@ namespace DataStore.Core.Models
         [StringLength(250)]
         public string? DeniedReason { get; set; }
         public virtual List<Attachment> Attachments { get; set; }
+        public DateTime? DateOfPayment { get; set; }
 
        
     }

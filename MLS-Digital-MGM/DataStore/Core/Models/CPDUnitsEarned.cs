@@ -9,6 +9,7 @@ namespace DataStore.Core.Models
     public class CPDUnitsEarned: Meta
     {
         public int MemberId { get; set; }
+        public Member Member { get; set; }
         public int CPDTrainingId { get; set; }
         public CPDTraining CPDTraining { get; set; }
         public int UnitsEarned { get; set; }

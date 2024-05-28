@@ -24,6 +24,6 @@ namespace DataStore.Persistence.Interfaces
         void ActivateAccount(ApplicationUser user);
 
         string GetRoleName(string roleId);
-
+        Task<List<ApplicationUser>> GetUsersByRoleAsync(string finance);
     }
 }
