@@ -16,6 +16,7 @@ using MLS_Digital_MGM.DataStore.Helpers;
 using System.Linq.Expressions;
 using Microsoft.AspNetCore.Authorization;
 using System.Reflection;
+using Hangfire;
 
 namespace MLS_Digital_MGM_API.Controllers
 {
@@ -137,6 +138,12 @@ namespace MLS_Digital_MGM_API.Controllers
 
               if (!licenseApplicationDTO.ActionType.Equals(Lambda.Draft,StringComparison.CurrentCultureIgnoreCase))
                 {
+                    //check if the Id has been submitted. If not the set it to zero
+
+                    if(licenseApplicationDTO.Id == null)
+                    {
+                        licenseApplicationDTO.Id = 0;
+                    }
                     if (!ModelState.IsValid)
                         return BadRequest(ModelState);
 
@@ -302,7 +309,7 @@ namespace MLS_Digital_MGM_API.Controllers
             {
                 // Send status details email
                 string emailBody = $"Your have made a license application for {currentYearOfOperation.StartDate.Year} - {currentYearOfOperation.EndDate.Year} year of operation. You can view the status of your application by clicking the link below.";
-                var passwordEmailResult = await _emailService.SendMailWithKeyVarReturn(user.Email, "Annual Membership Application Status", emailBody);
+                  BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(user.Email, "Annual Membership Application Status", emailBody));
             }
 
                 //only add application approval history if the application is not a draft
@@ -512,7 +519,7 @@ namespace MLS_Digital_MGM_API.Controllers
             var appHistoryList = await _repositoryManager.LicenseApprovalHistoryRepository.GetLicenseApprovalHistoryByLicenseApplication(licenseApplication.Id);
             await NotifyUsersAsync(licenseApplication, user, denyLicenseApplicationDTO.Reason, appHistoryList);
 
-            await _emailService.SendMailWithKeyVarReturn(licenseApplication.CreatedBy.Email, "License Application Status", $"Member please note that your license application has been denied.<br/> Reason: {denyLicenseApplicationDTO.Reason}");
+              BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(licenseApplication.CreatedBy.Email, "License Application Status", $"Member please note that your license application has been denied.<br/> Reason: {denyLicenseApplicationDTO.Reason}"));
 
             return Ok();
         }
@@ -553,7 +560,7 @@ namespace MLS_Digital_MGM_API.Controllers
             {
                 var userToNotify = await _repositoryManager.UserRepository.GetSingleUser(userId);
                 string emailBody = $"Member license application has been denied. <br/>Reason: {reason}  <br/>Action Taken by:{user.Email}";
-                await _emailService.SendMailWithKeyVarReturn(userToNotify.Email, "License Application Status", emailBody);
+                BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(userToNotify.Email, "License Application Status", emailBody));
             }
         }
     }
@@ -608,7 +615,7 @@ namespace MLS_Digital_MGM_API.Controllers
             var currentDepartment = currentLicenseApprovalLevel.Department;
             string licenseNumber = string.Empty;
 
-            if (currentDepartment.Name.Equals("Executive", StringComparison.OrdinalIgnoreCase))
+            if (currentDepartment.Name.Equals("Executive", StringComparison.OrdinalIgnoreCase) && currentRole.Equals("president", StringComparison.OrdinalIgnoreCase) || currentRole.Equals("honarary secretary", StringComparison.OrdinalIgnoreCase))
             {
                 licenseApplication.ApplicationStatus = Lambda.Approved;
                 licenseNumber = await GenerateLicenseNumber(licenseApplication);
@@ -717,22 +724,21 @@ namespace MLS_Digital_MGM_API.Controllers
     {
         string emailTo = licenseApplication.CreatedBy.Email;
         string emailBody = "Your license has been approved in the system. Please visit the system to get your license number.";
-        await _emailService.SendMailWithKeyVarReturn(emailTo, "License Application Status", emailBody);
+        BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(emailTo, "License Application Status", emailBody));
 
         emailTo = user.Email;
         emailBody = $"You have approved a license application for a member {licenseApplication.CreatedBy.FirstName} {licenseApplication.CreatedBy.LastName}.";
-        await _emailService.SendMailWithKeyVarReturn(emailTo, "License Application Status", emailBody);
+        BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(emailTo, "License Application Status", emailBody));
     }
 
     private async Task SendReviewNotification(LicenseApplication licenseApplication, ApplicationUser user)
     {
         string emailTo = user.Email;
         string emailBody = $"You have approved a license application for a member {licenseApplication.CreatedBy.FirstName} {licenseApplication.CreatedBy.LastName}. It has been sent to {licenseApplication.CurrentApprovalLevel.Department.Name} department for further review.";
-        await _emailService.SendMailWithKeyVarReturn(emailTo, "License Application Status", emailBody);
+        BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(emailTo, "License Application Status", emailBody));
 
         emailBody = $"You license application is under review and currently it has been sent to {licenseApplication.CurrentApprovalLevel.Department.Name} department for review.";
-        await _emailService.SendMailWithKeyVarReturn(licenseApplication.CreatedBy.Email, "License Application Status", emailBody);
-
+        BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(licenseApplication.CreatedBy.Email, "License Application Status", emailBody));
 
         }
     }

@@ -20,6 +20,6 @@ namespace DataStore.Core.DTOs.CPDTraining
         [StringLength(200)]
         public string? AccreditingInstitution { get; set; }
 
-        public List<IFormFile> Attachments = new List<IFormFile>();
+        public List<IFormFile> Attachments  { get; set; }
     }
 }

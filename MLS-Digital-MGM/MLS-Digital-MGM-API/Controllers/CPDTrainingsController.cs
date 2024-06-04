@@ -236,7 +236,7 @@ namespace MLS_Digital_MGM_API.Controllers
             {
                 string attachmentTypeName = attachment.AttachmentType.Name;
 
-                string newFilePath = Path.Combine($"http://{HttpContext.Request.Host}/uploads/{Lambda.LicenseApplicationFolderName}", attachment.FileName);
+                string newFilePath = Path.Combine($"http://{HttpContext.Request.Host}/uploads/{Lambda.CPDTrainingFolderName}", attachment.FileName);
 
                 attachment.FilePath = newFilePath;
 
@@ -271,10 +271,10 @@ namespace MLS_Digital_MGM_API.Controllers
                 {
                         var attachmentsList = await SaveAttachmentsAsync(cpdTrainingDTO.Attachments, attachmentType.Id);
                       // Remove old attachments with the same name as the new ones
-                        cpdTraining.Attachments.ToList().RemoveAll(a => attachmentsList.Any(b => b.PropertyName == a.PropertyName));
+                        cpdTraining.Attachments.RemoveAll(a => attachmentsList.Any(b => b.PropertyName == a.PropertyName));
 
                         // Add fresh list of attachments
-                        cpdTraining.Attachments.ToList().AddRange(attachmentsList);
+                        cpdTraining.Attachments.AddRange(attachmentsList);
                 }
 
                 if(string.IsNullOrEmpty(cpdTrainingDTO.AccreditingInstitution))

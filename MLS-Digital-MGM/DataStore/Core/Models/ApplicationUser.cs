@@ -13,6 +13,10 @@ namespace DataStore.Core.Models
 {
     public class ApplicationUser: IdentityUser, IEntity
     {
+        public ApplicationUser()
+        {
+            Penalties = new List<Penalty>();
+        }
 
         [Required]
         [StringLength(maximumLength: 100)]
@@ -58,6 +62,7 @@ namespace DataStore.Core.Models
         public DateTime? DeletedDate { get; set; }
         public DateTime LastLogin { get; set; }
         public int? Pin { get; set; }
+        public List<Penalty> Penalties { get; set; }
 
        
         

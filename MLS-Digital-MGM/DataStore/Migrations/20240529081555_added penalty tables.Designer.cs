@@ -3,6 +3,7 @@ using System;
 using DataStore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240529081555_added penalty tables")]
+    partial class addedpenaltytables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -77,36 +80,6 @@ namespace DataStore.Migrations
                     b.HasIndex("MemberQualificationsId");
 
                     b.ToTable("AttachmentMemberQualification");
-                });
-
-            modelBuilder.Entity("AttachmentPenalty", b =>
-                {
-                    b.Property<int>("AttachmentsId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PenaltiesId")
-                        .HasColumnType("int");
-
-                    b.HasKey("AttachmentsId", "PenaltiesId");
-
-                    b.HasIndex("PenaltiesId");
-
-                    b.ToTable("AttachmentPenalty");
-                });
-
-            modelBuilder.Entity("AttachmentPenaltyPayment", b =>
-                {
-                    b.Property<int>("AttachmentsId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PenaltyPaymentsId")
-                        .HasColumnType("int");
-
-                    b.HasKey("AttachmentsId", "PenaltyPaymentsId");
-
-                    b.HasIndex("PenaltyPaymentsId");
-
-                    b.ToTable("AttachmentPenaltyPayment");
                 });
 
             modelBuilder.Entity("AttachmentProBono", b =>
@@ -1177,16 +1150,8 @@ namespace DataStore.Migrations
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<double>("Fee")
-                        .HasColumnType("double");
-
                     b.Property<int>("MemberId")
                         .HasColumnType("int");
-
-                    b.Property<string>("PenaltyStatus")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
 
                     b.Property<int>("PenaltyTypeId")
                         .HasColumnType("int");
@@ -1195,19 +1160,12 @@ namespace DataStore.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("ResolutionComment")
-                        .HasMaxLength(250)
-                        .HasColumnType("varchar(250)");
-
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<DateTime>("UpdatedDate")
                         .HasColumnType("datetime(6)");
-
-                    b.Property<int>("YearOfOperationId")
-                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -1215,48 +1173,7 @@ namespace DataStore.Migrations
 
                     b.HasIndex("MemberId");
 
-                    b.HasIndex("YearOfOperationId");
-
                     b.ToTable("Penalties");
-                });
-
-            modelBuilder.Entity("DataStore.Core.Models.PenaltyPayment", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("longtext");
-
-                    b.Property<double>("Fee")
-                        .HasColumnType("double");
-
-                    b.Property<string>("PaymentStatus")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<int>("PenaltyId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PenaltyId");
-
-                    b.ToTable("PenaltyPayments");
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.PenaltyType", b =>
@@ -1942,36 +1859,6 @@ namespace DataStore.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("AttachmentPenalty", b =>
-                {
-                    b.HasOne("DataStore.Core.Models.Attachment", null)
-                        .WithMany()
-                        .HasForeignKey("AttachmentsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DataStore.Core.Models.Penalty", null)
-                        .WithMany()
-                        .HasForeignKey("PenaltiesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("AttachmentPenaltyPayment", b =>
-                {
-                    b.HasOne("DataStore.Core.Models.Attachment", null)
-                        .WithMany()
-                        .HasForeignKey("AttachmentsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DataStore.Core.Models.PenaltyPayment", null)
-                        .WithMany()
-                        .HasForeignKey("PenaltyPaymentsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("AttachmentProBono", b =>
                 {
                     b.HasOne("DataStore.Core.Models.Attachment", null)
@@ -2352,28 +2239,9 @@ namespace DataStore.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DataStore.Core.Models.YearOfOperation", "YearOfOperation")
-                        .WithMany()
-                        .HasForeignKey("YearOfOperationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("CreatedBy");
 
                     b.Navigation("Member");
-
-                    b.Navigation("YearOfOperation");
-                });
-
-            modelBuilder.Entity("DataStore.Core.Models.PenaltyPayment", b =>
-                {
-                    b.HasOne("DataStore.Core.Models.Penalty", "Penalty")
-                        .WithMany("PenaltyPayments")
-                        .HasForeignKey("PenaltyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Penalty");
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.ProBono", b =>
@@ -2610,11 +2478,6 @@ namespace DataStore.Migrations
                     b.Navigation("Licenses");
 
                     b.Navigation("Penalties");
-                });
-
-            modelBuilder.Entity("DataStore.Core.Models.Penalty", b =>
-                {
-                    b.Navigation("PenaltyPayments");
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.ProBono", b =>

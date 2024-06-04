@@ -108,6 +108,11 @@ namespace DataStore.Persistence.SQLRepositories
             {
                 query = query.Include("Attachments.AttachmentType");
             }
+             if (propertyName == "CurrentApprovalLevel")
+            {
+                query = query.Include("CurrentApprovalLevel.Department");
+            }
+
 
             if(propertyName == "Member")
             {

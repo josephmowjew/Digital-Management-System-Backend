@@ -13,7 +13,7 @@ namespace DataStore.Core.Models
         {
             this.CPDUnitsEarned = new List<CPDUnitsEarned>();
             this.CPDTrainingRegistration = new List<CPDTrainingRegistration>();
-            Attachments = new List<Attachment>();
+            this.Attachments = new List<Attachment>();
 
         }
 
@@ -37,6 +37,6 @@ namespace DataStore.Core.Models
         public virtual List<CPDUnitsEarned> CPDUnitsEarned { get; set; }
         public virtual List<CPDTrainingRegistration> CPDTrainingRegistration { get; set;}
 
-        public ICollection<Attachment> Attachments { get; set; }
+        public List<Attachment> Attachments { get; set; }
     }
 }

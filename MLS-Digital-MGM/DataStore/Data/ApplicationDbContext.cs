@@ -108,6 +108,7 @@ namespace DataStore.Data
                 entity.Property(u => u.Value).HasMaxLength(200);
             });
 
+
             //builder.Entity<ApplicationUser>().Property(u => u.FullName).HasComputedColumnSql("[FirstName] + ' ' + [LastName]");
 
 
@@ -139,5 +140,8 @@ namespace DataStore.Data
         public DbSet<CPDTraining> CPDTrainings { get; set; }
         public DbSet<CPDTrainingRegistration> CPDTrainingRegistrations { get; set; }
         public DbSet<CPDUnitsEarned> CPDUnitsEarned { get; set; }
+        public DbSet<Penalty> Penalties { get; set; }
+        public DbSet<PenaltyType> PenaltyTypes { get; set;}
+        public DbSet<PenaltyPayment> PenaltyPayments { get; set; }
     }
 }

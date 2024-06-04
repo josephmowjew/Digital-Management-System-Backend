@@ -23,6 +23,7 @@ namespace DataStore.Helpers
         public static string ProBonoApplication = "Pro Bono Application";
         public static string LicenseApplication = "License Application";
         public static string LicenseApplicationFolderName = "LicenseApplication";
+        public static string CPDTrainingFolderName ="CPDTrainings";
 
 
         private static Random _random = new Random(); // declaring it as static and initiating it once
@@ -36,6 +37,12 @@ namespace DataStore.Helpers
         public static string Cancelled = "Cancelled";
         public static string Attended = "Attended";
         public static string Finance = "Finance Officer";
+
+        //Penalty sections
+        public static string Issued = "Issued";
+        public static string Paid = "Paid";
+        public static string PartiallyPaid = "Partially Paid";
+        public static string Resolved = "Resolved";
 
         public static int RandomNumber()
         {

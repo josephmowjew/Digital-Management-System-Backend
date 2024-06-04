@@ -6,6 +6,7 @@ using DataStore.Core.ViewModels;
 using DataStore.Helpers;
 using DataStore.Persistence.Interfaces;
 using DataStore.Persistence.SQLRepositories;
+using Hangfire;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -131,21 +132,12 @@ namespace MLS_Digital_MGM_API.Controllers
 
             // Send login details email
             string passwordBody = $"Your account has been created on Malawi Law Society. Your login details are as follows: <br /> Email: {model.Email} <br /> Password: {model.Password} <br /> Login to Sparc Rides. Your password is {model.Password}";
-            var passwordEmailResult = await _emailService.SendMailWithKeyVarReturn(user.Email, "Login Details", passwordBody);
-            if (!passwordEmailResult.Key)
-            {
-                ModelState.AddModelError(nameof(model.Email), $"Failed to send login details email. Error: {passwordEmailResult.Value}");
-                return BadRequest(ModelState);
-            }
-
+            var passwordEmailResult = BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(user.Email, "Login Details", passwordBody));
+          
             // Send OTP email
             string pinBody = $"An account has been created on Malawi Law Society. Your OTP is {pin} <br /> Enter the OTP to activate your account <br /> You can activate your account by clicking <a href='https://cutt.ly/mentallab'>here</a>";
-            var pinEmailResult = await _emailService.SendMailWithKeyVarReturn(user.Email, "Login Details", pinBody);
-            if (!pinEmailResult.Key)
-            {
-                ModelState.AddModelError(nameof(model.Email), $"Failed to send OTP email. Error: {pinEmailResult.Value}");
-                return BadRequest(ModelState);
-            }
+            var pinEmailResult = BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(user.Email, "Login Details", pinBody));
+           
 
             return Ok(user);
         }
@@ -256,13 +248,9 @@ namespace MLS_Digital_MGM_API.Controllers
 
             // sending an email
             string PinBody = "Your OTP for Sparc Rides Account is " + pin + " <br /> Enter the OTP, email address and the new password to reset your account";
-            var pinEmailResult = await _emailService.SendMailWithKeyVarReturn(user.Email, "Account Reset Details", PinBody);
+            var pinEmailResult = BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(user.Email, "Account Reset Details", PinBody));
 
-            if (!pinEmailResult.Key)
-            {
-                ModelState.AddModelError("", $"Failed to send OTP email. Error: {pinEmailResult.Value}");
-                return BadRequest(ModelState);
-            }
+           
 
             return Ok("Check your email for the pin");
 
@@ -394,7 +382,7 @@ namespace MLS_Digital_MGM_API.Controllers
             
                var body = $"Please reset your password by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.";
 
-            var pinEmailResult = await _emailService.SendMailWithKeyVarReturn(user.Email, "Reset Password", body);
+            var pinEmailResult = BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(user.Email, "Reset Password", body));
 
             return Ok("Password reset link was sent to your email successfully");
         }

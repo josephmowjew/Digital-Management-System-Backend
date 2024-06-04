@@ -41,6 +41,9 @@ namespace DataStore.Persistence.SQLRepositories
         private ICPDTrainingRegistrationRepository _CPDTrainingRegistrationRepository;
         private ICPDTrainingRepository _CPDTrainingRepository;
         private ICPDUnitsEarnedRepository _CPDUnitsEarnedRepository;
+        private IPenaltyRepository _penaltyRepository;
+        private IPenaltyTypeRepository _penaltyTypeRepository;
+        private IPenaltyPaymentRepository _penaltyPaymentRepository;
 
         // Add other repository fields here, e.g., private IProductRepository _productRepository;
 
@@ -98,5 +101,10 @@ namespace DataStore.Persistence.SQLRepositories
         public ICPDTrainingRegistrationRepository CPDTrainingRegistrationRepository => _CPDTrainingRegistrationRepository ??= new CPDTrainingRegistrationRepository(_context, _unitOfWork);
         public ICPDTrainingRepository CPDTrainingRepository => _CPDTrainingRepository ??= new CPDTrainingRepository(_context, _unitOfWork);
         public ICPDUnitsEarnedRepository CPDUnitsEarnedRepository => _CPDUnitsEarnedRepository ??= new CPDUnitsEarnedRepository(_context, _unitOfWork);
+        public IPenaltyRepository PenaltyRepository => _penaltyRepository ??= new PenaltyRepository(_context, _unitOfWork);
+        public IPenaltyTypeRepository PenaltyTypeRepository => _penaltyTypeRepository ??= new PenaltyTypeRepository(_context, _unitOfWork);
+        public IPenaltyPaymentRepository PenaltyPaymentRepository => _penaltyPaymentRepository ??= new PenaltyPaymentRepository(_context, _unitOfWork);
+
+       
     }
 }

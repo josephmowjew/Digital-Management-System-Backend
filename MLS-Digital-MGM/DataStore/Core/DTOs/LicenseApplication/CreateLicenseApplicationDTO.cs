@@ -9,7 +9,7 @@ namespace DataStore.Core.DTOs.LicenseApplication
     public class CreateLicenseApplicationDTO
     {
 
-        public int Id { get; set; } = 0;
+        public int? Id { get; set; } = 0;
         
         [Required]
         public string ApplicationStatus { get; set; } = Lambda.Pending;

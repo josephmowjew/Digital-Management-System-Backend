@@ -55,6 +55,11 @@ namespace DataStore.Persistence.Interfaces
         ICPDTrainingRegistrationRepository CPDTrainingRegistrationRepository {get;}
         ICPDTrainingRepository CPDTrainingRepository {get;}
         ICPDUnitsEarnedRepository CPDUnitsEarnedRepository {get;}
+        IPenaltyRepository PenaltyRepository {get;}
+        IPenaltyTypeRepository PenaltyTypeRepository {get;}
+        IPenaltyPaymentRepository PenaltyPaymentRepository {get;}
+        
+
 
     }
 }

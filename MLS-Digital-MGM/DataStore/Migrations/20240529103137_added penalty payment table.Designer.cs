@@ -3,6 +3,7 @@ using System;
 using DataStore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240529103137_added penalty payment table")]
+    partial class addedpenaltypaymenttable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -77,36 +80,6 @@ namespace DataStore.Migrations
                     b.HasIndex("MemberQualificationsId");
 
                     b.ToTable("AttachmentMemberQualification");
-                });
-
-            modelBuilder.Entity("AttachmentPenalty", b =>
-                {
-                    b.Property<int>("AttachmentsId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PenaltiesId")
-                        .HasColumnType("int");
-
-                    b.HasKey("AttachmentsId", "PenaltiesId");
-
-                    b.HasIndex("PenaltiesId");
-
-                    b.ToTable("AttachmentPenalty");
-                });
-
-            modelBuilder.Entity("AttachmentPenaltyPayment", b =>
-                {
-                    b.Property<int>("AttachmentsId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PenaltyPaymentsId")
-                        .HasColumnType("int");
-
-                    b.HasKey("AttachmentsId", "PenaltyPaymentsId");
-
-                    b.HasIndex("PenaltyPaymentsId");
-
-                    b.ToTable("AttachmentPenaltyPayment");
                 });
 
             modelBuilder.Entity("AttachmentProBono", b =>
@@ -326,6 +299,12 @@ namespace DataStore.Migrations
                         .HasMaxLength(250)
                         .HasColumnType("varchar(250)");
 
+                    b.Property<int?>("PenaltyId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("PenaltyPaymentId")
+                        .HasColumnType("int");
+
                     b.Property<string>("PropertyName")
                         .HasMaxLength(200)
                         .HasColumnType("varchar(200)");
@@ -340,6 +319,10 @@ namespace DataStore.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AttachmentTypeId");
+
+                    b.HasIndex("PenaltyId");
+
+                    b.HasIndex("PenaltyPaymentId");
 
                     b.ToTable("Attachments");
                 });
@@ -1942,36 +1925,6 @@ namespace DataStore.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("AttachmentPenalty", b =>
-                {
-                    b.HasOne("DataStore.Core.Models.Attachment", null)
-                        .WithMany()
-                        .HasForeignKey("AttachmentsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DataStore.Core.Models.Penalty", null)
-                        .WithMany()
-                        .HasForeignKey("PenaltiesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("AttachmentPenaltyPayment", b =>
-                {
-                    b.HasOne("DataStore.Core.Models.Attachment", null)
-                        .WithMany()
-                        .HasForeignKey("AttachmentsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DataStore.Core.Models.PenaltyPayment", null)
-                        .WithMany()
-                        .HasForeignKey("PenaltyPaymentsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("AttachmentProBono", b =>
                 {
                     b.HasOne("DataStore.Core.Models.Attachment", null)
@@ -2063,6 +2016,14 @@ namespace DataStore.Migrations
                         .HasForeignKey("AttachmentTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("DataStore.Core.Models.Penalty", null)
+                        .WithMany("Attachments")
+                        .HasForeignKey("PenaltyId");
+
+                    b.HasOne("DataStore.Core.Models.PenaltyPayment", null)
+                        .WithMany("Attachments")
+                        .HasForeignKey("PenaltyPaymentId");
 
                     b.Navigation("AttachmentType");
                 });
@@ -2614,7 +2575,14 @@ namespace DataStore.Migrations
 
             modelBuilder.Entity("DataStore.Core.Models.Penalty", b =>
                 {
+                    b.Navigation("Attachments");
+
                     b.Navigation("PenaltyPayments");
+                });
+
+            modelBuilder.Entity("DataStore.Core.Models.PenaltyPayment", b =>
+                {
+                    b.Navigation("Attachments");
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.ProBono", b =>
