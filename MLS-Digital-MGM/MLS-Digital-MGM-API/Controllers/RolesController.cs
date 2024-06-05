@@ -4,6 +4,7 @@ using DataStore.Core.Models;
 using DataStore.Core.Services.Interfaces;
 using DataStore.Helpers;
 using DataStore.Persistence.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MLS_Digital_MGM.DataStore.Helpers;
 using System;
@@ -13,6 +14,7 @@ using System.Threading.Tasks;
 namespace MLS_Digital_MGM_API.Controllers
 {
     [Route("api/[controller]")]
+    [Authorize(AuthenticationSchemes = "Bearer")]
     public class RolesController : Controller
     {
         // Dependency Injection

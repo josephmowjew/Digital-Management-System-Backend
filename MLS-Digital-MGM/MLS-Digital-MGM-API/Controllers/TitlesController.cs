@@ -5,6 +5,7 @@ using DataStore.Core.Models;
 using DataStore.Core.Services.Interfaces;
 using DataStore.Helpers;
 using DataStore.Persistence.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -14,6 +15,7 @@ using System.Threading.Tasks;
 namespace MLS_Digital_MGM_API.Controllers
 {
     [Route("api/[controller]")]
+    [Authorize(AuthenticationSchemes = "Bearer")]
     public class TitlesController : Controller
     {
         private readonly IRepositoryManager _repositoryManager; // Interface to the data layer
