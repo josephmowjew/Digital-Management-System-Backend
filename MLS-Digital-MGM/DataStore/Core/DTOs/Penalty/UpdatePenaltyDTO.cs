@@ -15,8 +15,8 @@ namespace DataStore.Core.DTOs.Penalty
         [Required]
         [StringLength(250)]
         public string Reason { get; set; }
-        [Required]
-        public string CreatedById { get; set; }
+        /*[Required]
+        public string CreatedById { get; set; }*/
         public int YearOfOperationId { get; set; }
         [AllowedFileTypes(new[] { ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".txt","png","jpg","jpeg" })]
         [FileSize(5242880)] // 5 MB

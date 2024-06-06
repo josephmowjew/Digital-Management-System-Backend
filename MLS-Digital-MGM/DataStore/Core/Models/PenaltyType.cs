@@ -9,9 +9,14 @@ namespace DataStore.Core.Models
 {
     public class PenaltyType: Meta
     {
+        public PenaltyType()
+        {
+            this.Penalties = new List<Penalty>();
+        }
         [StringLength(maximumLength:100)]
         public string Name { get; set; }
         [StringLength(maximumLength:250)]
         public string Description { get; set; }
+        public List<Penalty> Penalties { get; set; }
     }
 }

@@ -46,6 +46,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 var pagingParameters = new PagingParameters<Penalty>
                 {
+                    Predicate = u => u.Status != Lambda.Deleted,
                     PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
                     PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
                     SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
@@ -53,7 +54,7 @@ namespace MLS_Digital_MGM_API.Controllers
                     SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null,
                     Includes = new Expression<Func<Penalty, object>>[] {
                         p => p.CreatedBy,
-                        p => p.PenaltyType,
+                        p => p.PenaltyType
                     }
                 };
 
@@ -124,7 +125,7 @@ namespace MLS_Digital_MGM_API.Controllers
                     await _repositoryManager.AttachmentTypeRepository.AddAsync(attachmentType);
                     await _unitOfWork.CommitAsync();
                 }
-                if (penaltyDTO.Attachments != null && penalty.Attachments.Count > 0)
+                if (penaltyDTO.Attachments != null && penaltyDTO.Attachments.Count > 0)
                 {
                     penalty.Attachments = await SaveAttachmentsAsync(penaltyDTO.Attachments, attachmentType.Id);
                 }
@@ -152,6 +153,16 @@ namespace MLS_Digital_MGM_API.Controllers
                     return NotFound();
                 }
 
+                foreach (var attachment in penalty.Attachments)
+                {
+                    string attachmentTypeName = attachment.AttachmentType.Name;
+
+                    string newFilePath = Path.Combine($"http://{HttpContext.Request.Host}/uploads/{Lambda.PenaltyFolderName}", attachment.FileName);
+
+                    attachment.FilePath = newFilePath;
+
+                }
+
                 var mappedPenalty = _mapper.Map<ReadPenaltyDTO>(penalty);
                 return Ok(mappedPenalty);
             }
@@ -165,12 +176,19 @@ namespace MLS_Digital_MGM_API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdatePenalty(int id, [FromForm] UpdatePenaltyDTO penaltyDTO)
         {
+
             try
             {
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
 
+                string username = _httpContextAccessor.HttpContext.User.Identity.Name;
+
                 var penalty = await _repositoryManager.PenaltyRepository.GetByIdAsync(id);
+
+                var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
+                //penalty.CreatedById = user.Id;
+
                 if (penalty == null)
                     return NotFound();
 
@@ -246,7 +264,8 @@ namespace MLS_Digital_MGM_API.Controllers
                 {
                     FileName = uniqueFileName,
                     FilePath = filePath,
-                    AttachmentTypeId = attachmentTypeId
+                    AttachmentTypeId = attachmentTypeId,
+                    PropertyName = attachment.Name
                 });
             }
     

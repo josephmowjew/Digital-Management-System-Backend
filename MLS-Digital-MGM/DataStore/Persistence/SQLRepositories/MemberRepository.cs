@@ -1,5 +1,6 @@
 using DataStore.Core.Models;
-using DataStore.Data;  
+using DataStore.Data;
+using DataStore.Helpers;
 using DataStore.Persistence.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -24,6 +25,11 @@ namespace DataStore.Persistence.SQLRepositories
         public async Task<Member?> GetMemberByUserId(string userId)
         {
             return await _context.Members.Include(m => m.User).FirstOrDefaultAsync(x => x.UserId == userId);
+        }
+
+        public async Task<IEnumerable<Member>> GetAllAsync()
+        {
+            return await _context.Members.Include(m => m.User).Where(q => q.Status != Lambda.Deleted).ToListAsync();
         }
     }
 }

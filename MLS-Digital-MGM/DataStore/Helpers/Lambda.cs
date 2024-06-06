@@ -24,6 +24,7 @@ namespace DataStore.Helpers
         public static string LicenseApplication = "License Application";
         public static string LicenseApplicationFolderName = "LicenseApplication";
         public static string CPDTrainingFolderName ="CPDTrainings";
+        public static string PenaltyFolderName = "Penalties";
 
 
         private static Random _random = new Random(); // declaring it as static and initiating it once
