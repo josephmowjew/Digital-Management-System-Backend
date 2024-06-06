@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
+using Thread = DataStore.Core.Models.Thread;
 
 namespace DataStore.Data
 {
@@ -143,5 +144,9 @@ namespace DataStore.Data
         public DbSet<Penalty> Penalties { get; set; }
         public DbSet<PenaltyType> PenaltyTypes { get; set;}
         public DbSet<PenaltyPayment> PenaltyPayments { get; set; }
+        public DbSet<Committee> Committees { get; set; } 
+        public DbSet<CommitteeMembership> CommitteeMembers { get; set; }
+        public DbSet<Thread> Threads { get; set; }
+        public DbSet<Message> Messages { get; set; }
     }
 }
