@@ -3,6 +3,7 @@ using System;
 using DataStore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240605120027_added fee to cpd registration")]
+    partial class addedfeetocpdregistration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -415,16 +418,10 @@ namespace DataStore.Migrations
                     b.Property<bool>("IsFree")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<double?>("MemberPhysicalAttendanceFee")
+                    b.Property<double?>("NonMemberFee")
                         .HasColumnType("double");
 
-                    b.Property<double?>("MemberVirtualAttendanceFee")
-                        .HasColumnType("double");
-
-                    b.Property<double?>("NonMemberPhysicalAttendanceFee")
-                        .HasColumnType("double");
-
-                    b.Property<double?>("NonMemberVirtualAttandanceFee")
+                    b.Property<double?>("PhysicalAttendanceFee")
                         .HasColumnType("double");
 
                     b.Property<string>("PhysicalVenue")
@@ -433,9 +430,6 @@ namespace DataStore.Migrations
 
                     b.Property<int>("ProposedUnits")
                         .HasColumnType("int");
-
-                    b.Property<DateTime?>("RegistrationDueDate")
-                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -448,6 +442,9 @@ namespace DataStore.Migrations
 
                     b.Property<DateTime>("UpdatedDate")
                         .HasColumnType("datetime(6)");
+
+                    b.Property<double?>("VirtualAttendanceFee")
+                        .HasColumnType("double");
 
                     b.Property<int>("YearOfOperationId")
                         .HasColumnType("int");

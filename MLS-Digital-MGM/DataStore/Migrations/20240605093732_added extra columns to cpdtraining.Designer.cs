@@ -3,6 +3,7 @@ using System;
 using DataStore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,13 +11,15 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240605093732_added extra columns to cpdtraining")]
+    partial class addedextracolumnstocpdtraining
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.6")
+                .HasAnnotation("ProductVersion", "8.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("AttachmentCPDTraining", b =>
@@ -415,27 +418,14 @@ namespace DataStore.Migrations
                     b.Property<bool>("IsFree")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<double?>("MemberPhysicalAttendanceFee")
+                    b.Property<double?>("NonMemberFee")
                         .HasColumnType("double");
 
-                    b.Property<double?>("MemberVirtualAttendanceFee")
+                    b.Property<double?>("PhysicalAttendanceFee")
                         .HasColumnType("double");
-
-                    b.Property<double?>("NonMemberPhysicalAttendanceFee")
-                        .HasColumnType("double");
-
-                    b.Property<double?>("NonMemberVirtualAttandanceFee")
-                        .HasColumnType("double");
-
-                    b.Property<string>("PhysicalVenue")
-                        .HasMaxLength(250)
-                        .HasColumnType("varchar(250)");
 
                     b.Property<int>("ProposedUnits")
                         .HasColumnType("int");
-
-                    b.Property<DateTime?>("RegistrationDueDate")
-                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -448,6 +438,9 @@ namespace DataStore.Migrations
 
                     b.Property<DateTime>("UpdatedDate")
                         .HasColumnType("datetime(6)");
+
+                    b.Property<double?>("VirtualAttendanceFee")
+                        .HasColumnType("double");
 
                     b.Property<int>("YearOfOperationId")
                         .HasColumnType("int");
@@ -486,9 +479,6 @@ namespace DataStore.Migrations
                     b.Property<string>("DeniedReason")
                         .HasMaxLength(250)
                         .HasColumnType("varchar(250)");
-
-                    b.Property<double>("Fee")
-                        .HasColumnType("double");
 
                     b.Property<int>("MemberId")
                         .HasColumnType("int");

@@ -19,12 +19,17 @@ namespace DataStore.Core.DTOs.CPDTraining
 
         [Required]
         public DateTime DateToBeConducted { get; set; }
+        [StringLength(maximumLength: 250)]
+        public string? PhysicalVenue { get; set; }
 
         [Required]
         public int ProposedUnits { get; set; }
-
-        public double? TrainingFee { get; set; }
-
+        public DateTime? RegistrationDueDate { get; set; }
+        public double? MemberPhysicalAttendanceFee { get; set; } = 0;
+        public double? MemberVirtualAttendanceFee { get; set; } = 0;
+        public double? NonMemberPhysicalAttendanceFee { get; set; } = 0; 
+        public double? NonMemberVirtualAttandanceFee { get; set; } = 0;
+        public bool IsFree { get; set; } = false;
         [Required]
         public int CPDUnitsAwarded { get; set; }
 

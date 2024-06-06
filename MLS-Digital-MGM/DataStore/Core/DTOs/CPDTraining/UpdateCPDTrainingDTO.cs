@@ -1,3 +1,4 @@
+using DataStore.Helpers;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.ComponentModel.DataAnnotations;
@@ -13,13 +14,29 @@ namespace DataStore.Core.DTOs.CPDTraining
         [StringLength(250)]
         public string Description { get; set; }
         public double Duration { get; set; }
-        public double? TrainingFee { get; set; }
+   
+        public double? MemberPhysicalAttendanceFee { get; set; } = 0;
+        public double? MemberVirtualAttendanceFee { get; set; } = 0;
+        public double? NonMemberPhysicalAttendanceFee { get; set; } = 0; 
+         public double? NonMemberVirtualAttandanceFee { get; set; } = 0;
+        public string? PhysicalVenue { get; set; }
+        public bool IsFree { get; set; } = false;
         public DateTime DateToBeConducted { get; set; }
+        [DateGreaterThanOrEqualToToday(ErrorMessage = "Registration due date must be today or a future date.")]
+        public DateTime? RegistrationDueDate { get; set; }
         public int ProposedUnits { get; set; }
         public int CPDUnitsAwarded { get; set; }
         [StringLength(200)]
         public string? AccreditingInstitution { get; set; }
 
         public List<IFormFile> Attachments  { get; set; }
+
+         public void SetDefaultValues()
+        {
+            MemberPhysicalAttendanceFee ??= 0; 
+            MemberVirtualAttendanceFee ??= 0;
+            NonMemberPhysicalAttendanceFee ??= 0;
+            NonMemberVirtualAttandanceFee ??= 0;
+        }
     }
 }

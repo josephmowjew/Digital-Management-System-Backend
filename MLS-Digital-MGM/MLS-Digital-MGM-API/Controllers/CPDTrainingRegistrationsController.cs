@@ -160,7 +160,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 if (member == null)
                 {
-                    ModelState.AddModelError(nameof(cpdTrainingRegistrationDTO.CPDTrainingId), "Your membership application is incomplete. Please complete it but filling details in your profile to proceed");
+                    ModelState.AddModelError(nameof(cpdTrainingRegistrationDTO.CPDTrainingId), "Your membership application is incomplete. Please complete it by filling details in your profile to proceed");
                     return BadRequest(ModelState);
                 }
 
@@ -189,25 +189,41 @@ namespace MLS_Digital_MGM_API.Controllers
                 cpdTrainingRegistration.MemberId = member.Id;
                 cpdTrainingRegistration.Member = member;
 
-                //check if it is a paid event/training or not
+                string currentUserRole = await Lambda.GetCurrentUserRole(_repositoryManager, HttpContext, _errorLogService);
 
-                if(cpdTraining.TrainingFee != null && cpdTraining.TrainingFee > 0)
+                                // Check if it is a paid event/training or not
+                if (cpdTraining.IsFree)
                 {
-                    //set the status of the registration to pending
-                    cpdTrainingRegistration.RegistrationStatus = Lambda.Pending;
-
-                    //check if proof of payment was submitted
-
-                    if(!cpdTrainingRegistrationDTO.Attachments.Any())
+                    if (cpdTrainingRegistrationDTO.Attachments.Count < 1)
                     {
                         ModelState.AddModelError(nameof(cpdTrainingRegistrationDTO.Attachments), "Please upload proof of payment");
                         return BadRequest(ModelState);
-                    }  
+                    }
+
+                    // Set the status of the registration to registered for free events
                     
+                    cpdTrainingRegistration.RegistrationStatus = Lambda.Registered;
                 }
                 else
                 {
-                     cpdTrainingRegistration.RegistrationStatus = Lambda.Registered;
+                    // Check if proof of payment was submitted
+                    if (!cpdTrainingRegistrationDTO.Attachments.Any())
+                    {
+                        ModelState.AddModelError(nameof(cpdTrainingRegistrationDTO.Attachments), "Please upload proof of payment");
+                        return BadRequest(ModelState);
+                    }
+
+                    // Determine the fee based on the user's role and attendance mode
+                    double fee = currentUserRole switch
+                    {
+                        "Unknown" => GetNonMemberFee(cpdTraining, cpdTrainingRegistrationDTO.AttendanceMode),
+                        "NonMember" => GetNonMemberFee(cpdTraining, cpdTrainingRegistrationDTO.AttendanceMode),
+                        _ => GetMemberFee(cpdTraining, cpdTrainingRegistrationDTO.AttendanceMode)
+                    };
+
+                    // Set the status of the registration to pending for paid events
+                    cpdTrainingRegistration.RegistrationStatus = Lambda.Pending;
+                    cpdTrainingRegistration.Fee = fee;
                 }
 
 
@@ -333,7 +349,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
             foreach (var formFile in attachments)
             {
-                var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(formFile.FileName)}";
+                var uniqueFileName = FileNameGenerator.GenerateUniqueFileName(formFile.FileName);
                 var filePath = Path.Combine(cpdTrainingAttachmentsPath, uniqueFileName);
 
                 await using (var fileStream = new FileStream(filePath, FileMode.Create))
@@ -459,8 +475,29 @@ namespace MLS_Digital_MGM_API.Controllers
             
         }
 
+    private double GetMemberFee(CPDTraining cpdTraining, string attendanceMode)
+    {
+        return attendanceMode switch
+        {
+            "Virtual" => (double)cpdTraining.MemberVirtualAttendanceFee,
+            "Physical" => (double)cpdTraining.MemberPhysicalAttendanceFee,
+            _ => 0.0
+        };
+    }
+
+    private double GetNonMemberFee(CPDTraining cpdTraining, string attendanceMode)
+    {
+        return attendanceMode switch
+        {
+            "Virtual" => (double)cpdTraining.NonMemberVirtualAttandanceFee,
+            "Physical" => (double)cpdTraining.NonMemberPhysicalAttendanceFee,
+            _ => 0.0
+        };
+    }
+
         
     }
+
 
     public class CPDRejectionDTO
     {

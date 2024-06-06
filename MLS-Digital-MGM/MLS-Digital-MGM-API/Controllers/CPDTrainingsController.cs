@@ -149,6 +149,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 {
                     cpdTrainingDTO.AccreditingInstitution = "MLS";
                 }
+                //check if it is a free training 
                 
                 var cpdTraining = _mapper.Map<CPDTraining>(cpdTrainingDTO);
                 string username = _httpContextAccessor.HttpContext.User.Identity.Name;
@@ -264,6 +265,9 @@ namespace MLS_Digital_MGM_API.Controllers
                 if (cpdTraining == null)
                     return NotFound();
 
+
+                cpdTrainingDTO.SetDefaultValues();
+
                 var attachmentType = await _repositoryManager.AttachmentTypeRepository.GetAsync(d => d.Name == "CPDTraining")
                                     ?? new AttachmentType { Name = "CPDTraining" };
 
@@ -281,6 +285,8 @@ namespace MLS_Digital_MGM_API.Controllers
                 {
                     cpdTrainingDTO.AccreditingInstitution = "MLS";
                 }
+
+                
 
                 _mapper.Map(cpdTrainingDTO, cpdTraining);
                 await _repositoryManager.CPDTrainingRepository.UpdateAsync(cpdTraining);
@@ -328,7 +334,9 @@ namespace MLS_Digital_MGM_API.Controllers
 
             foreach (var formFile in attachments)
             {
-                var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(formFile.FileName)}";
+
+                var uniqueFileName = FileNameGenerator.GenerateUniqueFileName(formFile.FileName);
+                
                 var filePath = Path.Combine(cpdTrainingAttachmentsPath, uniqueFileName);
 
                 await using (var fileStream = new FileStream(filePath, FileMode.Create))
