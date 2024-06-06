@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DataStore.Core.Services.Interfaces;
 using DataStore.Persistence.Interfaces;
+using Microsoft.AspNetCore.Http;
 
 namespace DataStore.Helpers
 {
@@ -75,6 +77,34 @@ namespace DataStore.Helpers
             return currentRole;
         }
 
+       public static async Task<string> GetCurrentUserRole(IRepositoryManager repositoryManager, HttpContext httpContext, IErrorLogService errorLogService)
+        {
+            try
+            {
+                string username = httpContext.User.Identity?.Name;
+                if (string.IsNullOrEmpty(username))
+                {
+                    // Handle case where username is not available
+                    return "Unknown";
+                }
+
+                var user = await repositoryManager.UserRepository.FindByEmailAsync(username);
+                if (user == null)
+                {
+                    // Handle case where user is not found
+                    return "Unknown";
+                }
+
+                string currentRole = Lambda.GetCurrentUserRole(repositoryManager, user.Id);
+                return currentRole;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception or handle it as appropriate
+                  await errorLogService.LogErrorAsync(ex);
+                  return "Unknown";
+            }
+        }
     }
 
     

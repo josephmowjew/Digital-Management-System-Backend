@@ -468,7 +468,7 @@ namespace MLS_Digital_MGM_API.Controllers
         foreach (var attachment in attachments)
         {
 
-            var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(attachment.FileName)}";
+            var uniqueFileName = FileNameGenerator.GenerateUniqueFileName(attachment.FileName);
             var propertyName = attachment.Name;
             var filePath = Path.Combine(applicationAttachmentsPath, uniqueFileName);
             using (var stream = System.IO.File.Create(filePath))

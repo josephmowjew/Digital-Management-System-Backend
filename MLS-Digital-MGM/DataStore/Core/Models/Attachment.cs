@@ -44,6 +44,7 @@ namespace DataStore.Core.Models
         public ICollection<CPDTrainingRegistration> CPDTrainingRegistrations { get; set; }
         public ICollection<Penalty> Penalties { get; set; }
         public ICollection<PenaltyPayment> PenaltyPayments { get; set; }
+        public ICollection<Message> Messages { get; set; }
 
 
     }

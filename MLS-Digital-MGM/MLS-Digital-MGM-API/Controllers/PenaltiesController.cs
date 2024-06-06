@@ -253,7 +253,7 @@ namespace MLS_Digital_MGM_API.Controllers
         
             foreach (var attachment in attachments)
             {
-                var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(attachment.FileName)}";
+                var uniqueFileName = FileNameGenerator.GenerateUniqueFileName(attachment.FileName);
                 var filePath = Path.Combine(proBonoReportAttachmentsPath, uniqueFileName);
                 using (var stream = System.IO.File.Create(filePath))
                 {

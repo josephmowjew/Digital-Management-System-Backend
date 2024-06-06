@@ -17,6 +17,7 @@ namespace DataStore.Core.Models
         public Member Member { get; set; }
         [StringLength(100)]
         public string RegistrationStatus { get; set; }
+        public double Fee { get; set; }
         public CPDTraining CPDTraining { get; set; }
         public int CPDTrainingId { get; set; }
         public string CreatedById { get; set; }

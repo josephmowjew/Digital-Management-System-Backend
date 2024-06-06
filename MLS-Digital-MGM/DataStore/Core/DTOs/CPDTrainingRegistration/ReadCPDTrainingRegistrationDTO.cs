@@ -19,6 +19,7 @@ namespace DataStore.Core.DTOs.CPDTrainingRegistration
         public ReadMemberDTO Member { get; set; }
         public string RegistrationStatus { get; set; }
         public int CPDTrainingId { get; set; }
+         public double Fee { get; set; }
         public ReadCPDTrainingDTO CPDTraining { get; set; }
         public string CreatedById { get; set; }
         public ApplicationUser CreatedBy { get; set; }

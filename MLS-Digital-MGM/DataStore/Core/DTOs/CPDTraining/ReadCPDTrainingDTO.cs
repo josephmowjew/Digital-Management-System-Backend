@@ -5,6 +5,7 @@ using DataStore.Core.DTOs.CPDUnitsEarned;
 using DataStore.Core.DTOs.User;
 using DataStore.Core.DTOs.YearOfOperation;
 using DataStore.Core.Models;
+using DataStore.Helpers;
 
 namespace DataStore.Core.DTOs.CPDTraining
 {
@@ -26,9 +27,16 @@ namespace DataStore.Core.DTOs.CPDTraining
         public int CPDUnitsAwarded { get; set; }
         public string AccreditingInstitution { get; set; }
         public string CreatedById { get; set; }
-        public double? TrainingFee { get; set; }
+        public double? MemberPhysicalAttendanceFee { get; set; } = 0;
+        public double? MemberVirtualAttendanceFee { get; set; } = 0;
+        public double? NonMemberPhysicalAttendanceFee { get; set; } = 0; 
+        public double? NonMemberVirtualAttandanceFee { get; set; } = 0;
+        public string? PhysicalVenue { get; set; }
         public ReadUserDTO CreatedBy { get; set; }
         public int YearOfOperationId { get; set; }
+        
+        public DateTime? RegistrationDueDate { get; set; }
+        public bool IsFree { get; set; } = false;
         public ReadYearOfOperationDTO YearOfOperation { get; set; }
         public ICollection<ReadCPDUnitsEarnedDTO> CPDUnitsEarned { get; set; }
         public ICollection<ReadCPDTrainingRegistrationDTO> CPDTrainingRegistration { get; set; }

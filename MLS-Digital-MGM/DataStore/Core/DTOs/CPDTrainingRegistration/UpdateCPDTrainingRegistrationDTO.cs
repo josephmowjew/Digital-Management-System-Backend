@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using DataStore.Helpers;
 using Microsoft.AspNetCore.Http;
 
 namespace DataStore.Core.DTOs.CPDTrainingRegistration
@@ -14,6 +15,8 @@ namespace DataStore.Core.DTOs.CPDTrainingRegistration
         [Required]
         public string CreatedById { get; set; }
         public List<IFormFile?> Attachments { get; set; }
+        [Display(Name ="Date of payment")]
+        [DateLessThanOrEqualToToday(ErrorMessage = "Date of payment can not be of a future date.")]
         public DateTime? DateOfPayment { get; set; }
     }
 }

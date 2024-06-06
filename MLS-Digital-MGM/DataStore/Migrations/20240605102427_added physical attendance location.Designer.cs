@@ -3,6 +3,7 @@ using System;
 using DataStore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240605102427_added physical attendance location")]
+    partial class addedphysicalattendancelocation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -77,21 +80,6 @@ namespace DataStore.Migrations
                     b.HasIndex("MemberQualificationsId");
 
                     b.ToTable("AttachmentMemberQualification");
-                });
-
-            modelBuilder.Entity("AttachmentMessage", b =>
-                {
-                    b.Property<int>("AttachmentsId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("MessagesId")
-                        .HasColumnType("int");
-
-                    b.HasKey("AttachmentsId", "MessagesId");
-
-                    b.HasIndex("MessagesId");
-
-                    b.ToTable("AttachmentMessage");
                 });
 
             modelBuilder.Entity("AttachmentPenalty", b =>
@@ -430,16 +418,10 @@ namespace DataStore.Migrations
                     b.Property<bool>("IsFree")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<double?>("MemberPhysicalAttendanceFee")
+                    b.Property<double?>("NonMemberFee")
                         .HasColumnType("double");
 
-                    b.Property<double?>("MemberVirtualAttendanceFee")
-                        .HasColumnType("double");
-
-                    b.Property<double?>("NonMemberPhysicalAttendanceFee")
-                        .HasColumnType("double");
-
-                    b.Property<double?>("NonMemberVirtualAttandanceFee")
+                    b.Property<double?>("PhysicalAttendanceFee")
                         .HasColumnType("double");
 
                     b.Property<string>("PhysicalVenue")
@@ -448,9 +430,6 @@ namespace DataStore.Migrations
 
                     b.Property<int>("ProposedUnits")
                         .HasColumnType("int");
-
-                    b.Property<DateTime?>("RegistrationDueDate")
-                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -463,6 +442,9 @@ namespace DataStore.Migrations
 
                     b.Property<DateTime>("UpdatedDate")
                         .HasColumnType("datetime(6)");
+
+                    b.Property<double?>("VirtualAttendanceFee")
+                        .HasColumnType("double");
 
                     b.Property<int>("YearOfOperationId")
                         .HasColumnType("int");
@@ -501,9 +483,6 @@ namespace DataStore.Migrations
                     b.Property<string>("DeniedReason")
                         .HasMaxLength(250)
                         .HasColumnType("varchar(250)");
-
-                    b.Property<double>("Fee")
-                        .HasColumnType("double");
 
                     b.Property<int>("MemberId")
                         .HasColumnType("int");
@@ -571,91 +550,6 @@ namespace DataStore.Migrations
                     b.HasIndex("YearOfOperationId");
 
                     b.ToTable("CPDUnitsEarned");
-                });
-
-            modelBuilder.Entity("DataStore.Core.Models.Committee", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ChairpersonID")
-                        .HasColumnType("int");
-
-                    b.Property<string>("CommitteeName")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime>("CreationDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("MeetingSchedule")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ChairpersonID");
-
-                    b.ToTable("Committees");
-                });
-
-            modelBuilder.Entity("DataStore.Core.Models.CommitteeMembership", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<int>("CommitteeID")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime>("JoinedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("MemberID")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CommitteeID");
-
-                    b.HasIndex("MemberID");
-
-                    b.ToTable("CommitteeMembers");
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.Country", b =>
@@ -1283,52 +1177,6 @@ namespace DataStore.Migrations
                     b.ToTable("MemberQualifications");
                 });
 
-            modelBuilder.Entity("DataStore.Core.Models.Message", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<int>("CommitteeID")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("SenderID")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<int?>("ThreadID")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CommitteeID");
-
-                    b.HasIndex("SenderID");
-
-                    b.HasIndex("ThreadID");
-
-                    b.ToTable("Messages");
-                });
-
             modelBuilder.Entity("DataStore.Core.Models.Penalty", b =>
                 {
                     b.Property<int>("Id")
@@ -1785,47 +1633,6 @@ namespace DataStore.Migrations
                     b.ToTable("QualificationTypes");
                 });
 
-            modelBuilder.Entity("DataStore.Core.Models.Thread", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<int>("CommitteeID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CreatedBy")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CreatedByMemberId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Subject")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CommitteeID");
-
-                    b.HasIndex("CreatedByMemberId");
-
-                    b.ToTable("Threads");
-                });
-
             modelBuilder.Entity("DataStore.Core.Models.Title", b =>
                 {
                     b.Property<int>("Id")
@@ -2151,21 +1958,6 @@ namespace DataStore.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("AttachmentMessage", b =>
-                {
-                    b.HasOne("DataStore.Core.Models.Attachment", null)
-                        .WithMany()
-                        .HasForeignKey("AttachmentsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DataStore.Core.Models.Message", null)
-                        .WithMany()
-                        .HasForeignKey("MessagesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("AttachmentPenalty", b =>
                 {
                     b.HasOne("DataStore.Core.Models.Attachment", null)
@@ -2362,34 +2154,6 @@ namespace DataStore.Migrations
                     b.Navigation("Member");
 
                     b.Navigation("YearOfOperation");
-                });
-
-            modelBuilder.Entity("DataStore.Core.Models.Committee", b =>
-                {
-                    b.HasOne("DataStore.Core.Models.Member", "Chairperson")
-                        .WithMany()
-                        .HasForeignKey("ChairpersonID");
-
-                    b.Navigation("Chairperson");
-                });
-
-            modelBuilder.Entity("DataStore.Core.Models.CommitteeMembership", b =>
-                {
-                    b.HasOne("DataStore.Core.Models.Committee", "Committee")
-                        .WithMany("CommitteeMemberships")
-                        .HasForeignKey("CommitteeID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DataStore.Core.Models.Member", "Member")
-                        .WithMany()
-                        .HasForeignKey("MemberID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Committee");
-
-                    b.Navigation("Member");
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.ErrorLog", b =>
@@ -2590,31 +2354,6 @@ namespace DataStore.Migrations
                     b.Navigation("QualificationType");
                 });
 
-            modelBuilder.Entity("DataStore.Core.Models.Message", b =>
-                {
-                    b.HasOne("DataStore.Core.Models.Committee", "Committee")
-                        .WithMany("Messages")
-                        .HasForeignKey("CommitteeID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DataStore.Core.Models.Member", "Sender")
-                        .WithMany()
-                        .HasForeignKey("SenderID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DataStore.Core.Models.Thread", "Thread")
-                        .WithMany("Messages")
-                        .HasForeignKey("ThreadID");
-
-                    b.Navigation("Committee");
-
-                    b.Navigation("Sender");
-
-                    b.Navigation("Thread");
-                });
-
             modelBuilder.Entity("DataStore.Core.Models.Penalty", b =>
                 {
                     b.HasOne("DataStore.Core.Models.ApplicationUser", "CreatedBy")
@@ -2764,25 +2503,6 @@ namespace DataStore.Migrations
                     b.Navigation("ProBonoReport");
                 });
 
-            modelBuilder.Entity("DataStore.Core.Models.Thread", b =>
-                {
-                    b.HasOne("DataStore.Core.Models.Committee", "Committee")
-                        .WithMany("Threads")
-                        .HasForeignKey("CommitteeID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DataStore.Core.Models.Member", "CreatedByMember")
-                        .WithMany()
-                        .HasForeignKey("CreatedByMemberId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Committee");
-
-                    b.Navigation("CreatedByMember");
-                });
-
             modelBuilder.Entity("MemberProBono", b =>
                 {
                     b.HasOne("DataStore.Core.Models.Member", null)
@@ -2876,15 +2596,6 @@ namespace DataStore.Migrations
                     b.Navigation("CPDUnitsEarned");
                 });
 
-            modelBuilder.Entity("DataStore.Core.Models.Committee", b =>
-                {
-                    b.Navigation("CommitteeMemberships");
-
-                    b.Navigation("Messages");
-
-                    b.Navigation("Threads");
-                });
-
             modelBuilder.Entity("DataStore.Core.Models.Department", b =>
                 {
                     b.Navigation("Users");
@@ -2925,11 +2636,6 @@ namespace DataStore.Migrations
             modelBuilder.Entity("DataStore.Core.Models.ProBono", b =>
                 {
                     b.Navigation("ProBonoReports");
-                });
-
-            modelBuilder.Entity("DataStore.Core.Models.Thread", b =>
-                {
-                    b.Navigation("Messages");
                 });
 #pragma warning restore 612, 618
         }

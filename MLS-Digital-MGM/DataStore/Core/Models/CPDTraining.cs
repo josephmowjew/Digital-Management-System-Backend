@@ -24,9 +24,16 @@ namespace DataStore.Core.Models
         public string Description { get; set; }
         public double Duration { get; set; }
         public DateTime DateToBeConducted { get; set; }
+        [StringLength(maximumLength:250)]
+        public string? PhysicalVenue { get; set; }
         public string ApprovalStatus { get; set; }
         public int ProposedUnits { get; set; }
-        public double? TrainingFee { get; set; }
+        public double? MemberPhysicalAttendanceFee { get; set; } 
+        public double? MemberVirtualAttendanceFee { get; set; } 
+        public double? NonMemberPhysicalAttendanceFee { get; set; } 
+         public double? NonMemberVirtualAttandanceFee { get; set; }
+        public DateTime? RegistrationDueDate { get; set; }
+        public bool IsFree { get; set; } = false;
         public int CPDUnitsAwarded { get; set; }
         [StringLength(maximumLength:200)]
         public string AccreditingInstitution { get; set; }
