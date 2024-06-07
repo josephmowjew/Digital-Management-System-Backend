@@ -6,14 +6,14 @@ namespace DataStore.Core.DTOs.Thread
 {
     public class CreateThreadDTO
     {
-        public int CommitteeID { get; set; }
+        public int CommitteeId { get; set; }
 
         [Required]
-        [StringLength(maximumLength: 100)]
+        [StringLength(maximumLength: 150)]
         public string Subject { get; set; }
 
-        public DateTime CreatedDate { get; set; }
+        
 
-        public int CreatedBy { get; set; }
+        
     }
 }

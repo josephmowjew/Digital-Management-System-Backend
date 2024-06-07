@@ -9,9 +9,7 @@ namespace DataStore.Core.DTOs.Message
     {
         public int Id { get; set; }
 
-        public int CommitteeID { get; set; }
-
-        public int SenderID { get; set; }
+        public int CommitteeId { get; set; }
 
         [Required]
         public DateTime Timestamp { get; set; }
@@ -20,7 +18,7 @@ namespace DataStore.Core.DTOs.Message
         [StringLength(300)]
         public string Content { get; set; }
 
-        public List<IFormFile> Attachments { get; set; }
+        public List<IFormFile>? Attachments { get; set; }
 
         public int? ThreadID { get; set; }
     }
