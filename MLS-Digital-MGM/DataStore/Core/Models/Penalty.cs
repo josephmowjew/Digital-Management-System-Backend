@@ -13,7 +13,7 @@ namespace DataStore.Core.Models
         public int MemberId { get; set; }
         public Member Member { get; set; }
         public int PenaltyTypeId {  get; set; }
-        public PenaltyType PenaltyType { get;}
+        public PenaltyType PenaltyType { get; set; }
         public double Fee { get; set; }
         public string Reason { get; set; }
         public string CreatedById { get; set; }

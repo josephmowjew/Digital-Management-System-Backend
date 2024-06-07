@@ -227,18 +227,21 @@ namespace MLS_Digital_MGM_API.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
-        
-        [HttpGet("getAllMembers")]
-        public async Task<IActionResult> GetAllMembers()
+       
+        [HttpGet("getAll")]
+        public async Task<IActionResult> GetAll()
         {
             try
             {
-                var members = await _repositoryManager.MemberRepository.GetAllAsync();
-                var mappedMembers = _mapper.Map<List<ReadMemberDTO>>(members);
-                return Ok(mappedMembers);
+                var memberRecords =  await this._repositoryManager.MemberRepository.GetAllAsync();
+
+                var readMemberRecordsMapped = this._mapper.Map<List<ReadMemberDTO>>(memberRecords);
+
+                return Ok(readMemberRecordsMapped);
             }
             catch (Exception ex)
             {
+
                 await _errorLogService.LogErrorAsync(ex);
                 return StatusCode(500, "Internal server error");
             }

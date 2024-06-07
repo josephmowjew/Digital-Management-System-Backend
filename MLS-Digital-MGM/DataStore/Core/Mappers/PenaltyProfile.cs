@@ -9,8 +9,10 @@ namespace DataStore.Core.Mappers
         public PenaltyProfile()
         {
             CreateMap<Penalty, ReadPenaltyDTO>();
-            CreateMap<CreatePenaltyDTO, Penalty>();
-            CreateMap<UpdatePenaltyDTO, Penalty>();
+            CreateMap<CreatePenaltyDTO, Penalty>()
+             .ForMember(dest => dest.Attachments, opt => opt.Ignore());
+            CreateMap<UpdatePenaltyDTO, Penalty>()
+            .ForMember(dest => dest.Attachments, opt => opt.Ignore());
         }
     }
 }

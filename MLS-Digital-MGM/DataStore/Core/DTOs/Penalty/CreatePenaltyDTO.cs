@@ -6,14 +6,18 @@ namespace DataStore.Core.DTOs.Penalty
 {
     public class CreatePenaltyDTO
     {
+        public CreatePenaltyDTO()
+        {
+            Attachments = new List<IFormFile>();
+        }
         public int MemberId { get; set; }
         public int PenaltyTypeId { get; set; }
         public double Fee { get; set; }
         [Required]
         [StringLength(maximumLength: 250)]
         public string Reason { get; set; }
-        [Required]
-        public string CreatedById { get; set; }
+        /*[Required]
+        public string CreatedById { get; set; }*/
         [Required]
         public int YearOfOperationId { get; set; }
         
