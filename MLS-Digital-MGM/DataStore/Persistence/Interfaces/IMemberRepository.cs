@@ -14,6 +14,6 @@ namespace DataStore.Persistence.Interfaces;
      
      
 
-     Task<IEnumerable<Member>> GetAllAsync()
+     Task<IEnumerable<Member>> GetAllAsync();
   
   }

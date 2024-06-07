@@ -53,7 +53,8 @@ namespace MLS_Digital_MGM_API.Controllers
                     Includes = new Expression<Func<Committee, object>>[] {
                         p => p.Chairperson,
                         p => p.Chairperson.User,
-                        p => p.Threads
+                        p => p.Threads,
+                        p => p.YearOfOperation
                     }
                 };
 
