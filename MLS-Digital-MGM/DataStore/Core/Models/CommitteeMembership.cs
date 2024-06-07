@@ -11,5 +11,5 @@ public class CommitteeMembership : Meta
     public Member Member { get; set; }
 
     public DateTime JoinedDate { get; set; }
-    public string Role { get; set; }
+    
 }

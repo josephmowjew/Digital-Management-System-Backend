@@ -58,6 +58,10 @@ namespace DataStore.Persistence.Interfaces
         IPenaltyRepository PenaltyRepository {get;}
         IPenaltyTypeRepository PenaltyTypeRepository {get;}
         IPenaltyPaymentRepository PenaltyPaymentRepository {get;}
+        ICommitteeRepository CommitteeRepository {get;}
+        ICommitteeMemberRepository CommitteeMemberRepository {get;}
+        IMessageRepository MessageRepository {get;}
+        IThreadRepository ThreadRepository {get;}
         
 
 

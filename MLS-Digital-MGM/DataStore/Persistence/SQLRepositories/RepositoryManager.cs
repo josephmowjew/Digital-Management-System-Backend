@@ -44,6 +44,10 @@ namespace DataStore.Persistence.SQLRepositories
         private IPenaltyRepository _penaltyRepository;
         private IPenaltyTypeRepository _penaltyTypeRepository;
         private IPenaltyPaymentRepository _penaltyPaymentRepository;
+        private ICommitteeRepository _committeeRepository;
+        private ICommitteeMemberRepository _committeeMemberRepository;
+        private IMessageRepository _messageRepository;
+        private IThreadRepository _threadRepository;
 
         // Add other repository fields here, e.g., private IProductRepository _productRepository;
 
@@ -104,6 +108,10 @@ namespace DataStore.Persistence.SQLRepositories
         public IPenaltyRepository PenaltyRepository => _penaltyRepository ??= new PenaltyRepository(_context, _unitOfWork);
         public IPenaltyTypeRepository PenaltyTypeRepository => _penaltyTypeRepository ??= new PenaltyTypeRepository(_context, _unitOfWork);
         public IPenaltyPaymentRepository PenaltyPaymentRepository => _penaltyPaymentRepository ??= new PenaltyPaymentRepository(_context, _unitOfWork);
+        public ICommitteeRepository CommitteeRepository => _committeeRepository ??= new CommitteeRepository(_context, _unitOfWork);
+        public ICommitteeMemberRepository CommitteeMemberRepository => _committeeMemberRepository ??= new CommitteeMemberRepository(_context, _unitOfWork);
+        public IMessageRepository MessageRepository => _messageRepository ??= new MessageRepository(_context, _unitOfWork);
+        public IThreadRepository ThreadRepository => _threadRepository ??= new ThreadRepository(_context, _unitOfWork);
 
        
     }

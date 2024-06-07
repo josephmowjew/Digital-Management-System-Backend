@@ -25,5 +25,9 @@ namespace DataStore.Persistence.SQLRepositories
         {
             return await _context.Members.Include(m => m.User).FirstOrDefaultAsync(x => x.UserId == userId);
         }
+        public new async Task<List<Member>> GetAllAsync()
+        {
+            return await _context.Members.Include(m => m.User).ToListAsync();
+        }
     }
 }

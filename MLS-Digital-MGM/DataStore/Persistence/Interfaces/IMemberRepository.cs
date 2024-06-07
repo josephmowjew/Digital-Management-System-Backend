@@ -11,5 +11,7 @@ namespace DataStore.Persistence.Interfaces;
     // Additional methods specific to the Member entity, if needed
 
      Task<Member?> GetMemberByUserId(string userId);
+     
+     Task<List<Member>> GetAllAsync();
   
   }

@@ -64,83 +64,99 @@ namespace DataStore.Persistence.SQLRepositories
             return await _context.Set<T>().Where(q => q.Status != Lambda.Deleted).Where(predicate).FirstOrDefaultAsync();
         }
 
-      public async Task<IEnumerable<T>> GetPagedAsync(PagingParameters<T> pagingParameters)
-      {
-        var query = _context.Set<T>().Where(pagingParameters.Predicate);
+public async Task<IEnumerable<T>> GetPagedAsync(PagingParameters<T> pagingParameters)
+{
+    var query = _context.Set<T>().Where(pagingParameters.Predicate);
 
-        if (!string.IsNullOrEmpty(pagingParameters.SearchTerm))
-        {
-            // Get properties of T
-            var entityProperties = typeof(T).GetProperties((BindingFlags.Instance | BindingFlags.Public));
-            // Create parameter for query
-            var parameter = Expression.Parameter(typeof(T), "record");
+    if (!string.IsNullOrEmpty(pagingParameters.SearchTerm))
+    {
+        var entityProperties = typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public);
+        var parameter = Expression.Parameter(typeof(T), "record");
+        var searchTermValue = Expression.Constant(pagingParameters.SearchTerm.ToLower(), typeof(string));
 
-            // Convert search term to lower
-            var searchTermValue = Expression.Constant(pagingParameters.SearchTerm.ToLower(), typeof(string));
-            // Create search expressions
-            var searchExpressions = entityProperties
-                .Where(p => p.PropertyType == typeof(string))
-                .Select(p =>
-                {
-                    var propertyAccess = Expression.Property(parameter, p);
-                    var toLowerExpression = Expression.Call(propertyAccess, typeof(string).GetMethod("ToLower", Type.EmptyTypes));
-                    var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) });
-                    var containsExpression = Expression.Call(toLowerExpression, containsMethod, searchTermValue);
-                    return containsExpression;
-                });
-
-            // Combine search expressions
-            var orExpression = searchExpressions.Aggregate<Expression>(Expression.OrElse);
-            // Create lambda for query
-            var lambda = Expression.Lambda<Func<T, bool>>(orExpression, parameter);
-
-            // Add search term to query
-            query = query.Where(lambda);
-        }
-
-        // Include the specified navigation properties
-       foreach (var include in pagingParameters.Includes)
-        {
-            var memberExpression = (MemberExpression)include.Body;
-            var propertyName = memberExpression.Member.Name; // Get the property name
-            query = query.Include(propertyName);
-            if (propertyName == "Attachments")
+        var searchExpressions = entityProperties
+            .Where(p => p.PropertyType == typeof(string))
+            .Select(p =>
             {
-                query = query.Include("Attachments.AttachmentType");
-            }
-             if (propertyName == "CurrentApprovalLevel")
-            {
-                query = query.Include("CurrentApprovalLevel.Department");
-            }
+                var propertyAccess = Expression.Property(parameter, p);
+                var toLowerExpression = Expression.Call(propertyAccess, typeof(string).GetMethod("ToLower", Type.EmptyTypes));
+                var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) });
+                var containsExpression = Expression.Call(toLowerExpression, containsMethod, searchTermValue);
+                return containsExpression;
+            });
 
+        var orExpression = searchExpressions.Aggregate<Expression>(Expression.OrElse);
+        var lambda = Expression.Lambda<Func<T, bool>>(orExpression, parameter);
 
-            if(propertyName == "Member")
-            {
-                query = query.Include("Member.User");
-            }
-        }
-        //query = query.Where(q => q.Status != Lambda.Deleted);
+        query = query.Where(lambda);
+    }
 
-        // Apply sort ordering
-        if (!string.IsNullOrEmpty(pagingParameters.SortColumn) && !string.IsNullOrEmpty(pagingParameters.SortDirection))
+    // Include the specified navigation properties
+    foreach (var include in pagingParameters.Includes)
+    {
+        var includeString = GetIncludePath(include);
+        query = query.Include(includeString);
+
+        if (includeString == "Attachments")
         {
-            query = query.OrderBy($"{pagingParameters.SortColumn} {pagingParameters.SortDirection.ToLower()}");
+            query = query.Include("Attachments.AttachmentType");
         }
-
-        // Check if CreatedById is not null in pagingParameters
-        if (pagingParameters.CreatedById != null)
+        if (includeString == "CurrentApprovalLevel")
         {
-            // Check if CreatedById property exists in T
-            if (typeof(T).GetProperty("CreatedById") != null)
-            {
-                query = query.Where(x => EF.Property<string>(x, "CreatedById") == pagingParameters.CreatedById);
-            }
+            query = query.Include("CurrentApprovalLevel.Department");
         }
+        if (includeString == "Member")
+        {
+            query = query.Include("Member.User");
+        }
+    }
 
-        var result = await query.Skip((pagingParameters.PageNumber - 1) * pagingParameters.PageSize).Take(pagingParameters.PageSize).ToListAsync();
+    // Apply sort ordering
+    if (!string.IsNullOrEmpty(pagingParameters.SortColumn) && !string.IsNullOrEmpty(pagingParameters.SortDirection))
+    {
+        query = query.OrderBy($"{pagingParameters.SortColumn} {pagingParameters.SortDirection.ToLower()}");
+    }
 
-        return result;
-      }
+    // Check if CreatedById is not null in pagingParameters
+    if (pagingParameters.CreatedById != null)
+    {
+        if (typeof(T).GetProperty("CreatedById") != null)
+        {
+            query = query.Where(x => EF.Property<string>(x, "CreatedById") == pagingParameters.CreatedById);
+        }
+    }
+
+    var result = await query.Skip((pagingParameters.PageNumber - 1) * pagingParameters.PageSize).Take(pagingParameters.PageSize).ToListAsync();
+
+    return result;
+}
+
+private string GetIncludePath(Expression<Func<T, object>> includeExpression)
+{
+    if (includeExpression.Body is MemberExpression memberExpression)
+    {
+        return GetFullPropertyPath(memberExpression);
+    }
+    else if (includeExpression.Body is UnaryExpression unaryExpression && unaryExpression.Operand is MemberExpression innerMemberExpression)
+    {
+        return GetFullPropertyPath(innerMemberExpression);
+    }
+    else
+    {
+        throw new InvalidOperationException("Invalid include expression");
+    }
+}
+
+private string GetFullPropertyPath(MemberExpression memberExpression)
+{
+    var path = new List<string>();
+    while (memberExpression != null)
+    {
+        path.Insert(0, memberExpression.Member.Name);
+        memberExpression = memberExpression.Expression as MemberExpression;
+    }
+    return string.Join(".", path);
+}
 
 
 
