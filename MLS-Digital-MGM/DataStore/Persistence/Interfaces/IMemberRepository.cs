@@ -12,6 +12,8 @@ namespace DataStore.Persistence.Interfaces;
 
      Task<Member?> GetMemberByUserId(string userId);
      
-     Task<List<Member>> GetAllAsync();
+     
+
+     Task<IEnumerable<Member>> GetAllAsync()
   
   }
