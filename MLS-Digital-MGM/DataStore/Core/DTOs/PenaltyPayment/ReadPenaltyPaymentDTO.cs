@@ -10,9 +10,9 @@ namespace DataStore.Core.DTOs.PenaltyPayment
     {
         public ReadPenaltyPaymentDTO()
         {
-            Attachments = new List<ReadAttachmentDTO>();
+            //Attachments = new List<ReadAttachmentDTO>();
         }
-
+        public int Id { get; set; }
         public int PenaltyId { get; set; }
         public ReadPenaltyDTO Penalty { get; set; }
         public string PaymentStatus { get; set; }

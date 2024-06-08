@@ -20,8 +20,6 @@ namespace DataStore.Core.DTOs.PenaltyPayment
         [StringLength(250)]
         public string? Description { get; set; }
 
-        public string? PaymentStatus { get; set; }
-
         [AllowedFileTypes(new[] { ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".txt","png","jpg","jpeg" })]
         [FileSize(5242880)] // 5 MB
         public ICollection<IFormFile>? Attachments { get; set; }

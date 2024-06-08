@@ -43,6 +43,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 var pagingParameters = new PagingParameters<PenaltyType>
                 {
+                    Predicate = u => u.Status != Lambda.Deleted,
                     PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
                     PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
                     SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
@@ -111,7 +112,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 await _repositoryManager.PenaltyTypeRepository.AddAsync(penaltyType);
                 await _unitOfWork.CommitAsync();
 
-                return CreatedAtAction("GetPenaltyTypeId", new { id = penaltyType.Id }, penaltyType);
+                return Ok();
             }
             catch (Exception ex)
             {
