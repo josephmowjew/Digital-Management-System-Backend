@@ -1299,20 +1299,21 @@ namespace DataStore.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<string>("CreatedById")
+                        .IsRequired()
+                        .HasColumnType("varchar(200)");
+
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime(6)");
 
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int>("SenderID")
-                        .HasColumnType("int");
-
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<int?>("ThreadID")
+                    b.Property<int?>("ThreadId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("Timestamp")
@@ -1325,9 +1326,9 @@ namespace DataStore.Migrations
 
                     b.HasIndex("CommitteeID");
 
-                    b.HasIndex("SenderID");
+                    b.HasIndex("CreatedById");
 
-                    b.HasIndex("ThreadID");
+                    b.HasIndex("ThreadId");
 
                     b.ToTable("Messages");
                 });
@@ -1385,6 +1386,8 @@ namespace DataStore.Migrations
                     b.HasIndex("CreatedById");
 
                     b.HasIndex("MemberId");
+
+                    b.HasIndex("PenaltyTypeId");
 
                     b.HasIndex("YearOfOperationId");
 
@@ -1794,14 +1797,12 @@ namespace DataStore.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<int>("CommitteeID")
+                    b.Property<int>("CommitteeId")
                         .HasColumnType("int");
 
-                    b.Property<int>("CreatedBy")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CreatedByMemberId")
-                        .HasColumnType("int");
+                    b.Property<string>("CreatedById")
+                        .IsRequired()
+                        .HasColumnType("varchar(200)");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime(6)");
@@ -1822,9 +1823,9 @@ namespace DataStore.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CommitteeID");
+                    b.HasIndex("CommitteeId");
 
-                    b.HasIndex("CreatedByMemberId");
+                    b.HasIndex("CreatedById");
 
                     b.ToTable("Threads");
                 });
@@ -2617,19 +2618,19 @@ namespace DataStore.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DataStore.Core.Models.Member", "Sender")
+                    b.HasOne("DataStore.Core.Models.ApplicationUser", "CreatedBy")
                         .WithMany()
-                        .HasForeignKey("SenderID")
+                        .HasForeignKey("CreatedById")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("DataStore.Core.Models.Thread", "Thread")
                         .WithMany("Messages")
-                        .HasForeignKey("ThreadID");
+                        .HasForeignKey("ThreadId");
 
                     b.Navigation("Committee");
 
-                    b.Navigation("Sender");
+                    b.Navigation("CreatedBy");
 
                     b.Navigation("Thread");
                 });
@@ -2648,6 +2649,12 @@ namespace DataStore.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("DataStore.Core.Models.PenaltyType", "PenaltyType")
+                        .WithMany("Penalties")
+                        .HasForeignKey("PenaltyTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("DataStore.Core.Models.YearOfOperation", "YearOfOperation")
                         .WithMany()
                         .HasForeignKey("YearOfOperationId")
@@ -2657,6 +2664,8 @@ namespace DataStore.Migrations
                     b.Navigation("CreatedBy");
 
                     b.Navigation("Member");
+
+                    b.Navigation("PenaltyType");
 
                     b.Navigation("YearOfOperation");
                 });
@@ -2787,19 +2796,19 @@ namespace DataStore.Migrations
                 {
                     b.HasOne("DataStore.Core.Models.Committee", "Committee")
                         .WithMany("Threads")
-                        .HasForeignKey("CommitteeID")
+                        .HasForeignKey("CommitteeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DataStore.Core.Models.Member", "CreatedByMember")
+                    b.HasOne("DataStore.Core.Models.ApplicationUser", "CreatedBy")
                         .WithMany()
-                        .HasForeignKey("CreatedByMemberId")
+                        .HasForeignKey("CreatedById")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Committee");
 
-                    b.Navigation("CreatedByMember");
+                    b.Navigation("CreatedBy");
                 });
 
             modelBuilder.Entity("MemberProBono", b =>
@@ -2939,6 +2948,11 @@ namespace DataStore.Migrations
             modelBuilder.Entity("DataStore.Core.Models.Penalty", b =>
                 {
                     b.Navigation("PenaltyPayments");
+                });
+
+            modelBuilder.Entity("DataStore.Core.Models.PenaltyType", b =>
+                {
+                    b.Navigation("Penalties");
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.ProBono", b =>

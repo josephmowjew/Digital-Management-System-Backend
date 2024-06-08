@@ -349,3 +349,5 @@ MigrationBackup/
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
 MLS-Digital-MGM/MLS-Digital-MGM-API/wwwroot/
+/MLS-Digital-MGM/MLS-Digital-MGM-API/Deploy/wwwroot/Uploads
+/MLS-Digital-MGM/MLS-Digital-MGM-API/wwwroot/Uploads

@@ -1,6 +1,8 @@
 using DataStore.Core.Models;
 using DataStore.Data;
+using DataStore.Helpers;
 using DataStore.Persistence.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,5 +22,12 @@ namespace DataStore.Persistence.SQLRepositories
         }
 
         // Implement additional methods here for thread-specific operations
+
+        public async Task<IEnumerable<Thread>> GetAllAsync(int committeeId)
+        {
+            return await _context.Threads
+                .Include(t => t.Messages).Include(t => t.CreatedBy).Where(q => q.CommitteeId == committeeId && q.Status != Lambda.Deleted)
+                .ToListAsync();
+        }
     }
 }
