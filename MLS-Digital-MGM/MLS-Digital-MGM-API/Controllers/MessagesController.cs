@@ -113,6 +113,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 string username = _httpContextAccessor.HttpContext.User.Identity.Name;
                 var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
                 message.CreatedById = user.Id;
+                message.Timestamp = DateTime.Now;
 
                 await _repositoryManager.MessageRepository.AddAsync(message);
                 await _unitOfWork.CommitAsync();

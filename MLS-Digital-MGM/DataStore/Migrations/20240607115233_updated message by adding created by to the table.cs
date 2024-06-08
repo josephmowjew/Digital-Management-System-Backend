@@ -10,27 +10,24 @@ namespace DataStore.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Messages_Members_SenderID",
-                table: "Messages");
+            // migrationBuilder.DropForeignKey(
+            //     name: "FK_Messages_Members_SenderID",
+            //     table: "Messages");
 
-            migrationBuilder.DropForeignKey(
-                name: "FK_Messages_Threads_ThreadID",
-                table: "Messages");
+            // migrationBuilder.DropForeignKey(
+            //     name: "FK_Messages_Threads_ThreadID",
+            //     table: "Messages");
 
-            migrationBuilder.DropIndex(
-                name: "IX_Messages_SenderID",
-                table: "Messages");
+            // migrationBuilder.DropIndex(
+            //     name: "IX_Messages_SenderID",
+            //     table: "Messages");
 
             migrationBuilder.DropColumn(
                 name: "SenderID",
                 table: "Messages");
 
-            migrationBuilder.RenameColumn(
-                name: "ThreadID",
-                table: "Messages",
-                newName: "ThreadId");
-
+           
+             migrationBuilder.Sql("ALTER TABLE Messages RENAME COLUMN ThreadID TO ThreadId;");
             migrationBuilder.RenameIndex(
                 name: "IX_Messages_ThreadID",
                 table: "Messages",

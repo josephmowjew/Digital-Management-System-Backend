@@ -31,7 +31,7 @@ namespace DataStore.Migrations
 
                     b.HasIndex("CPDTrainingsId");
 
-                    b.ToTable("AttachmentCPDTraining");
+                    b.ToTable("AttachmentCPDTraining", (string)null);
                 });
 
             modelBuilder.Entity("AttachmentCPDTrainingRegistration", b =>
@@ -46,7 +46,7 @@ namespace DataStore.Migrations
 
                     b.HasIndex("CPDTrainingRegistrationsId");
 
-                    b.ToTable("AttachmentCPDTrainingRegistration");
+                    b.ToTable("AttachmentCPDTrainingRegistration", (string)null);
                 });
 
             modelBuilder.Entity("AttachmentLicenseApplication", b =>
@@ -61,7 +61,7 @@ namespace DataStore.Migrations
 
                     b.HasIndex("LicenseApplicationsId");
 
-                    b.ToTable("AttachmentLicenseApplication");
+                    b.ToTable("AttachmentLicenseApplication", (string)null);
                 });
 
             modelBuilder.Entity("AttachmentMemberQualification", b =>
@@ -76,7 +76,7 @@ namespace DataStore.Migrations
 
                     b.HasIndex("MemberQualificationsId");
 
-                    b.ToTable("AttachmentMemberQualification");
+                    b.ToTable("AttachmentMemberQualification", (string)null);
                 });
 
             modelBuilder.Entity("AttachmentMessage", b =>
@@ -91,7 +91,7 @@ namespace DataStore.Migrations
 
                     b.HasIndex("MessagesId");
 
-                    b.ToTable("AttachmentMessage");
+                    b.ToTable("AttachmentMessage", (string)null);
                 });
 
             modelBuilder.Entity("AttachmentPenalty", b =>
@@ -106,7 +106,7 @@ namespace DataStore.Migrations
 
                     b.HasIndex("PenaltiesId");
 
-                    b.ToTable("AttachmentPenalty");
+                    b.ToTable("AttachmentPenalty", (string)null);
                 });
 
             modelBuilder.Entity("AttachmentPenaltyPayment", b =>
@@ -121,7 +121,7 @@ namespace DataStore.Migrations
 
                     b.HasIndex("PenaltyPaymentsId");
 
-                    b.ToTable("AttachmentPenaltyPayment");
+                    b.ToTable("AttachmentPenaltyPayment", (string)null);
                 });
 
             modelBuilder.Entity("AttachmentProBono", b =>
@@ -136,7 +136,7 @@ namespace DataStore.Migrations
 
                     b.HasIndex("ProBonosId");
 
-                    b.ToTable("AttachmentProBono");
+                    b.ToTable("AttachmentProBono", (string)null);
                 });
 
             modelBuilder.Entity("AttachmentProBonoApplication", b =>
@@ -151,7 +151,7 @@ namespace DataStore.Migrations
 
                     b.HasIndex("ProBonosApplicationsId");
 
-                    b.ToTable("AttachmentProBonoApplication");
+                    b.ToTable("AttachmentProBonoApplication", (string)null);
                 });
 
             modelBuilder.Entity("AttachmentProBonoReport", b =>
@@ -166,7 +166,7 @@ namespace DataStore.Migrations
 
                     b.HasIndex("ProBonoReportsId");
 
-                    b.ToTable("AttachmentProBonoReport");
+                    b.ToTable("AttachmentProBonoReport", (string)null);
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.ApplicationUser", b =>
@@ -356,7 +356,7 @@ namespace DataStore.Migrations
 
                     b.HasIndex("AttachmentTypeId");
 
-                    b.ToTable("Attachments");
+                    b.ToTable("Attachments", (string)null);
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.AttachmentType", b =>
@@ -385,7 +385,7 @@ namespace DataStore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("AttachmentTypes");
+                    b.ToTable("AttachmentTypes", (string)null);
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.CPDTraining", b =>
@@ -473,7 +473,7 @@ namespace DataStore.Migrations
 
                     b.HasIndex("YearOfOperationId");
 
-                    b.ToTable("CPDTrainings");
+                    b.ToTable("CPDTrainings", (string)null);
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.CPDTrainingRegistration", b =>
@@ -528,7 +528,7 @@ namespace DataStore.Migrations
 
                     b.HasIndex("MemberId");
 
-                    b.ToTable("CPDTrainingRegistrations");
+                    b.ToTable("CPDTrainingRegistrations", (string)null);
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.CPDUnitsEarned", b =>
@@ -570,7 +570,7 @@ namespace DataStore.Migrations
 
                     b.HasIndex("YearOfOperationId");
 
-                    b.ToTable("CPDUnitsEarned");
+                    b.ToTable("CPDUnitsEarned", (string)null);
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.Committee", b =>
@@ -621,7 +621,7 @@ namespace DataStore.Migrations
 
                     b.HasIndex("YearOfOperationId");
 
-                    b.ToTable("Committees");
+                    b.ToTable("Committees", (string)null);
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.CommitteeMembership", b =>
@@ -658,7 +658,7 @@ namespace DataStore.Migrations
 
                     b.HasIndex("MemberID");
 
-                    b.ToTable("CommitteeMembers");
+                    b.ToTable("CommitteeMembers", (string)null);
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.Country", b =>
@@ -692,7 +692,7 @@ namespace DataStore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Countries");
+                    b.ToTable("Countries", (string)null);
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.Department", b =>
@@ -721,7 +721,7 @@ namespace DataStore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Departments");
+                    b.ToTable("Departments", (string)null);
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.ErrorLog", b =>
@@ -761,7 +761,7 @@ namespace DataStore.Migrations
 
                     b.HasIndex("CreatedById");
 
-                    b.ToTable("ErrorLogs");
+                    b.ToTable("ErrorLogs", (string)null);
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.Firm", b =>
@@ -829,7 +829,7 @@ namespace DataStore.Migrations
 
                     b.HasIndex("CreatedById");
 
-                    b.ToTable("Firms");
+                    b.ToTable("Firms", (string)null);
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.IdentityType", b =>
@@ -858,7 +858,7 @@ namespace DataStore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("IdentityTypes");
+                    b.ToTable("IdentityTypes", (string)null);
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.License", b =>
@@ -905,7 +905,7 @@ namespace DataStore.Migrations
 
                     b.HasIndex("YearOfOperationId");
 
-                    b.ToTable("Licenses");
+                    b.ToTable("Licenses", (string)null);
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.LicenseApplication", b =>
@@ -1032,7 +1032,7 @@ namespace DataStore.Migrations
 
                     b.HasIndex("YearOfOperationId");
 
-                    b.ToTable("LicenseApplications");
+                    b.ToTable("LicenseApplications", (string)null);
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.LicenseApplicationApproval", b =>
@@ -1079,7 +1079,7 @@ namespace DataStore.Migrations
 
                     b.HasIndex("LicenseApprovalLevelID");
 
-                    b.ToTable("LicenseApplicationApprovals");
+                    b.ToTable("LicenseApplicationApprovals", (string)null);
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.LicenseApprovalComment", b =>
@@ -1109,7 +1109,7 @@ namespace DataStore.Migrations
 
                     b.HasIndex("CommentedById");
 
-                    b.ToTable("LicenseApprovalComments");
+                    b.ToTable("LicenseApprovalComments", (string)null);
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.LicenseApprovalHistory", b =>
@@ -1152,7 +1152,7 @@ namespace DataStore.Migrations
 
                     b.HasIndex("LicenseApplicationId");
 
-                    b.ToTable("LicenseApprovalHistories");
+                    b.ToTable("LicenseApprovalHistories", (string)null);
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.LicenseApprovalLevel", b =>
@@ -1184,7 +1184,7 @@ namespace DataStore.Migrations
 
                     b.HasIndex("DepartmentId");
 
-                    b.ToTable("LicenseApprovalLevels");
+                    b.ToTable("LicenseApprovalLevels", (string)null);
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.Member", b =>
@@ -1237,7 +1237,7 @@ namespace DataStore.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Members");
+                    b.ToTable("Members", (string)null);
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.MemberQualification", b =>
@@ -1283,7 +1283,7 @@ namespace DataStore.Migrations
 
                     b.HasIndex("QualificationTypeId");
 
-                    b.ToTable("MemberQualifications");
+                    b.ToTable("MemberQualifications", (string)null);
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.Message", b =>
@@ -1330,7 +1330,7 @@ namespace DataStore.Migrations
 
                     b.HasIndex("ThreadId");
 
-                    b.ToTable("Messages");
+                    b.ToTable("Messages", (string)null);
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.Penalty", b =>
@@ -1391,7 +1391,7 @@ namespace DataStore.Migrations
 
                     b.HasIndex("YearOfOperationId");
 
-                    b.ToTable("Penalties");
+                    b.ToTable("Penalties", (string)null);
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.PenaltyPayment", b =>
@@ -1430,7 +1430,7 @@ namespace DataStore.Migrations
 
                     b.HasIndex("PenaltyId");
 
-                    b.ToTable("PenaltyPayments");
+                    b.ToTable("PenaltyPayments", (string)null);
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.PenaltyType", b =>
@@ -1464,7 +1464,7 @@ namespace DataStore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("PenaltyTypes");
+                    b.ToTable("PenaltyTypes", (string)null);
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.ProBono", b =>
@@ -1526,7 +1526,7 @@ namespace DataStore.Migrations
 
                     b.HasIndex("YearOfOperationId");
 
-                    b.ToTable("ProBonos");
+                    b.ToTable("ProBonos", (string)null);
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.ProBonoApplication", b =>
@@ -1589,7 +1589,7 @@ namespace DataStore.Migrations
 
                     b.HasIndex("YearOfOperationId");
 
-                    b.ToTable("ProBonoApplications");
+                    b.ToTable("ProBonoApplications", (string)null);
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.ProBonoReport", b =>
@@ -1644,7 +1644,7 @@ namespace DataStore.Migrations
 
                     b.HasIndex("ProBonoId");
 
-                    b.ToTable("ProBonoReports");
+                    b.ToTable("ProBonoReports", (string)null);
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.ProbonoClient", b =>
@@ -1720,7 +1720,7 @@ namespace DataStore.Migrations
 
                     b.HasIndex("CreatedById");
 
-                    b.ToTable("ProbonoClients");
+                    b.ToTable("ProbonoClients", (string)null);
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.PropBonoReportFeedback", b =>
@@ -1759,7 +1759,7 @@ namespace DataStore.Migrations
 
                     b.HasIndex("ProBonoReportId");
 
-                    b.ToTable("PropBonoReportFeedbacks");
+                    b.ToTable("PropBonoReportFeedbacks", (string)null);
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.QualificationType", b =>
@@ -1788,7 +1788,7 @@ namespace DataStore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("QualificationTypes");
+                    b.ToTable("QualificationTypes", (string)null);
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.Thread", b =>
@@ -1827,7 +1827,7 @@ namespace DataStore.Migrations
 
                     b.HasIndex("CreatedById");
 
-                    b.ToTable("Threads");
+                    b.ToTable("Threads", (string)null);
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.Title", b =>
@@ -1856,7 +1856,7 @@ namespace DataStore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Titles");
+                    b.ToTable("Titles", (string)null);
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.YearOfOperation", b =>
@@ -1886,7 +1886,7 @@ namespace DataStore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("YearOfOperations");
+                    b.ToTable("YearOfOperations", (string)null);
                 });
 
             modelBuilder.Entity("MemberProBono", b =>
@@ -1901,7 +1901,7 @@ namespace DataStore.Migrations
 
                     b.HasIndex("ProBonosId");
 
-                    b.ToTable("MemberProBono");
+                    b.ToTable("MemberProBono", (string)null);
                 });
 
             modelBuilder.Entity("MemberQualificationType", b =>
@@ -1916,7 +1916,7 @@ namespace DataStore.Migrations
 
                     b.HasIndex("QualificationTypesId");
 
-                    b.ToTable("MemberQualificationType");
+                    b.ToTable("MemberQualificationType", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
