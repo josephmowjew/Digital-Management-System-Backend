@@ -1,3 +1,4 @@
+using DataStore.Core.Models;
 using System.Linq.Expressions;
 namespace DataStore.Helpers;
 public class PagingParameters<T>
@@ -12,4 +13,8 @@ public class PagingParameters<T>
     public Expression<Func<T, object>>[] Includes { get; set; } = new Expression<Func<T, object>>[] {};
     public string? CreatedById { get; set; } = null;
 
+    public static implicit operator PagingParameters<T>(PagingParameters<PenaltyPayment> v)
+    {
+        throw new NotImplementedException();
+    }
 }

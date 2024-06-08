@@ -1,27 +1,20 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using AutoMapper;
-using DataStore.Core.DTOs;
-using DataStore.Core.Services;
-using DataStore.Persistence.Interfaces;
-using DataStore.Core.Services.Interfaces;
-using DataStore.Core.Models;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using MLS_Digital_MGM.DataStore.Helpers;
-using DataStore.Helpers;
-using System.Linq.Expressions;
-using DataStore.Core.DTOs.Penalty;
+﻿using AutoMapper;
+using DataStore.Core.DTOs.PenaltyPayment;
 using DataStore.Core.DTOs.PenaltyType;
+using DataStore.Core.Models;
+using DataStore.Core.Services.Interfaces;
+using DataStore.Helpers;
+using DataStore.Persistence.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
+using MLS_Digital_MGM.DataStore.Helpers;
 
 namespace MLS_Digital_MGM_API.Controllers
 {
     [Route("api/[controller]")]
     [Authorize(AuthenticationSchemes = "Bearer")]
-    public class PenaltiesController : Controller
+    public class PenaltyPaymentsController : Controller
     {
         private readonly IRepositoryManager _repositoryManager;
         private readonly IErrorLogService _errorLogService;
@@ -29,7 +22,7 @@ namespace MLS_Digital_MGM_API.Controllers
         private readonly IMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public PenaltiesController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor)
+        public PenaltyPaymentsController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor)
         {
             _repositoryManager = repositoryManager;
             _errorLogService = errorLogService;
@@ -39,13 +32,13 @@ namespace MLS_Digital_MGM_API.Controllers
         }
 
         [HttpGet("paged")]
-        public async Task<IActionResult> GetPenalties(int pageNumber = 1, int pageSize = 10)
+        public async Task<IActionResult> GetPenaltyPayments(int pageNumber = 1, int pageSize = 10)
         {
             try
             {
                 var dataTableParams = new DataTablesParameters();
 
-                var pagingParameters = new PagingParameters<Penalty>
+                var pagingParameters = new PagingParameters<PenaltyPayment>
                 {
                     Predicate = u => u.Status != Lambda.Deleted,
                     PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
@@ -53,15 +46,12 @@ namespace MLS_Digital_MGM_API.Controllers
                     SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
                     SortColumn = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumn : null,
                     SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null,
-                    Includes = new Expression<Func<Penalty, object>>[] {
-                        p => p.CreatedBy,
-                        p => p.PenaltyType
-                    }
+
                 };
 
-                var penaltiesPaged = await _repositoryManager.PenaltyRepository.GetPagedAsync(pagingParameters);
-
-                if (penaltiesPaged == null || !penaltiesPaged.Any())
+                var penaltyPaymentsPaged = await _repositoryManager.PenaltyPaymentRepository.GetPagedAsync(pagingParameters);
+    
+                if (penaltyPaymentsPaged == null || !penaltyPaymentsPaged.Any())
                 {
                     if (dataTableParams.LoadFromRequest(_httpContextAccessor))
                     {
@@ -71,29 +61,29 @@ namespace MLS_Digital_MGM_API.Controllers
                             draw,
                             recordsFiltered = 0,
                             recordsTotal = 0,
-                            data = Enumerable.Empty<ReadPenaltyDTO>()
+                            data = Enumerable.Empty<ReadPenaltyPaymentDTO>()
                         });
                     }
-                    return Ok(Enumerable.Empty<ReadPenaltyDTO>());
+                    return Ok(Enumerable.Empty<ReadPenaltyPaymentDTO>());
                 }
 
-                var penaltyDTOs = _mapper.Map<List<ReadPenaltyDTO>>(penaltiesPaged);
+                var penaltyPaymentsDTOs = _mapper.Map<List<ReadPenaltyPaymentDTO>>(penaltyPaymentsPaged);
 
                 if (dataTableParams.LoadFromRequest(_httpContextAccessor))
                 {
                     var draw = dataTableParams.Draw;
-                    var resultTotalFiltered = penaltyDTOs.Count;
+                    var resultTotalFiltered = penaltyPaymentsDTOs.Count;
 
                     return Json(new
                     {
                         draw,
                         recordsFiltered = resultTotalFiltered,
                         recordsTotal = resultTotalFiltered,
-                        data = penaltyDTOs.ToList()
+                        data = penaltyPaymentsDTOs.ToList()
                     });
                 }
 
-                return Ok(penaltyDTOs);
+                return Ok(penaltyPaymentsDTOs);
             }
             catch (Exception ex)
             {
@@ -103,101 +93,22 @@ namespace MLS_Digital_MGM_API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddPenalty([FromForm] CreatePenaltyDTO penaltyDTO)
+        public async Task<IActionResult> AddPenaltyPayment([FromForm] CreatePenaltyPaymentDTO penaltyPaymentDTO)
         {
             try
             {
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
 
-                var penalty = _mapper.Map<Penalty>(penaltyDTO);
+                var penaltyPayment = _mapper.Map<PenaltyPayment>(penaltyPaymentDTO);
                 string username = _httpContextAccessor.HttpContext.User.Identity.Name;
 
                 var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
-                penalty.CreatedById = user.Id;
-
-                 // Get or create attachment type
-                var attachmentType = await _repositoryManager.AttachmentTypeRepository.GetAsync(d => d.Name == "Penalty") 
-                                    ?? new AttachmentType { Name = "Penalty" };
-
-                // Add attachment type if it doesn't exist
-                if (attachmentType.Id == 0)
-                {
-                    await _repositoryManager.AttachmentTypeRepository.AddAsync(attachmentType);
-                    await _unitOfWork.CommitAsync();
-                }
-                if (penaltyDTO.Attachments != null && penaltyDTO.Attachments.Count > 0)
-                {
-                    penalty.Attachments = await SaveAttachmentsAsync(penaltyDTO.Attachments, attachmentType.Id);
-                }
-
-                await _repositoryManager.PenaltyRepository.AddAsync(penalty);
-                await _unitOfWork.CommitAsync();
-
-                return CreatedAtAction("GetPenaltyById", new { id = penalty.Id }, penalty);
-            }
-            catch (Exception ex)
-            {
-                await _errorLogService.LogErrorAsync(ex);
-                return StatusCode(500, "Internal server error");
-            }
-        }
-
-        [HttpGet("GetPenaltyById/{id}")]
-        public async Task<IActionResult> GetPenaltyById(int id)
-        {
-            try
-            {
-                var penalty = await _repositoryManager.PenaltyRepository.GetByIdAsync(id);
-                if (penalty == null)
-                {
-                    return NotFound();
-                }
-
-                foreach (var attachment in penalty.Attachments)
-                {
-                    string attachmentTypeName = attachment.AttachmentType.Name;
-
-                    string newFilePath = Path.Combine($"http://{HttpContext.Request.Host}/uploads/{Lambda.PenaltyFolderName}", attachment.FileName);
-
-                    attachment.FilePath = newFilePath;
-
-                }
-
-                var mappedPenalty = _mapper.Map<ReadPenaltyDTO>(penalty);
-                return Ok(mappedPenalty);
-            }
-            catch (Exception ex)
-            {
-                await _errorLogService.LogErrorAsync(ex);
-                return StatusCode(500, "Internal server error");
-            }
-        }
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdatePenalty(int id, [FromForm] UpdatePenaltyDTO penaltyDTO)
-        {
-
-            try
-            {
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
-
-                string username = _httpContextAccessor.HttpContext.User.Identity.Name;
-
-                var penalty = await _repositoryManager.PenaltyRepository.GetByIdAsync(id);
-
-                var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
-                //penalty.CreatedById = user.Id;
-
-                if (penalty == null)
-                    return NotFound();
-
-                _mapper.Map(penaltyDTO, penalty);
+                //penaltyType.CreatedById = user.Id;
 
                 // Get or create attachment type
-                var attachmentType = await _repositoryManager.AttachmentTypeRepository.GetAsync(d => d.Name == "Penalty") 
-                                    ?? new AttachmentType { Name = "Penalty" };
+                var attachmentType = await _repositoryManager.AttachmentTypeRepository.GetAsync(d => d.Name == "PenaltyPayment")
+                                    ?? new AttachmentType { Name = "PenaltyPayment" };
 
                 // Add attachment type if it doesn't exist
                 if (attachmentType.Id == 0)
@@ -205,13 +116,15 @@ namespace MLS_Digital_MGM_API.Controllers
                     await _repositoryManager.AttachmentTypeRepository.AddAsync(attachmentType);
                     await _unitOfWork.CommitAsync();
                 }
-                if (penaltyDTO.Attachments != null && penalty.Attachments.Count > 0)
+                if (penaltyPaymentDTO.Attachments != null && penaltyPaymentDTO.Attachments.Count > 0)
                 {
-                    penalty.Attachments = await SaveAttachmentsAsync(penaltyDTO.Attachments, attachmentType.Id);
+                    penaltyPayment.Attachments = await SaveAttachmentsAsync(penaltyPaymentDTO.Attachments, attachmentType.Id);
                 }
 
-                await _repositoryManager.PenaltyRepository.UpdateAsync(penalty);
+                await _repositoryManager.PenaltyPaymentRepository.AddAsync(penaltyPayment);
                 await _unitOfWork.CommitAsync();
+
+                CreatedAtAction("GetPenaltyById", new { id = penaltyPayment.Id }, penaltyPayment);
 
                 return Ok();
             }
@@ -222,16 +135,67 @@ namespace MLS_Digital_MGM_API.Controllers
             }
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeletePenalty(int id)
+        [HttpGet("GetPenaltyPaymentById/{id}")]
+        public async Task<IActionResult> GetPenaltyPaymentById(int id)
         {
             try
             {
-                var penalty = await _repositoryManager.PenaltyRepository.GetByIdAsync(id);
-                if (penalty == null)
+                var penaltyPayment = await _repositoryManager.PenaltyPaymentRepository.GetByIdAsync(id);
+                if (penaltyPayment == null)
+                {
+                    return NotFound();
+                }
+
+                foreach (var attachment in penaltyPayment.Attachments)
+                {
+                    string attachmentTypeName = attachment.AttachmentType.Name;
+
+                    string newFilePath = Path.Combine($"http://{HttpContext.Request.Host}/uploads/{Lambda.PenaltyPaymentFolderName}", attachment.FileName);
+
+                    attachment.FilePath = newFilePath;
+
+                }
+
+                var mappedPenaltyPayment = _mapper.Map<ReadPenaltyPaymentDTO>(penaltyPayment);
+                return Ok(mappedPenaltyPayment);
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdatePenaltyPayment(int id, [FromForm] UpdatePenaltyPaymentDTO penaltyPaymentDTO)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
+
+                var penaltyPayment = await _repositoryManager.PenaltyPaymentRepository.GetByIdAsync(id);
+                if (penaltyPayment == null)
                     return NotFound();
 
-                await _repositoryManager.PenaltyRepository.DeleteAsync(penalty);
+                _mapper.Map(penaltyPaymentDTO, penaltyPayment);
+
+                // Get or create attachment type
+                var attachmentType = await _repositoryManager.AttachmentTypeRepository.GetAsync(d => d.Name == "PenaltyPayment")
+                                    ?? new AttachmentType { Name = "PenaltyPayment" };
+
+                // Add attachment type if it doesn't exist
+                if (attachmentType.Id == 0)
+                {
+                    await _repositoryManager.AttachmentTypeRepository.AddAsync(attachmentType);
+                    await _unitOfWork.CommitAsync();
+                }
+                if (penaltyPaymentDTO.Attachments != null && penaltyPayment.Attachments.Count > 0)
+                {
+                    penaltyPayment.Attachments = await SaveAttachmentsAsync(penaltyPaymentDTO.Attachments, attachmentType.Id);
+                }
+
+                await _repositoryManager.PenaltyPaymentRepository.UpdateAsync(penaltyPayment);
                 await _unitOfWork.CommitAsync();
 
                 return Ok();
@@ -248,11 +212,11 @@ namespace MLS_Digital_MGM_API.Controllers
         {
             try
             {
-                var penaltyRecords = await this._repositoryManager.PenaltyRepository.GetAllAsync();
+                var penaltyPaymentRecords = await this._repositoryManager.PenaltyTypeRepository.GetAllAsync();
 
-                var readPenaltyRecordsMapped = this._mapper.Map<List<ReadPenaltyDTO>>(penaltyRecords);
+                var readPenaltyPaymentRecordsMapped = this._mapper.Map<List<ReadPenaltyPaymentDTO>>(penaltyPaymentRecords);
 
-                return Ok(readPenaltyRecordsMapped);
+                return Ok(readPenaltyPaymentRecordsMapped);
             }
             catch (Exception ex)
             {
@@ -267,19 +231,19 @@ namespace MLS_Digital_MGM_API.Controllers
             var attachmentsList = new List<Attachment>();
             var hostEnvironment = HttpContext.RequestServices.GetRequiredService<IWebHostEnvironment>();
             var webRootPath = hostEnvironment.WebRootPath;
-            var proBonoReportAttachmentsPath = Path.Combine(webRootPath, "Uploads/PenaltyAttachments");
-        
-            Directory.CreateDirectory(proBonoReportAttachmentsPath);
-        
+            var penaltyPaymentAttachmentsPath = Path.Combine(webRootPath, "Uploads/PenaltyPaymentsAttachments");
+
+            Directory.CreateDirectory(penaltyPaymentAttachmentsPath);
+
             foreach (var attachment in attachments)
             {
                 var uniqueFileName = FileNameGenerator.GenerateUniqueFileName(attachment.FileName);
-                var filePath = Path.Combine(proBonoReportAttachmentsPath, uniqueFileName);
+                var filePath = Path.Combine(penaltyPaymentAttachmentsPath, uniqueFileName);
                 using (var stream = System.IO.File.Create(filePath))
                 {
                     await attachment.CopyToAsync(stream);
                 }
-        
+
                 attachmentsList.Add(new Attachment
                 {
                     FileName = uniqueFileName,
@@ -288,10 +252,30 @@ namespace MLS_Digital_MGM_API.Controllers
                     PropertyName = attachment.Name
                 });
             }
-    
+
             return attachmentsList;
         }
 
-    }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeletePenaltyPayment(int id)
+        {
+            try
+            {
+                var penaltyPayment = await _repositoryManager.PenaltyPaymentRepository.GetByIdAsync(id);
+                if (penaltyPayment == null)
+                    return NotFound();
 
+                await _repositoryManager.PenaltyPaymentRepository.DeleteAsync(penaltyPayment);
+                await _unitOfWork.CommitAsync();
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+    }
 }
