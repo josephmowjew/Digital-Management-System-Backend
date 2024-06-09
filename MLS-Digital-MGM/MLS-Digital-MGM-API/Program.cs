@@ -13,6 +13,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Hangfire;
 using Hangfire.MemoryStorage;
+//using MLS_Digital_MGM_API.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -101,6 +102,8 @@ builder.Services.AddHangfire(config =>
            .UseDefaultTypeSerializer()
            .UseMemoryStorage());
 
+builder.Services.AddSignalR();
+
 
 var app = builder.Build();
 app.UseCors("AllowAllOrigins");
@@ -117,7 +120,7 @@ app.UseStaticFiles();
 app.UseHttpsRedirection();
 
 app.MapControllers();
-
+//app.MapHub<ChatHub>("/chatHub");
 app.UseAuthentication();
 
 app.UseAuthorization();

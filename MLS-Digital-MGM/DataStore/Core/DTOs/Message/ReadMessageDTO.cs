@@ -15,7 +15,6 @@ namespace DataStore.Core.DTOs.Message
         }
 
         public int Id { get; set; }
-        public int CommitteeId { get; set; }
         public string CreatedById { get; set; }
         public ReadUserDTO CreatedBy {get; set;}
         public DateTime Timestamp { get; set; }

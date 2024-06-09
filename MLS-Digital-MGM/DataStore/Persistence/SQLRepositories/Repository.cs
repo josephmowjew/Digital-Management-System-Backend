@@ -59,6 +59,65 @@ namespace DataStore.Persistence.SQLRepositories
                                  .ToListAsync();
         }
 
+        public async Task<IEnumerable<T>> GetAllAsync(
+            Expression<Func<T, bool>> predicate,
+            Func<IQueryable<T>, IOrderedQueryable<T>> orderBy,
+            string orderByDirection,
+            int count,
+            int skip,
+            Expression<Func<T, object>>[] includes = null)
+        {
+            IQueryable<T> query = _context.Set<T>();
+
+            query = query.Where(predicate);
+
+            if (includes != null)
+            {
+                foreach (var include in includes)
+                {
+                    var includeString = GetIncludePath(include);
+                    query = query.Include(includeString);
+
+                    // Additional includes for specific navigation properties
+                    if (includeString == "Attachments")
+                    {
+                        query = query.Include("Attachments.AttachmentType");
+                    }
+                    if (includeString == "CurrentApprovalLevel")
+                    {
+                        query = query.Include("CurrentApprovalLevel.Department");
+                    }
+                    if (includeString == "Member")
+                    {
+                        query = query.Include("Member.User");
+                    }
+                }
+            }
+
+            if (orderBy != null)
+            {
+                if (orderByDirection.ToUpper() == "ASC")
+                {
+                    query = orderBy(query);
+                }
+                else if (orderByDirection.ToUpper() == "DESC")
+                {
+                    query = orderBy(query).Reverse();
+                }
+                else
+                {
+                    throw new ArgumentException("Invalid sort direction. Please use ASC or DESC.");
+                }
+            }
+
+            if (count > 0)
+            {
+                query = query.Skip(skip).Take(count);
+            }
+
+            return await query.ToListAsync();
+        }
+
         public async Task<T> GetAsync(Expression<Func<T, bool>> predicate)
         {
             return await _context.Set<T>().Where(q => q.Status != Lambda.Deleted).Where(predicate).FirstOrDefaultAsync();

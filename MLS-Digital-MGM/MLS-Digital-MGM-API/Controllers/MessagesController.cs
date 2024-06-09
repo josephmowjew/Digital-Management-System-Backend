@@ -193,5 +193,28 @@ namespace MLS_Digital_MGM_API.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+        [HttpGet("GetMessageByRange/{threadId}/{numberOfMessages}/{skip}")]
+        public async Task<IActionResult> GetMessageByRange(int threadId, int numberOfMessages,int skip)
+        {
+            try
+            {
+                var messages = await _repositoryManager.MessageRepository.GetAllAsync( m => m.ThreadId == threadId,m => m.OrderBy(y => y.Id),"DESC",numberOfMessages, skip,  new Expression<Func<Message, object>>[] {
+                        m => m.Thread,
+                        m => m.CreatedBy,
+                        
+                    });
+                if (messages == null)
+                {
+                    return NotFound();
+                }
+                var messageDTOs = _mapper.Map<List<ReadMessageDTO>>(messages);
+                return Ok(messageDTOs);
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
     }
 }
