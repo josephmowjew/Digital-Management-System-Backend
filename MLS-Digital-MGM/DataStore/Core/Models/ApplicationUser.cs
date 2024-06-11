@@ -16,6 +16,7 @@ namespace DataStore.Core.Models
         public ApplicationUser()
         {
             Penalties = new List<Penalty>();
+            Committees = new List<Committee>();
         }
 
         [Required]
@@ -63,6 +64,8 @@ namespace DataStore.Core.Models
         public DateTime LastLogin { get; set; }
         public int? Pin { get; set; }
         public List<Penalty> Penalties { get; set; }
+
+        public List<Committee> Committees { get; set; }
 
        
         
