@@ -118,12 +118,13 @@ namespace MLS_Digital_MGM_API.Controllers
                 {
                     var draw = dataTableParams.Draw;
                     var resultTotalFiltred = mappedMemberQualifications.Count;
+                    var totalRecords = await _repositoryManager.MemberQualificationRepository.CountAsync(pagingParameters);
 
                     return Json(new 
                     { 
                         draw, 
-                        recordsFiltered = resultTotalFiltred, 
-                        recordsTotal = resultTotalFiltred, 
+                        recordsFiltered = totalRecords, 
+                        recordsTotal = totalRecords, 
                         data = mappedMemberQualifications.ToList() 
                     });
                 }

@@ -85,12 +85,14 @@ public class FirmsController : Controller
             {
                 var draw = dataTableParams.Draw;
                 var resultTotalFiltred = mappedFirms.Count;
+                var totalRecords = await _repositoryManager.FirmRepository.CountAsync(pagingParameters);
+
 
                 return Json(new
                 {
                     draw,
-                    recordsFiltered = resultTotalFiltred,
-                    recordsTotal = resultTotalFiltred,
+                    recordsFiltered = totalRecords,
+                    recordsTotal = totalRecords,
                     data = mappedFirms.ToList() // Materialize the enumerable
                 });
             }

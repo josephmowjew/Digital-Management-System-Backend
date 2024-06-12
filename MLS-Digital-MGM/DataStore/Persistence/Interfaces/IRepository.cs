@@ -22,6 +22,8 @@ namespace DataStore.Persistence.Interfaces
         Task DeleteAsync(T entity);
         Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>> predicate,Func<IQueryable<T>, IOrderedQueryable<T>> orderBy,string orderByDirection,int count,int skip,Expression<Func<T, object>>[] includes = null);
 
+        Task<int> CountAsync(PagingParameters<T> pagingParameters);
+
         // New method to project entities to DTOs
         //Task<IEnumerable<TDto>> ProjectToAsync<TDto>(Expression<Func<T, bool>> predicate);
     }

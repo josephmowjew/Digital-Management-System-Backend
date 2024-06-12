@@ -79,12 +79,13 @@ namespace MLS_Digital_MGM_API.Controllers // Update with your actual namespace
                 {
                     var draw = dataTableParams.Draw;
                     var resultTotalFiltred = mappedClients.Count;
+                    var totalRecords = await _repositoryManager.ProBonoClientRepository.CountAsync(pagingParameters);
 
                     return Json(new 
                     { 
                         draw, 
-                        recordsFiltered = resultTotalFiltred, 
-                        recordsTotal = resultTotalFiltred, 
+                        recordsFiltered = totalRecords, 
+                        recordsTotal = totalRecords, 
                         data = mappedClients.ToList() // Materialize the enumerable
                     });
                 }

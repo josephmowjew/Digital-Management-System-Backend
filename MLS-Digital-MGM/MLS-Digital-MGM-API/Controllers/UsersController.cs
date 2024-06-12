@@ -95,12 +95,14 @@ namespace MLS_Digital_MGM_API.Controllers
                 {
                     var draw = dataTableParams.Draw;
                     var resultTotalFiltred = usersWithRoles.Count;
+                    var totalRecords = await _repositoryManager.UserRepository.CountAsync(pagingParameters);
+
 
                     return Json(new 
                     { 
                         draw, 
-                        recordsFiltered = resultTotalFiltred, 
-                        recordsTotal = resultTotalFiltred, 
+                        recordsFiltered = totalRecords, 
+                        recordsTotal = totalRecords, 
                         data = usersWithRoles.ToList() // Materialize the enumerable
                     });
                 }
@@ -459,5 +461,39 @@ namespace MLS_Digital_MGM_API.Controllers
             var restOfName = new string(roleName.Skip(1).SelectMany(c => char.IsUpper(c) ? new[] { ' ', c } : new[] { c }).ToArray());
             return firstChar + restOfName;
         }
+
+        [HttpGet("getAll")]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            try
+            {
+               
+                // Fetch paginated users using the DepartmentRepository
+                var users = await _repositoryManager.UserRepository.GetAllAsync();
+
+                // Check if users exist
+                if (users == null || !users.Any())
+                {
+                    return Ok(Enumerable.Empty<ReadUserDTO>()); // Return 404 Not Found if no departments are found
+                }
+
+                // Map users entities to ReadCountryDTO
+                var mappedDepartments = _mapper.Map<IEnumerable<ReadUserDTO>>(users);
+
+                return Ok(mappedDepartments); // Return paginated users
+
+            }
+            catch (Exception ex)
+            {
+                // Log the exception using ErrorLogService
+                await _errorLogService.LogErrorAsync(ex);
+
+                // Return 500 Internal Server Error
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
     }
+
+    
 }

@@ -83,6 +83,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 {
                     if (dataTableParams.LoadFromRequest(_httpContextAccessor))
                     {
+                       
                         var draw = dataTableParams.Draw;
                         return Json(new
                         {
@@ -104,12 +105,13 @@ namespace MLS_Digital_MGM_API.Controllers
                 {
                     var draw = dataTableParams.Draw;
                     var resultTotalFiltred = probonoapplicationFirms.Count;
+                    var totalRecords = await _repositoryManager.ProBonoApplicationRepository.CountAsync(pagingParameters);
 
                     return Json(new
                     {
                         draw,
-                        recordsFiltered = resultTotalFiltred,
-                        recordsTotal = resultTotalFiltred,
+                        recordsFiltered = totalRecords,
+                        recordsTotal = totalRecords,
                         data = probonoapplicationFirms.ToList() // Materialize the enumerable
                     });
                 }
