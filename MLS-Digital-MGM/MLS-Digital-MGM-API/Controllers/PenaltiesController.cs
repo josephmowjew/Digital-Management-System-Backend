@@ -82,6 +82,19 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 var penaltyDTOs = _mapper.Map<List<ReadPenaltyDTO>>(penaltiesPaged);
 
+                 foreach (var report in penaltyDTOs)
+            {
+                foreach (var attachment in report.Attachments)
+                {
+                    string attachmentTypeName = attachment.AttachmentType.Name;
+
+
+                      string newfilePath = Path.Combine("/uploads/PenaltyAttachments/", attachment.FileName);
+
+                    attachment.FilePath = newfilePath;
+                }
+            }
+
                 if (dataTableParams.LoadFromRequest(_httpContextAccessor))
                 {
                     var draw = dataTableParams.Draw;
