@@ -54,7 +54,8 @@ namespace MLS_Digital_MGM_API.Controllers
                         p => p.Chairperson,
                         p => p.Chairperson.User,
                         p => p.Threads,
-                        p => p.YearOfOperation
+                        p => p.YearOfOperation,
+                        p => p.CommitteeMemberships
                     }
                 };
 

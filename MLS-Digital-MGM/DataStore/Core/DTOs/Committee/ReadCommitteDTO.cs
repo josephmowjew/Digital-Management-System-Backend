@@ -15,6 +15,8 @@ namespace DataStore.Core.DTOs.Committee
         public int YearOfOperationId { get; set; }
         public ReadYearOfOperationDTO YearOfOperation { get; set; }
 
+        public List<CommitteeMembership> CommitteeMemberships { get; set; }
+
     }
 
     

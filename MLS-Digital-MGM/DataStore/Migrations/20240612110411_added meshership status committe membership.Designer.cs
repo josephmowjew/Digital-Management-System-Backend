@@ -3,6 +3,7 @@ using System;
 using DataStore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240612110411_added meshership status committe membership")]
+    partial class addedmeshershipstatuscommittemembership
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1348,12 +1351,6 @@ namespace DataStore.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<double>("AmountPaid")
-                        .HasColumnType("double");
-
-                    b.Property<double>("AmountRemaining")
-                        .HasColumnType("double");
-
                     b.Property<string>("CreatedById")
                         .IsRequired()
                         .HasColumnType("varchar(200)");
@@ -1418,12 +1415,6 @@ namespace DataStore.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<DateTime?>("DateApproved")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime?>("DateDenied")
-                        .HasColumnType("datetime(6)");
-
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime(6)");
 
@@ -1439,10 +1430,6 @@ namespace DataStore.Migrations
 
                     b.Property<int>("PenaltyId")
                         .HasColumnType("int");
-
-                    b.Property<string>("ReasonForDenial")
-                        .HasMaxLength(250)
-                        .HasColumnType("varchar(250)");
 
                     b.Property<string>("Status")
                         .IsRequired()

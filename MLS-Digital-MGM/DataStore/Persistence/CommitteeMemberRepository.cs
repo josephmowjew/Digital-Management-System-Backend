@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
+
 
 namespace DataStore.Persistence.SQLRepositories
 {
@@ -20,5 +22,14 @@ namespace DataStore.Persistence.SQLRepositories
         }
 
         // Implement additional methods here for committee member-specific operations
+
+        public async Task<CommitteeMembership> GetByIdAsync(int committeeMemberId)
+        {
+            return await _context.CommitteeMembers.Include(c => c.MemberShip).Include(c => c.Committee).FirstOrDefaultAsync(c => c.Id == committeeMemberId);
+        }
+        public async Task<CommitteeMembership> GetCommitteeMembershipAsync(int committeeId, string memberId)
+        {
+            return await _context.CommitteeMembers.Include(c => c.MemberShip).Include(c => c.Committee).FirstOrDefaultAsync(c => c.CommitteeID == committeeId && c.MemberShipId == memberId);
+        }
     }
 }
