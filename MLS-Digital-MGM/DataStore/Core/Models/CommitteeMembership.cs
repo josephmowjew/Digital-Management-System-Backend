@@ -12,6 +12,8 @@ public class CommitteeMembership : Meta
     public string MemberShipId { get; set; }
     public ApplicationUser MemberShip { get; set; }
 
+    public string? MemberShipStatus { get; set; }
+
     public DateTime JoinedDate { get; set; }
     [StringLength(maximumLength:150)]
     public string Role { get; set; }

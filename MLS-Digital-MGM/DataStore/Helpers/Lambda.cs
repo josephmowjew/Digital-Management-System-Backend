@@ -48,6 +48,10 @@ namespace DataStore.Helpers
         public static string PartiallyPaid = "Partially Paid";
         public static string Resolved = "Resolved";
 
+        public static string Revoked =  "Revoked";
+
+        public static string Exited = "Exited";
+
         public static int RandomNumber()
         {
             // generating a random number
