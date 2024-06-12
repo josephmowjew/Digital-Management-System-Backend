@@ -75,12 +75,13 @@ namespace MLS_Digital_MGM_API.Controllers
                 {
                     var draw = dataTableParams.Draw;
                     var resultTotalFiltred = mappedDepartments.Count;
+                    var totalRecords = await _repositoryManager.DepartmentRepository.CountAsync(pagingParameters);
 
                     return Json(new
                     {
                         draw,
-                        recordsFiltered = resultTotalFiltred,
-                        recordsTotal = resultTotalFiltred,
+                        recordsFiltered = totalRecords,
+                        recordsTotal = totalRecords,
                         data = mappedDepartments.ToList() // Materialize the enumerable
                     });
                 }

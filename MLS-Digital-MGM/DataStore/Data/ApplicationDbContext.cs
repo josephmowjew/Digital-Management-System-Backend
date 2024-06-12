@@ -109,6 +109,13 @@ namespace DataStore.Data
                 entity.Property(u => u.Value).HasMaxLength(200);
             });
 
+            
+
+        builder.Entity<Committee>()
+            .HasOne(c => c.Chairperson)
+            .WithMany()
+            .HasForeignKey(c => c.ChairpersonID);
+
 
             //builder.Entity<ApplicationUser>().Property(u => u.FullName).HasComputedColumnSql("[FirstName] + ' ' + [LastName]");
 

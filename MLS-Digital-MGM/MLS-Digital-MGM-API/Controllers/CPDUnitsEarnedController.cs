@@ -86,12 +86,13 @@ namespace MLS_Digital_MGM_API.Controllers
                 {
                     var draw = dataTableParams.Draw;
                     var resultTotalFiltered = cpdUnitEarnedDTOs.Count;
+                    var totalRecords = await _repositoryManager.CPDUnitsEarnedRepository.CountAsync(pagingParameters);
 
                     return Json(new
                     {
                         draw,
-                        recordsFiltered = resultTotalFiltered,
-                        recordsTotal = resultTotalFiltered,
+                        recordsFiltered = totalRecords,
+                        recordsTotal = totalRecords,
                         data = cpdUnitEarnedDTOs.ToList()
                     });
                 }

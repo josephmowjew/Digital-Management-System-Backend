@@ -90,12 +90,14 @@ namespace MLS_Digital_MGM_API.Controllers
                 {
                     var draw = dataTableParams.Draw;
                     var resultTotalFiltered = licenseApprovalHistoryDTOs.Count;
+                    var totalRecords = await _repositoryManager.LicenseApprovalHistoryRepository.CountAsync(pagingParameters);
+                    
 
                     return Json(new
                     {
                         draw,
-                        recordsFiltered = resultTotalFiltered,
-                        recordsTotal = resultTotalFiltered,
+                        recordsFiltered = totalRecords,
+                        recordsTotal = totalRecords,
                         data = licenseApprovalHistoryDTOs.ToList()
                     });
                 }

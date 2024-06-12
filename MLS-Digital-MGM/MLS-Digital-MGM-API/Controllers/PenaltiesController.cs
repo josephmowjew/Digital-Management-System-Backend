@@ -84,12 +84,14 @@ namespace MLS_Digital_MGM_API.Controllers
                 {
                     var draw = dataTableParams.Draw;
                     var resultTotalFiltered = penaltyDTOs.Count;
+                    var totalRecords = await _repositoryManager.PenaltyRepository.CountAsync(pagingParameters);
+                    
 
                     return Json(new
                     {
                         draw,
-                        recordsFiltered = resultTotalFiltered,
-                        recordsTotal = resultTotalFiltered,
+                        recordsFiltered = totalRecords,
+                        recordsTotal = totalRecords,
                         data = penaltyDTOs.ToList()
                     });
                 }

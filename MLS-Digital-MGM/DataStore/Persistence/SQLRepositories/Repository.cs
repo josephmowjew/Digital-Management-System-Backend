@@ -123,6 +123,71 @@ namespace DataStore.Persistence.SQLRepositories
             return await _context.Set<T>().Where(q => q.Status != Lambda.Deleted).Where(predicate).FirstOrDefaultAsync();
         }
 
+
+public async Task<int> CountAsync(PagingParameters<T> pagingParameters)
+{
+    var query = _context.Set<T>().Where(pagingParameters.Predicate);
+
+    if (!string.IsNullOrEmpty(pagingParameters.SearchTerm))
+    {
+        var entityProperties = typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public);
+        var parameter = Expression.Parameter(typeof(T), "record");
+        var searchTermValue = Expression.Constant(pagingParameters.SearchTerm.ToLower(), typeof(string));
+
+        var searchExpressions = entityProperties
+            .Where(p => p.PropertyType == typeof(string))
+            .Select(p =>
+            {
+                var propertyAccess = Expression.Property(parameter, p);
+                var toLowerExpression = Expression.Call(propertyAccess, typeof(string).GetMethod("ToLower", Type.EmptyTypes));
+                var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) });
+                var containsExpression = Expression.Call(toLowerExpression, containsMethod, searchTermValue);
+                return containsExpression;
+            });
+
+        var orExpression = searchExpressions.Aggregate<Expression>(Expression.OrElse);
+        var lambda = Expression.Lambda<Func<T, bool>>(orExpression, parameter);
+
+        query = query.Where(lambda);
+    }
+
+    foreach (var include in pagingParameters.Includes)
+    {
+        var includeString = GetIncludePath(include);
+        query = query.Include(includeString);
+
+        if (includeString == "Attachments")
+        {
+            query = query.Include("Attachments.AttachmentType");
+        }
+        if (includeString == "CurrentApprovalLevel")
+        {
+            query = query.Include("CurrentApprovalLevel.Department");
+        }
+        if (includeString == "Member")
+        {
+            query = query.Include("Member.User");
+        }
+    }
+
+    if (!string.IsNullOrEmpty(pagingParameters.SortColumn) && !string.IsNullOrEmpty(pagingParameters.SortDirection))
+    {
+        query = query.OrderBy($"{pagingParameters.SortColumn} {pagingParameters.SortDirection.ToLower()}");
+    }
+
+    if (pagingParameters.CreatedById != null)
+    {
+        if (typeof(T).GetProperty("CreatedById") != null)
+        {
+            query = query.Where(x => EF.Property<string>(x, "CreatedById") == pagingParameters.CreatedById);
+        }
+    }
+
+    var result = await query.CountAsync();  
+
+    return result;
+}
+
 public async Task<IEnumerable<T>> GetPagedAsync(PagingParameters<T> pagingParameters)
 {
     var query = _context.Set<T>().Where(pagingParameters.Predicate);
@@ -150,7 +215,6 @@ public async Task<IEnumerable<T>> GetPagedAsync(PagingParameters<T> pagingParame
         query = query.Where(lambda);
     }
 
-    // Include the specified navigation properties
     foreach (var include in pagingParameters.Includes)
     {
         var includeString = GetIncludePath(include);
@@ -170,13 +234,11 @@ public async Task<IEnumerable<T>> GetPagedAsync(PagingParameters<T> pagingParame
         }
     }
 
-    // Apply sort ordering
     if (!string.IsNullOrEmpty(pagingParameters.SortColumn) && !string.IsNullOrEmpty(pagingParameters.SortDirection))
     {
         query = query.OrderBy($"{pagingParameters.SortColumn} {pagingParameters.SortDirection.ToLower()}");
     }
 
-    // Check if CreatedById is not null in pagingParameters
     if (pagingParameters.CreatedById != null)
     {
         if (typeof(T).GetProperty("CreatedById") != null)
