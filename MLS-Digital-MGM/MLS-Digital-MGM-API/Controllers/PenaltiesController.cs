@@ -39,15 +39,16 @@ namespace MLS_Digital_MGM_API.Controllers
         }
 
         [HttpGet("paged")]
-        public async Task<IActionResult> GetPenalties(int pageNumber = 1, int pageSize = 10)
+        public async Task<IActionResult> GetPenalties(int pageNumber = 1, int pageSize = 10, int memberId = 0)
         {
             try
             {
                 var dataTableParams = new DataTablesParameters();
-
+               
                 var pagingParameters = new PagingParameters<Penalty>
                 {
-                    Predicate = u => u.Status != Lambda.Deleted,
+
+                    Predicate = u => u.Status != Lambda.Deleted && (memberId > 0 ? u.MemberId == memberId : true),
                     PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
                     PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
                     SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
@@ -55,7 +56,7 @@ namespace MLS_Digital_MGM_API.Controllers
                     SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null,
                     Includes = new Expression<Func<Penalty, object>>[] {
                         p => p.CreatedBy,
-                        p => p.PenaltyType
+                        p => p.PenaltyType,                   
                     }
                 };
 
@@ -116,6 +117,9 @@ namespace MLS_Digital_MGM_API.Controllers
                 var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
                 penalty.CreatedById = user.Id;
 
+                //assign amount remaining equal to penalty fee on creation
+                penalty.AmountRemaining = penalty.Fee;
+
                  // Get or create attachment type
                 var attachmentType = await _repositoryManager.AttachmentTypeRepository.GetAsync(d => d.Name == "Penalty") 
                                     ?? new AttachmentType { Name = "Penalty" };
@@ -145,6 +149,37 @@ namespace MLS_Digital_MGM_API.Controllers
 
         [HttpGet("GetPenaltyById/{id}")]
         public async Task<IActionResult> GetPenaltyById(int id)
+        {
+            try
+            {
+                var penalty = await _repositoryManager.PenaltyRepository.GetByIdAsync(id);
+                if (penalty == null)
+                {
+                    return NotFound();
+                }
+
+                foreach (var attachment in penalty.Attachments)
+                {
+                    string attachmentTypeName = attachment.AttachmentType.Name;
+
+                    string newFilePath = Path.Combine($"http://{HttpContext.Request.Host}/uploads/{Lambda.PenaltyFolderName}", attachment.FileName);
+
+                    attachment.FilePath = newFilePath;
+
+                }
+
+                var mappedPenalty = _mapper.Map<ReadPenaltyDTO>(penalty);
+                return Ok(mappedPenalty);
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpGet("GetPEnaltyByMemberId/{id}")]
+        public async Task<IActionResult> GetPenaltyByMemberId(int id)
         {
             try
             {

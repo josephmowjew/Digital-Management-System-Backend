@@ -22,7 +22,7 @@ namespace DataStore.Migrations
                 name: "IX_Threads_CreatedByMemberId",
                 table: "Threads");
 
-            migrationBuilder.DropColumn(
+           migrationBuilder.DropColumn(
                 name: "CreatedBy",
                 table: "Threads");
 

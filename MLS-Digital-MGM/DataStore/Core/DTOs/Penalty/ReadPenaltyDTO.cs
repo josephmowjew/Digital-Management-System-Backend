@@ -19,6 +19,8 @@ namespace DataStore.Core.DTOs.Penalty
         public DataStore.Core.DTOs.Member.ReadMemberDTO Member { get; set; }
         public int PenaltyTypeId { get; set; }
         public double Fee { get; set; }
+        public double AmountPaid { get; set; }
+        public double AmountRemaining { get; set; }
         public DataStore.Core.DTOs.PenaltyType.ReadPenaltyTypeDTO PenaltyType { get; set; }
          public string PenaltyStatus { get; set; }
         public string Reason { get; set; }

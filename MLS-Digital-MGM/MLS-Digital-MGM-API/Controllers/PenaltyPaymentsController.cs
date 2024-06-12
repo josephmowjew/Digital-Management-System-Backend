@@ -1,14 +1,17 @@
 ﻿using AutoMapper;
 using DataStore.Core.DTOs.PenaltyPayment;
 using DataStore.Core.DTOs.PenaltyType;
+using DataStore.Core.DTOs.ProBonoApplication;
 using DataStore.Core.Models;
 using DataStore.Core.Services.Interfaces;
 using DataStore.Helpers;
 using DataStore.Persistence.Interfaces;
+using Hangfire;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using MLS_Digital_MGM.DataStore.Helpers;
+using System.Linq.Expressions;
 
 namespace MLS_Digital_MGM_API.Controllers
 {
@@ -46,6 +49,9 @@ namespace MLS_Digital_MGM_API.Controllers
                     SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
                     SortColumn = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumn : null,
                     SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null,
+                    Includes = new Expression<Func<PenaltyPayment, object>>[] {
+                        p => p.Attachments
+                    },
 
                 };
 
@@ -102,7 +108,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 var penaltyPayment = _mapper.Map<PenaltyPayment>(penaltyPaymentDTO);
                 string username = _httpContextAccessor.HttpContext.User.Identity.Name;
-
+                
                 var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
                 //penaltyType.CreatedById = user.Id;
 
@@ -267,6 +273,100 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 await _repositoryManager.PenaltyPaymentRepository.DeleteAsync(penaltyPayment);
                 await _unitOfWork.CommitAsync();
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpPost("approve/{id}")]
+        public async Task<IActionResult> Approve(int id)
+        {
+            try
+            {
+                // Fetch  penalty payment
+                var payment = await _repositoryManager.PenaltyPaymentRepository.GetByIdAsync(id);
+
+                if (payment != null)
+                {
+                    payment.PaymentStatus = Lambda.Approved;
+                    payment.DateApproved = DateTime.UtcNow;
+                    await _repositoryManager.PenaltyPaymentRepository.UpdateAsync(payment);
+                    await _unitOfWork.CommitAsync();
+
+
+                    //update penalty amount paid
+                    var penalty = await _repositoryManager.PenaltyRepository.GetByIdAsync(payment.PenaltyId);
+                    if(penalty.AmountPaid < penalty.Fee) {
+                        penalty.AmountPaid += payment.Fee;
+                        penalty.AmountRemaining -= penalty.AmountPaid;
+                        await _repositoryManager.PenaltyRepository.UpdateAsync(penalty);
+                        await _unitOfWork.CommitAsync();
+                    }
+                    
+
+
+                    //send email to the user who created the probono application
+
+                    //string username = _httpContextAccessor.HttpContext.User.Identity.Name;
+
+                    //get user id from username
+                    //var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
+
+                    // Send status details email
+                    //string emailBody = $"Your application for the pro bono application has been accepted. The file number is {fileNumber}";
+
+
+                    //BackgroundJob.Enqueue(() => this._emailService.SendCPDStatusEmailsAsync(new List<string> { user.Email }, emailBody, "Pro Bono Application Status"));
+
+
+
+                    return Ok();
+                }
+                return BadRequest("Payment not found");
+
+            }
+            catch (Exception ex)
+            {
+
+                // Log the exception using ErrorLogService
+                await _errorLogService.LogErrorAsync(ex);
+
+                // Return 500 Internal Server Error
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpPost("denyPayment")]
+        public async Task<IActionResult> DenyPenaltyPayment(DenyPenaltyPaymentDTO denyPenaltyPaymentDTO)
+        {
+            try
+            {
+                var penaltyPayment = await _repositoryManager.PenaltyPaymentRepository.GetByIdAsync(denyPenaltyPaymentDTO.PenaltyPaymentId);
+                penaltyPayment.PaymentStatus = Lambda.Denied;
+                penaltyPayment.ReasonForDenial = denyPenaltyPaymentDTO.Reason;
+                penaltyPayment.DateDenied = DateTime.UtcNow;
+
+                await _repositoryManager.PenaltyPaymentRepository.UpdateAsync(penaltyPayment);
+                await _unitOfWork.CommitAsync();
+
+                //send email to the user who created the probono application
+
+                string username = _httpContextAccessor.HttpContext.User.Identity.Name;
+
+                //get user id from username
+                //var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
+
+                // Send status details email
+                /*string emailBody = $"Your application for the pro bono application has been denied. <br/> Reason: {denyPenaltyPaymentDTO.Reason}";
+
+
+                BackgroundJob.Enqueue(() => this._emailService.SendCPDStatusEmailsAsync(new List<string> { user.Email }, emailBody, "Pro Bono Application Status"));*/
+
 
                 return Ok();
             }

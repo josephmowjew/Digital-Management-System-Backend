@@ -20,6 +20,8 @@ namespace DataStore.Core.Models
         public ApplicationUser CreatedBy { get; set; }
         public int YearOfOperationId { get; set; }
         public YearOfOperation YearOfOperation{ get; set; }
+        public double AmountPaid { get; set; }
+        public double AmountRemaining { get; set; }
         public List<Attachment> Attachments { get; set; }
         [StringLength(maximumLength:100)]
         public string PenaltyStatus { get; set; } = Lambda.Issued;

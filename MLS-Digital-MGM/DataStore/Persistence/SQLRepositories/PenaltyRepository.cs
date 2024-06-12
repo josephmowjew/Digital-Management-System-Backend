@@ -3,6 +3,7 @@ using DataStore.Data;
 using DataStore.Helpers;
 using DataStore.Persistence.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace DataStore.Persistence.SQLRepositories
@@ -26,6 +27,12 @@ namespace DataStore.Persistence.SQLRepositories
             .ThenInclude(t => t.AttachmentType)
             .Include(t => t.YearOfOperation)
             .FirstOrDefaultAsync(t => t.Id == id);
+        }
+
+        
+
+        public async Task<List<Penalty>> GetByMemberId(int memberId) { 
+            return await _context.Penalties.Where(penalty => penalty.MemberId ==  memberId && penalty.Status != Lambda.Deleted).ToListAsync();
         }
 
         // Additional methods specific to the Penalty entity, if needed

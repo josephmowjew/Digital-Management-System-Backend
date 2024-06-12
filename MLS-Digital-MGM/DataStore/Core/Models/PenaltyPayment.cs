@@ -13,6 +13,11 @@ namespace DataStore.Core.Models
         public string? Description { get; set; }
         public double Fee { get; set; }
         public List<Attachment> Attachments { get; set; }
-        
+        public DateTime? DateApproved { get; set; }
+
+        public DateTime? DateDenied { get; set; }
+        [StringLength(250)]
+        public string? ReasonForDenial { get; set; }
+
     }
 }
