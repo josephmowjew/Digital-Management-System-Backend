@@ -55,8 +55,10 @@ namespace MLS_Digital_MGM_API.Controllers
                     SortColumn = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumn : null,
                     SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null,
                     Includes = new Expression<Func<Penalty, object>>[] {
+                        p => p.Member,
                         p => p.CreatedBy,
-                        p => p.PenaltyType,                   
+                        p => p.PenaltyType,
+                        p => p.Attachments
                     }
                 };
 

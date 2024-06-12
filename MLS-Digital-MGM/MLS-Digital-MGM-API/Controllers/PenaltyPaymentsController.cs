@@ -50,6 +50,7 @@ namespace MLS_Digital_MGM_API.Controllers
                     SortColumn = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumn : null,
                     SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null,
                     Includes = new Expression<Func<PenaltyPayment, object>>[] {
+                        p => p.Penalty,
                         p => p.Attachments
                     },
 
@@ -301,14 +302,18 @@ namespace MLS_Digital_MGM_API.Controllers
 
                     //update penalty amount paid
                     var penalty = await _repositoryManager.PenaltyRepository.GetByIdAsync(payment.PenaltyId);
-                    if(penalty.AmountPaid < penalty.Fee) {
+                    if(penalty.Fee >= penalty.AmountRemaining && penalty.AmountRemaining != 0.00) {
                         penalty.AmountPaid += payment.Fee;
-                        penalty.AmountRemaining -= penalty.AmountPaid;
+                        penalty.AmountRemaining -= payment.Fee;
+
+                        if (penalty.Fee == penalty.AmountPaid)
+                        {
+                            penalty.PenaltyStatus = Lambda.Paid;
+                        }
+
                         await _repositoryManager.PenaltyRepository.UpdateAsync(penalty);
                         await _unitOfWork.CommitAsync();
                     }
-                    
-
 
                     //send email to the user who created the probono application
 
