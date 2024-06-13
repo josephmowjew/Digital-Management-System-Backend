@@ -11,6 +11,10 @@ namespace DataStore.Core.DTOs.ProBonoReport
 {
     public class CreateProBonoReportDTO
     {
+        public CreateProBonoReportDTO()
+        {
+            Attachments = new List<IFormFile>();
+        }
         [Display(Name = "Probono Identification Number")]
         public int ProBonoId { get; set; }
 
@@ -23,6 +27,7 @@ namespace DataStore.Core.DTOs.ProBonoReport
         //public string ReportStatus { get; set; } = "Pending";
         [AllowedFileTypes(new[] { ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".txt" })]
         [FileSize(5242880)] // 5 MB
-        public ICollection<IFormFile> Attachments { get; set; }  
+        //public ICollection<IFormFile> Attachments { get; set; }
+        public List<IFormFile> Attachments { get; set; }
     }
 }

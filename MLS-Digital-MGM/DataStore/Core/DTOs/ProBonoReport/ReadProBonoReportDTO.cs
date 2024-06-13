@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DataStore.Core.DTOs.Attachment;
 using DataStore.Core.Models;
 
 namespace DataStore.Core.DTOs.ProBonoReport
@@ -26,7 +27,7 @@ namespace DataStore.Core.DTOs.ProBonoReport
 
         [StringLength(250)]
         public string Description { get; set; }
-        
-        public ICollection<DataStore.Core.Models.Attachment> Attachments { get; set; }
+        public List<ReadAttachmentDTO> Attachments { get; set; }
+        //public ICollection<DataStore.Core.Models.Attachment> Attachments { get; set; }
     }
 }

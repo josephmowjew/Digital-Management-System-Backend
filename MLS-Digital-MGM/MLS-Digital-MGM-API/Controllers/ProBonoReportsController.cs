@@ -275,7 +275,8 @@ public class ProBonoReportsController : Controller
             {
                 FileName = uniqueFileName,
                 FilePath = filePath,
-                AttachmentTypeId = attachmentTypeId
+                AttachmentTypeId = attachmentTypeId,
+                PropertyName = attachment.Name
             });
         }
  
@@ -292,8 +293,19 @@ public class ProBonoReportsController : Controller
             {
                 return NotFound();
             }
-    
-            return Ok(report);
+
+            foreach (var attachments in report.Attachments)
+            {
+                string attachmentTypeName = attachments.AttachmentType.Name;
+
+                string newFilePath = Path.Combine($"http://{HttpContext.Request.Host}/uploads/{Lambda.ProBonoReportFolderName}", attachments.FileName);
+
+                attachments.FilePath = newFilePath;
+
+            }
+
+            var mappedReport = _mapper.Map<ReadProBonoReportDTO>(report);
+            return Ok(mappedReport);
         }
         catch (Exception ex)
         {

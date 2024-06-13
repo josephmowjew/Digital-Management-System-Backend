@@ -8,7 +8,8 @@ namespace DataStore.Core.Mappers
     {
         public ProBonoProfile()
         {
-            CreateMap<ProBonoApplication, ProBono>();
+            CreateMap<ProBonoApplication, ProBono>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore());
             CreateMap<ProBono, ReadProBonoDTO>();
             CreateMap<UpdateProBonoDTO, ProBono>();
             
