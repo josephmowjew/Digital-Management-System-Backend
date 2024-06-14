@@ -213,10 +213,14 @@ namespace MLS_Digital_MGM_API.Controllers
                     proBonoApplication.Attachments = await SaveAttachmentsAsync(proBonoApplicationDTO.Attachments, attachmentType.Id);
                 }
 
+                //save changes to the database 
+
+                await _unitOfWork.CommitAsync();
+
                 //get the current role of the user
 
-            
-                 string currentRole  = Lambda.GetCurrentUserRole(_repositoryManager,user.Id);
+
+                string currentRole  = Lambda.GetCurrentUserRole(_repositoryManager,user.Id);
 
 
                 // Check if the user is secretariat and approve the application if so
@@ -251,7 +255,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
                
                 // Add ProBonoApplication to repository
-                await _repositoryManager.ProBonoApplicationRepository.AddAsync(proBonoApplication);
+               
                 await _unitOfWork.CommitAsync();
 
                 
