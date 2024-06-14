@@ -97,15 +97,28 @@ namespace MLS_Digital_MGM_API.Controllers
                     return Ok(Enumerable.Empty<ReadProBonoApplicationDTO>()); // Return empty list
 
                 }
-    
-                    // Map the Roles to a list of ReadFirmDTOs
-                var probonoapplicationFirms = _mapper.Map<List<ReadProBonoApplicationDTO>>(proBonoApplicationspaged);
+
+                // Map the Roles to a list of ReadFirmDTOs
+                var probonoapplication = _mapper.Map<List<ReadProBonoApplicationDTO>>(proBonoApplicationspaged);
+
+                foreach (var probono in probonoapplication)
+                {
+                    foreach (var attachment in probono.Attachments)
+                    {
+                        string attachmentTypeName = attachment.AttachmentType.Name;
+
+
+                        string newfilePath = Path.Combine("/uploads/ProBonoAttachments/", attachment.FileName);
+
+                        attachment.FilePath = newfilePath;
+                    }
+                }
 
                 // Return datatable JSON if the request came from a datatable
                 if (dataTableParams.LoadFromRequest(_httpContextAccessor))
                 {
                     var draw = dataTableParams.Draw;
-                    var resultTotalFiltred = probonoapplicationFirms.Count;
+                    var resultTotalFiltred = probonoapplication.Count;
                     var totalRecords = await _repositoryManager.ProBonoApplicationRepository.CountAsync(pagingParameters);
 
                     return Json(new
@@ -113,13 +126,13 @@ namespace MLS_Digital_MGM_API.Controllers
                         draw,
                         recordsFiltered = totalRecords,
                         recordsTotal = totalRecords,
-                        data = probonoapplicationFirms.ToList() // Materialize the enumerable
+                        data = probonoapplication.ToList() // Materialize the enumerable
                     });
                 }
 
 
                 // Return an Ok result with the mapped Roles
-                return Ok(probonoapplicationFirms);
+                return Ok(probonoapplication);
     
             }
             catch (Exception ex)
