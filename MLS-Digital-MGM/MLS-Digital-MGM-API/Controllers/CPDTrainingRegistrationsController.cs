@@ -339,38 +339,74 @@ namespace MLS_Digital_MGM_API.Controllers
             }
         }
 
-        private async Task<List<Attachment>> SaveAttachmentsAsync(IEnumerable<IFormFile> attachments, int attachmentTypeId)
-        {
+
+    private async Task<List<Attachment>> SaveAttachmentsAsync(IEnumerable<IFormFile> attachments, int attachmentTypeId)
+     {
             var attachmentsList = new List<Attachment>();
             var hostEnvironment = HttpContext.RequestServices.GetRequiredService<IWebHostEnvironment>();
             var webRootPath = hostEnvironment.WebRootPath;
-            var cpdTrainingAttachmentsPath = Path.Combine(webRootPath, "Uploads", "CPDTrainingRegistration");
 
-            if (!Directory.Exists(cpdTrainingAttachmentsPath))
-                Directory.CreateDirectory(cpdTrainingAttachmentsPath);
+            // Log the web root path for debugging
+           
 
-            foreach (var formFile in attachments)
+            // Check if webRootPath is null or empty
+            if (string.IsNullOrWhiteSpace(webRootPath))
             {
-                var uniqueFileName = FileNameGenerator.GenerateUniqueFileName(formFile.FileName);
-                var filePath = Path.Combine(cpdTrainingAttachmentsPath, uniqueFileName);
+                throw new ArgumentNullException(nameof(webRootPath), "Web root path cannot be null or empty");
+            }
 
-                await using (var fileStream = new FileStream(filePath, FileMode.Create))
+            var AttachmentsPath = Path.Combine(webRootPath, "Uploads/CPDTrainingRegistration" );
+
+          
+
+            // Ensure the directory exists
+            if (!Directory.Exists(AttachmentsPath))
+            {
+                Directory.CreateDirectory(AttachmentsPath);
+               
+            }
+
+            foreach (var attachment in attachments)
+            {
+                if (attachment == null || string.IsNullOrWhiteSpace(attachment.FileName))
                 {
-                    await formFile.CopyToAsync(fileStream);
+                   
+                    continue;
                 }
 
-                var attachment = new Attachment
+                var uniqueFileName = FileNameGenerator.GenerateUniqueFileName(attachment.FileName);
+                var filePath = Path.Combine(AttachmentsPath, uniqueFileName);
+
+                // Log the file path
+               
+
+                try
                 {
-                    FileName = uniqueFileName,
-                    FilePath = filePath,
-                    AttachmentTypeId = attachmentTypeId,
-                    PropertyName = formFile.Name
-                };
-                attachmentsList.Add(attachment);
+                    using (var stream = System.IO.File.Create(filePath))
+                    {
+                        await attachment.CopyToAsync(stream);
+                    }
+
+                    attachmentsList.Add(new Attachment
+                    {
+                        FileName = uniqueFileName,
+                        FilePath = filePath,
+                        AttachmentTypeId = attachmentTypeId,
+                        PropertyName = attachment.Name
+                    });
+                }
+                catch (Exception ex)
+                {
+                   
+                    throw;
+                }
             }
 
             return attachmentsList;
         }
+
+
+       
 
         //method to accept cpd training registration taking the id of the cpd training registration
         [HttpGet("AcceptCPDTrainingRegistration/{id}")]

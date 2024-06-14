@@ -458,37 +458,78 @@ namespace MLS_Digital_MGM_API.Controllers
         return formFileProperties;
     }
 
-    private async Task<List<Attachment>> SaveAttachmentsAsync(IEnumerable<IFormFile> attachments, int attachmentTypeId)
-    {
-        var attachmentsList = new List<Attachment>();
-        var hostEnvironment = HttpContext.RequestServices.GetRequiredService<IWebHostEnvironment>();
-        var webRootPath = hostEnvironment.WebRootPath;
-        var applicationAttachmentsPath = Path.Combine(webRootPath, "Uploads/"+Lambda.LicenseApplicationFolderName);
+     private async Task<List<Attachment>> SaveAttachmentsAsync(IEnumerable<IFormFile> attachments, int attachmentTypeId)
+     {
+            var attachmentsList = new List<Attachment>();
+            var hostEnvironment = HttpContext.RequestServices.GetRequiredService<IWebHostEnvironment>();
+            var webRootPath = hostEnvironment.WebRootPath;
 
-        Directory.CreateDirectory(applicationAttachmentsPath);
+            // Log the web root path for debugging
+            Log($"Web Root Path: {webRootPath}");
 
-        foreach (var attachment in attachments)
-        {
-
-            var uniqueFileName = FileNameGenerator.GenerateUniqueFileName(attachment.FileName);
-            var propertyName = attachment.Name;
-            var filePath = Path.Combine(applicationAttachmentsPath, uniqueFileName);
-            using (var stream = System.IO.File.Create(filePath))
+            // Check if webRootPath is null or empty
+            if (string.IsNullOrWhiteSpace(webRootPath))
             {
-                await attachment.CopyToAsync(stream);
+                throw new ArgumentNullException(nameof(webRootPath), "Web root path cannot be null or empty");
             }
 
-            attachmentsList.Add(new Attachment
+            var AttachmentsPath = Path.Combine(webRootPath, "Uploads",Lambda.LicenseApplicationFolderName );
+
+           
+
+            // Ensure the directory exists
+            if (!Directory.Exists(AttachmentsPath))
             {
-                FileName = uniqueFileName,
-                FilePath = filePath,
-                AttachmentTypeId = attachmentTypeId,
-                PropertyName = attachment.Name
-            });
+                Directory.CreateDirectory(AttachmentsPath);
+               
+            }
+
+            foreach (var attachment in attachments)
+            {
+                if (attachment == null || string.IsNullOrWhiteSpace(attachment.FileName))
+                {
+                  
+                    continue;
+                }
+
+                var uniqueFileName = FileNameGenerator.GenerateUniqueFileName(attachment.FileName);
+                var filePath = Path.Combine(AttachmentsPath, uniqueFileName);
+
+               
+
+                try
+                {
+                    using (var stream = System.IO.File.Create(filePath))
+                    {
+                        await attachment.CopyToAsync(stream);
+                    }
+
+                    attachmentsList.Add(new Attachment
+                    {
+                        FileName = uniqueFileName,
+                        FilePath = filePath,
+                        AttachmentTypeId = attachmentTypeId,
+                        PropertyName = attachment.Name
+                    });
+                }
+                catch (Exception ex)
+                {
+                  
+                    throw;
+                }
+            }
+
+            return attachmentsList;
         }
 
-        return attachmentsList;
-    }
+
+
+private void Log(string message)
+{
+    // Implement your logging mechanism here
+    Console.WriteLine(message);
+}
+
 
 
     // POST api/licenseapplications/deny// POST api/licenseapplications/deny
