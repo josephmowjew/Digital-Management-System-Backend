@@ -23,13 +23,14 @@ namespace DataStore.Helpers
         public static string Submit = "Submit";
 
         public static string ProBonoApplication = "Pro Bono Application";
+        public static string ProBonoApplicationFolderName = "ProBonoApplicationAttachments";
         public static string ProBono = "ProBono";
-        public static string ProBonoReportFolderName = "ProBonoReport";
+        public static string ProBonoReportFolderName = "ProBonoReportAttachments";
         public static string LicenseApplication = "License Application";
-        public static string LicenseApplicationFolderName = "LicenseApplication";
-        public static string CPDTrainingFolderName ="CPDTrainings";
-        public static string PenaltyFolderName = "Penalties";
-        public static string PenaltyPaymentFolderName = "PenaltyPayments";
+        public static string LicenseApplicationFolderName = "LicenseApplicationAttachment";
+        public static string CPDTrainingFolderName ="CPDTrainingsAttachments";
+        public static string PenaltyFolderName = "PenaltiesAttachments";
+        public static string PenaltyPaymentFolderName = "PenaltyPaymentsAttachments ";
 
 
         private static Random _random = new Random(); // declaring it as static and initiating it once

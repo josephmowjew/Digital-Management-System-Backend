@@ -70,7 +70,8 @@ namespace MLS_Digital_MGM_API.Controllers
                     Includes = new Expression<Func<ProBonoApplication, object>>[] {
                         p => p.YearOfOperation,
                         p => p.ProbonoClient,
-                        p => p.CreatedBy
+                        p => p.CreatedBy,
+                        p => p.Attachments
                     },
                     CreatedById = string.Equals(currentRole, "secretariat", StringComparison.OrdinalIgnoreCase) ? null : CreatedById,
 
@@ -108,7 +109,7 @@ namespace MLS_Digital_MGM_API.Controllers
                         string attachmentTypeName = attachment.AttachmentType.Name;
 
 
-                        string newfilePath = Path.Combine("/uploads/ProBonoAttachments/", attachment.FileName);
+                        string newfilePath = Path.Combine("/uploads/ProBonoApplicationAttachments/", attachment.FileName);
 
                         attachment.FilePath = newfilePath;
                     }
@@ -297,7 +298,7 @@ namespace MLS_Digital_MGM_API.Controllers
         }   
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateProBonoApplication(int id, [FromBody] UpdateProBonoApplicationDTO proBonoApplicationDTO)
+        public async Task<IActionResult> UpdateProBonoApplication(int id, [FromForm] UpdateProBonoApplicationDTO proBonoApplicationDTO)
         {
             try
             {
@@ -369,7 +370,7 @@ namespace MLS_Digital_MGM_API.Controllers
             throw new ArgumentNullException(nameof(webRootPath), "Web root path cannot be null or empty");
         }
 
-        var attachmentsPath = Path.Combine(webRootPath, "Uploads/ProBonoAttachments" );
+        var attachmentsPath = Path.Combine(webRootPath, "Uploads/ProBonoApplicationAttachments" );
 
         
 
@@ -433,7 +434,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 {
                     string attachmentTypeName = attachment.AttachmentType.Name;
 
-                    string newFilePath = Path.Combine($"http://{HttpContext.Request.Host}/uploads/{Lambda.ProBono}", attachment.FileName);
+                    string newFilePath = Path.Combine($"http://{HttpContext.Request.Host}/uploads/{Lambda.ProBonoApplicationFolderName}", attachment.FileName);
 
                     attachment.FilePath = newFilePath;
 

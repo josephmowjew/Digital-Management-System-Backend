@@ -64,6 +64,7 @@ namespace DataStore.Core.Models
         public string? ExplanationForNoComplianceWithPenalties { get; set; }
         public virtual List<LicenseApprovalHistory> LicenseApprovalHistories { get; set; }
 
+
     }
 
 

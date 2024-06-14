@@ -23,13 +23,17 @@ namespace DataStore.Core.DTOs.ProBonoApplication
 
         public int ProbonoClientId { get; set; }
 
-        
-        public string SummaryOfDispute { get; set; }
-        public int YearOfOperationId { get; set; }
+        public string ApplicationStatus { get; set; } = Lambda.Pending;
 
-        //[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public DateTime? ApprovedDate { get; set; } = null;
+
+
+        public string SummaryOfDispute { get; set; }
+
+
+        public int YearOfOperationId { get; set; }
         [AllowedFileTypes(new[] { ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".txt" })]
         [FileSize(5242880)] // 5 MB
-        public ICollection<IFormFile>? Attachments { get; set; } 
+        public ICollection<IFormFile>? Attachments { get; set; }
     }
 }
