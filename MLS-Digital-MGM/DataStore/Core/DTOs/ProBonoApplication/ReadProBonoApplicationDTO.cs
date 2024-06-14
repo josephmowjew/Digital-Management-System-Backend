@@ -1,3 +1,4 @@
+using DataStore.Core.DTOs.Attachment;
 using DataStore.Core.DTOs.User;
 using DataStore.Core.Models;
 using System;
@@ -8,10 +9,10 @@ namespace DataStore.Core.DTOs.ProBonoApplication
 {
     public class ReadProBonoApplicationDTO
     {
-        public ReadProBonoApplicationDTO()
+        /*public ReadProBonoApplicationDTO()
         {
             Attachments = new List<DataStore.Core.Models.Attachment>();
-        }
+        }*/
 
         public int Id { get; set; }
 
@@ -38,7 +39,7 @@ namespace DataStore.Core.DTOs.ProBonoApplication
         public string SummaryOfDispute { get; set; }
         public int YearOfOperationId { get; set; }
         public DataStore.Core.Models.YearOfOperation YearOfOperation { get; set; }
-        public ICollection<DataStore.Core.Models.Attachment> Attachments { get; set; }
+        public List<ReadAttachmentDTO> Attachments { get; set; }
         public DateOnly CreatedDate { get; set; }
     }
 }

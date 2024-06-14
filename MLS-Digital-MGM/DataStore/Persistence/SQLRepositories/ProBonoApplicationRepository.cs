@@ -21,6 +21,16 @@ namespace DataStore.Persistence.SQLRepositories
             this._unitOfWork = unitOfWork;
         }
 
-       
+        public async Task<ProBonoApplication> GetByIdAsync(int id)
+        {
+            return await _context.ProBonoApplications
+            .Include(t => t.CreatedBy)
+            .Include(t => t.Attachments)
+            .ThenInclude(t => t.AttachmentType)
+            .Include(t => t.YearOfOperation)
+            .FirstOrDefaultAsync(t => t.Id == id);
+        }
+
+
     }
 }

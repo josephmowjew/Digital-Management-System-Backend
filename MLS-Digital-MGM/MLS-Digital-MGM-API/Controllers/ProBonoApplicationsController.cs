@@ -16,6 +16,7 @@ using MLS_Digital_MGM.DataStore.Helpers;
 using System.Linq.Expressions;
 using Microsoft.AspNetCore.Authorization;
 using Hangfire;
+using DataStore.Core.DTOs.Penalty;
 
 namespace MLS_Digital_MGM_API.Controllers 
 {
@@ -363,7 +364,8 @@ namespace MLS_Digital_MGM_API.Controllers
                 {
                     FileName = uniqueFileName,
                     FilePath = filePath,
-                    AttachmentTypeId = attachmentTypeId
+                    AttachmentTypeId = attachmentTypeId,
+                    PropertyName = attachment.Name
                 });
             }
 
@@ -379,6 +381,16 @@ namespace MLS_Digital_MGM_API.Controllers
                 if (proBonoApplication == null)
                 {
                     return NotFound();
+                }
+
+                foreach (var attachment in proBonoApplication.Attachments)
+                {
+                    string attachmentTypeName = attachment.AttachmentType.Name;
+
+                    string newFilePath = Path.Combine($"http://{HttpContext.Request.Host}/uploads/{Lambda.ProBono}", attachment.FileName);
+
+                    attachment.FilePath = newFilePath;
+
                 }
                 var proBonoApplicationDTO = _mapper.Map<ReadProBonoApplicationDTO>(proBonoApplication);
                 return Ok(proBonoApplicationDTO);
