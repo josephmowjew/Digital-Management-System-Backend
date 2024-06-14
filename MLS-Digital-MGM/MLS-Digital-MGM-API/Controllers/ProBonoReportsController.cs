@@ -253,33 +253,65 @@ public class ProBonoReportsController : Controller
         }
     }
 
-     private async Task<List<Attachment>> SaveAttachmentsAsync(IEnumerable<IFormFile> attachments, int attachmentTypeId)
+    
+    private async Task<List<Attachment>> SaveAttachmentsAsync(IEnumerable<IFormFile> attachments, int attachmentTypeId)
     {
         var attachmentsList = new List<Attachment>();
         var hostEnvironment = HttpContext.RequestServices.GetRequiredService<IWebHostEnvironment>();
         var webRootPath = hostEnvironment.WebRootPath;
-        var proBonoReportAttachmentsPath = Path.Combine(webRootPath, "Uploads/ProBonoReportAttachments");
-    
-        Directory.CreateDirectory(proBonoReportAttachmentsPath);
-    
+
+
+        // Check if webRootPath is null or empty
+        if (string.IsNullOrWhiteSpace(webRootPath))
+        {
+            throw new ArgumentNullException(nameof(webRootPath), "Web root path cannot be null or empty");
+        }
+
+        var applicationAttachmentsPath = Path.Combine(webRootPath, "Uploads/ProBonoReportAttachments" );
+
+       
+        // Ensure the directory exists
+        if (!Directory.Exists(applicationAttachmentsPath))
+        {
+            Directory.CreateDirectory(applicationAttachmentsPath);
+           
+        }
+
         foreach (var attachment in attachments)
         {
-            var uniqueFileName = FileNameGenerator.GenerateUniqueFileName(attachment.FileName);
-            var filePath = Path.Combine(proBonoReportAttachmentsPath, uniqueFileName);
-            using (var stream = System.IO.File.Create(filePath))
+            if (attachment == null || string.IsNullOrWhiteSpace(attachment.FileName))
             {
-                await attachment.CopyToAsync(stream);
+              
+                continue;
             }
-    
-            attachmentsList.Add(new Attachment
+
+            var uniqueFileName = FileNameGenerator.GenerateUniqueFileName(attachment.FileName);
+            var filePath = Path.Combine(applicationAttachmentsPath, uniqueFileName);
+
+           
+
+            try
             {
-                FileName = uniqueFileName,
-                FilePath = filePath,
-                AttachmentTypeId = attachmentTypeId,
-                PropertyName = attachment.Name
-            });
+                using (var stream = System.IO.File.Create(filePath))
+                {
+                    await attachment.CopyToAsync(stream);
+                }
+
+                attachmentsList.Add(new Attachment
+                {
+                    FileName = uniqueFileName,
+                    FilePath = filePath,
+                    AttachmentTypeId = attachmentTypeId,
+                    PropertyName = attachment.Name
+                });
+            }
+            catch (Exception ex)
+            {
+               
+                throw;
+            }
         }
- 
+
         return attachmentsList;
     }
 
