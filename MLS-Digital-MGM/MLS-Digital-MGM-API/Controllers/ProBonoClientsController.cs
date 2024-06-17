@@ -112,7 +112,7 @@ namespace MLS_Digital_MGM_API.Controllers // Update with your actual namespace
                 // If no identity types found, return NotFound result
                 if (probonoClients == null || !probonoClients.Any())
                 {
-                    return NotFound();
+                    return Ok(new List<ReadProBonoClientDTO>());
                 }
 
                 // Map pro bono clients types to DTOs and return as Ok result
