@@ -15,6 +15,7 @@ using MLS_Digital_MGM.DataStore.Helpers;
 using Microsoft.CodeAnalysis.Elfie.Serialization;
 using Microsoft.AspNetCore.Authorization;
 using System.Linq.Expressions;
+using System.Composition;
 
 namespace MLS_Digital_MGM_API.Controllers 
 {
@@ -259,7 +260,19 @@ namespace MLS_Digital_MGM_API.Controllers
                     return NotFound();
                 }
 
+
+                foreach (var attachment in memberQualification.Attachments)
+                {
+                    string attachmentTypeName = attachment.AttachmentType.Name;
+
+
+                    string newfilePath = Path.Combine("/uploads/QualificationAttachments/", attachment.FileName);
+
+                    attachment.FilePath = newfilePath;
+                }
+
                 var mappedMemberQualification = _mapper.Map<ReadMemberQualificationDTO>(memberQualification);
+
                 return Ok(mappedMemberQualification);
             }
             catch (Exception ex)

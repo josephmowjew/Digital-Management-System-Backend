@@ -23,12 +23,21 @@ namespace DataStore.Persistence.SQLRepositories
 
     public async Task<MemberQualification?> GetMemberQualificationByMemberId(int memberId)
     {
-      return await _context.MemberQualifications.Include(m => m.Member).Include(q => q.QualificationType).FirstOrDefaultAsync(x => x.MemberId == memberId);
+      return await _context.MemberQualifications
+                .Include(m => m.Member)
+                .Include(q => q.QualificationType)
+                .Include(t => t.Attachments)
+                .ThenInclude(t => t.AttachmentType)
+                .FirstOrDefaultAsync(x => x.MemberId == memberId);
     }
 
     public new async Task<MemberQualification> GetByIdAsync(int id)
     {
-      return await _context.MemberQualifications.Include(m => m.Member).Include(q => q.QualificationType).FirstOrDefaultAsync(x => x.Id == id);
+      return await _context.MemberQualifications
+                .Include(m => m.Member)
+                
+                .Include(q => q.QualificationType)
+                .FirstOrDefaultAsync(x => x.Id == id);
     }
   }
 }

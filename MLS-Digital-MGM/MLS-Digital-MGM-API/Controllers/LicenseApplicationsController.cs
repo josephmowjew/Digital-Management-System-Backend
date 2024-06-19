@@ -369,8 +369,9 @@ namespace MLS_Digital_MGM_API.Controllers
                 string attachmentTypeName = attachment.AttachmentType.Name;
 
                 string newFilePath = Path.Combine($"http://{HttpContext.Request.Host}/uploads/{Lambda.LicenseApplicationFolderName}", attachment.FileName);
+                //string newFilePath = Path.Combine($"https://{HttpContext.Request.Host}/uploads/{Lambda.PenaltyPaymentFolderName}", attachment.FileName);
 
-                attachment.FilePath = newFilePath;
+                    attachment.FilePath = newFilePath;
                 //get the property with the same as the attachment property name
                // var property = licenseApplicationDTO.GetType().GetProperty(attachment.PropertyName);
 
