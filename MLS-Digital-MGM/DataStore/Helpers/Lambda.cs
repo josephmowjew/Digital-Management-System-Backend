@@ -31,6 +31,7 @@ namespace DataStore.Helpers
         public static string CPDTrainingFolderName ="CPDTrainingsAttachments";
         public static string PenaltyFolderName = "PenaltiesAttachments";
         public static string PenaltyPaymentFolderName = "PenaltyPaymentsAttachments ";
+        public static string MemberQualificationFolderName = "QualificationAttachments";
 
 
         private static Random _random = new Random(); // declaring it as static and initiating it once
