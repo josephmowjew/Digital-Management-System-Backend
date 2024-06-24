@@ -338,7 +338,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 throw new ArgumentNullException(nameof(webRootPath), "Web root path cannot be null or empty");
             }
 
-            var AttachmentsPath = Path.Combine(webRootPath, "Uploads/CPDTrainings" );
+            var AttachmentsPath = Path.Combine(webRootPath, "Uploads/CPDTrainingsAttachments" );
 
            
 
