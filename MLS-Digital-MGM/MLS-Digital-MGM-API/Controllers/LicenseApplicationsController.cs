@@ -279,6 +279,8 @@ namespace MLS_Digital_MGM_API.Controllers
                         //map update to existing application
                         _mapper.Map(licenseApplicationDTO, existingApplication);
 
+                      
+
 
                         // Update the application
                         await _repositoryManager.LicenseApplicationRepository.UpdateAsync(existingApplication);
@@ -368,7 +370,7 @@ namespace MLS_Digital_MGM_API.Controllers
             {
                 string attachmentTypeName = attachment.AttachmentType.Name;
 
-                string newFilePath = Path.Combine($"http://{HttpContext.Request.Host}/uploads/{Lambda.LicenseApplicationFolderName}", attachment.FileName);
+                string newFilePath = Path.Combine($"/uploads/{Lambda.LicenseApplicationFolderName}", attachment.FileName);
                 //string newFilePath = Path.Combine($"https://{HttpContext.Request.Host}/uploads/{Lambda.PenaltyPaymentFolderName}", attachment.FileName);
 
                     attachment.FilePath = newFilePath;
