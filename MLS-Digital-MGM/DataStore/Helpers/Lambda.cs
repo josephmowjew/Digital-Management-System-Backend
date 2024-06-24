@@ -22,6 +22,9 @@ namespace DataStore.Helpers
         public static string Draft = "Draft";
         public static string Submit = "Submit";
 
+        public static string https = "https";
+        public static string http = "http";
+
         public static string ProBonoApplication = "Pro Bono Application";
         public static string ProBonoApplicationFolderName = "ProBonoApplicationAttachments";
         public static string ProBono = "ProBono";

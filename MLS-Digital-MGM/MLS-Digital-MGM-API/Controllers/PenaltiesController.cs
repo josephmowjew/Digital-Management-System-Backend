@@ -179,7 +179,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 {
                     string attachmentTypeName = attachment.AttachmentType.Name;
 
-                    string newFilePath = Path.Combine($"http://{HttpContext.Request.Host}/uploads/{Lambda.PenaltyFolderName}", attachment.FileName);
+                    string newFilePath = Path.Combine($"{Lambda.https}://{HttpContext.Request.Host}/uploads/{Lambda.PenaltyFolderName}", attachment.FileName);
 
                     attachment.FilePath = newFilePath;
 
