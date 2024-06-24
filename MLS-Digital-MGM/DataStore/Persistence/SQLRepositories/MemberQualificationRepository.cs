@@ -35,7 +35,8 @@ namespace DataStore.Persistence.SQLRepositories
     {
       return await _context.MemberQualifications
                 .Include(m => m.Member)
-                
+                .Include(t => t.Attachments)
+                .ThenInclude(t => t.AttachmentType)
                 .Include(q => q.QualificationType)
                 .FirstOrDefaultAsync(x => x.Id == id);
     }

@@ -249,12 +249,12 @@ namespace MLS_Digital_MGM_API.Controllers
             }
         }
 
-        [HttpGet("get/{id}")]
+        [HttpGet("GetQualificationById/{id}")]
         public async Task<IActionResult> GetMemberQualification(int id)
         {
             try
             {
-                var memberQualification = await _repositoryManager.MemberQualificationRepository.GetMemberQualificationByMemberId(id);
+                var memberQualification = await _repositoryManager.MemberQualificationRepository.GetByIdAsync(id);
                 if (memberQualification == null)
                 {
                     return NotFound();
