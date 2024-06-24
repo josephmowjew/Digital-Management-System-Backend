@@ -27,7 +27,7 @@ namespace DataStore.Helpers
         public static string ProBono = "ProBono";
         public static string ProBonoReportFolderName = "ProBonoReportAttachments";
         public static string LicenseApplication = "License Application";
-        public static string LicenseApplicationFolderName = "LicenseApplicationAttachment";
+        public static string LicenseApplicationFolderName = "LicenseApplicationAttachments";
         public static string CPDTrainingFolderName ="CPDTrainingsAttachments";
         public static string PenaltyFolderName = "PenaltiesAttachments";
         public static string PenaltyPaymentFolderName = "PenaltyPaymentsAttachments ";

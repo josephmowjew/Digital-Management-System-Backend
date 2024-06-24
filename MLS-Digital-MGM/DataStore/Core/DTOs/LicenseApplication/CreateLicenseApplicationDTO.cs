@@ -62,6 +62,7 @@ namespace DataStore.Core.DTOs.LicenseApplication
         public int? FirmId { get; set; }
         public bool CertificateOfAdmission {get; set;}
          public IFormFile? CertificateOfAdmissionAttachment {get; set;}
+        [StringLength(maximumLength: 250)]
         public string? ExplanationForNotSubmittingCertificateOfAdmission {get; set;}
 
         public bool HasPreviousLicenseApplication {get; set;}

@@ -41,76 +41,73 @@ namespace MLS_Digital_MGM_API.Controllers
         }
 
        [HttpGet("paged")]
-public async Task<IActionResult> GetCommitteeMembers(int pageNumber = 1, int pageSize = 10, int committeeId = 0)
-{
-    try
-    {
-        var dataTableParams = new DataTablesParameters(); // Create DataTables parameters instance
-
-        string username = _httpContextAccessor.HttpContext.User.Identity.Name;
-        var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
-        string userId = user.Id;
-
-        Expression<Func<CommitteeMembership, bool>> predicate;
-
-        
-       
-
-        var pagingParameters = new PagingParameters<CommitteeMembership>
+        public async Task<IActionResult> GetCommitteeMembers(int pageNumber = 1, int pageSize = 10, int committeeId = 0)
         {
-            Predicate = cm => cm.CommitteeID == committeeId && cm.Status != Lambda.Deleted,
-            PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
-            PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
-            SortColumn = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumn : null,
-            SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null,
-            // Includes should be specified in your PagingParameters
-            Includes = new Expression<Func<CommitteeMembership, object>>[]{
-                cm => cm.MemberShip
-            }
-        };
-
-        var committeeMembers = await _repositoryManager.CommitteeMemberRepository.GetPagedAsync(pagingParameters);
-
-        if (committeeMembers == null || !committeeMembers.Any())
-        {
-            if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+            try
             {
-                var draw = dataTableParams.Draw;
-                return Json(new
+                var dataTableParams = new DataTablesParameters(); // Create DataTables parameters instance
+
+                string username = _httpContextAccessor.HttpContext.User.Identity.Name;
+                var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
+                string userId = user.Id;
+
+                Expression<Func<CommitteeMembership, bool>> predicate;
+
+                var pagingParameters = new PagingParameters<CommitteeMembership>
                 {
-                    draw,
-                    recordsFiltered = 0,
-                    recordsTotal = 0,
-                    data = Enumerable.Empty<ReadCommitteeMemberShipDTO>()
-                });
-            }
-            return Ok(Enumerable.Empty<ReadCommitteeMemberShipDTO>());
-        }
+                    Predicate = cm => cm.CommitteeID == committeeId && cm.Status != Lambda.Deleted && cm.MemberShipId == userId,
+                    PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
+                    PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
+                    SortColumn = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumn : null,
+                    SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null,
+                    // Includes should be specified in your PagingParameters
+                    Includes = new Expression<Func<CommitteeMembership, object>>[]{
+                        cm => cm.MemberShip
+                    }
+                };
 
-        var mappedCommitteeMembers = _mapper.Map<List<ReadCommitteeMemberShipDTO>>(committeeMembers);
+                var committeeMembers = await _repositoryManager.CommitteeMemberRepository.GetPagedAsync(pagingParameters);
 
-        if (dataTableParams.LoadFromRequest(_httpContextAccessor))
-        {
-            var draw = dataTableParams.Draw;
-            var totalRecords = await _repositoryManager.CommitteeMemberRepository.CountAsync(pagingParameters);
+                if (committeeMembers == null || !committeeMembers.Any())
+                {
+                    if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                    {
+                        var draw = dataTableParams.Draw;
+                        return Json(new
+                        {
+                            draw,
+                            recordsFiltered = 0,
+                            recordsTotal = 0,
+                            data = Enumerable.Empty<ReadCommitteeMemberShipDTO>()
+                        });
+                    }
+                    return Ok(Enumerable.Empty<ReadCommitteeMemberShipDTO>());
+                }
+
+                var mappedCommitteeMembers = _mapper.Map<List<ReadCommitteeMemberShipDTO>>(committeeMembers);
+
+                if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                {
+                    var draw = dataTableParams.Draw;
+                    var totalRecords = await _repositoryManager.CommitteeMemberRepository.CountAsync(pagingParameters);
             
-            return Json(new
-            {
-                draw,
-                recordsFiltered = totalRecords,
-                recordsTotal = totalRecords,
-                data = mappedCommitteeMembers
-            });
-        }
+                    return Json(new
+                    {
+                        draw,
+                        recordsFiltered = totalRecords,
+                        recordsTotal = totalRecords,
+                        data = mappedCommitteeMembers
+                    });
+                }
 
-        return Ok(mappedCommitteeMembers);
-    }
-    catch (Exception ex)
-    {
-        await _errorLogService.LogErrorAsync(ex);
-        return StatusCode(500, "Internal server error");
-    }
-}
+                return Ok(mappedCommitteeMembers);
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
 
         [HttpPost]
         public async Task<IActionResult> AddCommitteeMember([FromForm] CreateCommitteeMemberShipDTO committeeMemberDTO)

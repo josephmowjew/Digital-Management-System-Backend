@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DataStore.Core.DTOs.User;
 using DataStore.Helpers;
+using Microsoft.AspNetCore.Http;
 
 namespace DataStore.Core.Models
 {
@@ -63,6 +64,10 @@ namespace DataStore.Core.Models
          [StringLength(maximumLength:250)]
         public string? ExplanationForNoComplianceWithPenalties { get; set; }
         public virtual List<LicenseApprovalHistory> LicenseApprovalHistories { get; set; }
+        public bool CertificateOfAdmission { get; set; }
+        [StringLength(maximumLength: 250)]
+        public string? ExplanationForNotSubmittingCertificateOfAdmission { get; set; }
+
 
 
     }

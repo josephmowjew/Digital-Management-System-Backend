@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using System.ComponentModel.DataAnnotations;
 
 namespace DataStore.Core.DTOs.LicenseApplication
@@ -20,6 +21,8 @@ namespace DataStore.Core.DTOs.LicenseApplication
         public bool RenewedLicensePreviousYear { get; set; }
         public bool ObtainedLeaveToRenewLicenseOutOfTime { get; set; }
         public bool PaidAnnualSubscriptionToSociety { get; set; }
+        [StringLength(250)]
+        public string? ExplanationForNoAnnualSubscriptionToSociety { get; set; }
         public bool MadeContributionToFidelityFund { get; set; }
         [StringLength(250)]
         public string ExplanationForNoContributionToFidelityFund { get; set; }
@@ -47,5 +50,8 @@ namespace DataStore.Core.DTOs.LicenseApplication
         public bool CompliedWithPenaltiesImposedUnderTheAct { get; set; }
         [StringLength(250)]
         public string ExplanationForNoComplianceWithPenalties { get; set; }
+        public bool CertificateOfAdmission { get; set; }
+        [StringLength(maximumLength: 250)]
+        public string? ExplanationForNotSubmittingCertificateOfAdmission { get; set; }
     }
 }

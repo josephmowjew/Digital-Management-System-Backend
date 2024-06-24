@@ -7,6 +7,7 @@ using DataStore.Core.DTOs.LicenseApprovalLevelDTO;
 using DataStore.Core.DTOs.Member;
 using DataStore.Core.Models;
 using DataStore.Helpers;
+using Microsoft.AspNetCore.Http;
 
 namespace DataStore.Core.DTOs.LicenseApplication
 {
@@ -30,6 +31,7 @@ namespace DataStore.Core.DTOs.LicenseApplication
         public bool RenewedLicensePreviousYear { get; set; }
         public bool ObtainedLeaveToRenewLicenseOutOfTime { get; set; }
         public bool PaidAnnualSubscriptionToSociety { get; set; }
+        public string? ExplanationForNoAnnualSubscriptionToSociety { get; set; }
         public bool MadeContributionToFidelityFund { get; set; }
         public string ExplanationForNoContributionToFidelityFund { get; set; }
         public bool RemittedSocietysLevy { get; set; }
@@ -48,7 +50,9 @@ namespace DataStore.Core.DTOs.LicenseApplication
         public string ExplanationForNoAccountantsCertificate { get; set; }
         public bool CompliedWithPenaltiesImposedUnderTheAct { get; set; }
         public string ExplanationForNoComplianceWithPenalties { get; set; }
+        public bool CertificateOfAdmission { get; set; }
         public string ExplanationForNotSubmittingCertificateOfAdmission { get; set; }
+
 
     }
 }
