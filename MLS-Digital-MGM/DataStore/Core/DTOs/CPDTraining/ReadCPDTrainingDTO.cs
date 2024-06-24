@@ -35,7 +35,7 @@ namespace DataStore.Core.DTOs.CPDTraining
         public ReadUserDTO CreatedBy { get; set; }
         public int YearOfOperationId { get; set; }
         
-        public DateTime? RegistrationDueDate { get; set; }
+        public DateOnly RegistrationDueDate { get; set; }
         public bool IsFree { get; set; } = false;
         public ReadYearOfOperationDTO YearOfOperation { get; set; }
         public ICollection<ReadCPDUnitsEarnedDTO> CPDUnitsEarned { get; set; }

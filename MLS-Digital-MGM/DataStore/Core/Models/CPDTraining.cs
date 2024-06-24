@@ -32,7 +32,7 @@ namespace DataStore.Core.Models
         public double? MemberVirtualAttendanceFee { get; set; } 
         public double? NonMemberPhysicalAttendanceFee { get; set; } 
          public double? NonMemberVirtualAttandanceFee { get; set; }
-        public DateTime? RegistrationDueDate { get; set; }
+        public DateTime RegistrationDueDate { get; set; }
         public bool IsFree { get; set; } = false;
         public int CPDUnitsAwarded { get; set; }
         [StringLength(maximumLength:200)]

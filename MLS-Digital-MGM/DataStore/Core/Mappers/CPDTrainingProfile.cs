@@ -9,7 +9,8 @@ namespace DataStore.Core.Mappers
         public CPDTrainingProfile()
         {
             CreateMap<CPDTraining, ReadCPDTrainingDTO>()
-            .ForMember(dest => dest.DateToBeConducted, opt => opt.MapFrom(src => DateOnly.FromDateTime(src.DateToBeConducted)));
+            .ForMember(dest => dest.DateToBeConducted, opt => opt.MapFrom(src => DateOnly.FromDateTime(src.DateToBeConducted)))
+            .ForMember(dest => dest.RegistrationDueDate, opt => opt.MapFrom(src => DateOnly.FromDateTime(src.RegistrationDueDate)));
             CreateMap<CreateCPDTrainingDTO, CPDTraining>()
             .ForMember(dest => dest.Attachments, opt => opt.Ignore());
             CreateMap<UpdateCPDTrainingDTO, CPDTraining>()

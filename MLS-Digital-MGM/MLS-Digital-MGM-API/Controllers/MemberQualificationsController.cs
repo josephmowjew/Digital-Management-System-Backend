@@ -266,9 +266,9 @@ namespace MLS_Digital_MGM_API.Controllers
                     string attachmentTypeName = attachment.AttachmentType.Name;
 
 
-                    string newfilePath = Path.Combine("/uploads/QualificationAttachments/", attachment.FileName);
+                    string newFilePath = Path.Combine($"/uploads/{Lambda.MemberQualificationFolderName}", attachment.FileName);
 
-                    attachment.FilePath = newfilePath;
+                    attachment.FilePath = newFilePath;
                 }
 
                 var mappedMemberQualification = _mapper.Map<ReadMemberQualificationDTO>(memberQualification);
