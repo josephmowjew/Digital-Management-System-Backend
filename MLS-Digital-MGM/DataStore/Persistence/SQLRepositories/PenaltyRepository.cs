@@ -43,17 +43,21 @@ namespace DataStore.Persistence.SQLRepositories
             {
                 penalty.DeletedDate = DateTime.Now;
                 penalty.Status = Lambda.Deleted;
-            }
 
-            //get all penalty payments associated with the penalty
+                // Mark related Penalty payments as deleted
+                var payments = _context.PenaltyPayments
+                                           .Where(app => app.PenaltyId == penalty.Id && app.Status != "Deleted")
+                                           .ToList();
 
-            var penaltyPayments = penalty.PenaltyPayments.ToList();
-
-            foreach (var item in penaltyPayments)
-            {
-                item.DeletedDate = DateTime.Now;
-                item.Status = Lambda.Deleted;
-               
+                //Console.WriteLine("Hello");
+                if (payments.Any())
+                {
+                    foreach (var payment in payments)
+                    {
+                        payment.DeletedDate = DateTime.Now;
+                        payment.Status = Lambda.Deleted;
+                    }
+                }
             }
 
             return penalty;

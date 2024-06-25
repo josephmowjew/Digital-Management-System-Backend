@@ -7,5 +7,8 @@ namespace DataStore.Persistence.Interfaces
         // Additional methods specific to the Penalty entity, if needed
 
         Task<List<Penalty>> GetByMemberId(int memberId);
+
+        Task<Penalty> DeleteAsync(Penalty penalty);
+
     }
 }
