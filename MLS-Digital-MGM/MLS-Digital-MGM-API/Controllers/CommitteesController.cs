@@ -14,6 +14,7 @@ using DataStore.Persistence.Interfaces;
 using MLS_Digital_MGM.DataStore.Helpers;
 using DataStore.Helpers;
 using DataStore.Core.DTOs.Committee;
+using DataStore.Core.DTOs.CommitteeMemberShip;
 
 namespace MLS_Digital_MGM_API.Controllers
 {
@@ -120,6 +121,50 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 await _repositoryManager.CommitteeRepository.AddAsync(committee);
                 await _unitOfWork.CommitAsync();
+
+                //add the chairperson as a member to the committee with the role as chairperson
+                var member = await _repositoryManager.MemberRepository.GetByIdAsync(committee.ChairpersonID ?? 0);
+
+                // Add the chairperson as a member to the committee with the role as chairperson
+                if (committee.ChairpersonID.HasValue)
+                {
+                    var chairperson = await _repositoryManager.MemberRepository.GetByIdAsync(committee.ChairpersonID.Value);
+                    if (chairperson != null)
+                    {
+                        var chairpersonMembershipDTO = new CreateCommitteeMemberShipDTO
+                        {
+                            CommitteeID = committee.Id,
+                            MemberShipId = chairperson.UserId, // Assuming MemberShipId is a string representation of the chairperson's ID
+                            JoinedDate = DateTime.Now,
+                            Role = "Chairperson"
+                        };
+
+                        var committeeMember = _mapper.Map<CommitteeMembership>(chairpersonMembershipDTO);
+
+                        committeeMember.JoinedDate = DateTime.Now;
+
+                        // Check if the member already exists in the committee
+                        var existingMember = await _repositoryManager.CommitteeMemberRepository.GetAsync(cm => cm.MemberShipId == chairpersonMembershipDTO.MemberShipId && cm.CommitteeID == committee.Id);
+                        if (existingMember != null)
+                        {
+                            // Add the error to model state 
+                            ModelState.AddModelError(nameof(chairpersonMembershipDTO.MemberShipId), "Member already exists in the committee");
+                            return BadRequest(ModelState);
+                        }
+
+                        string currentRole = Lambda.GetCurrentUserRole(_repositoryManager, user.Id);
+
+                        if (!currentRole.Equals("member", StringComparison.OrdinalIgnoreCase))
+                        {
+                            // Automatically approve the member if the current user is not a member
+                            committeeMember.MemberShipStatus = Lambda.Approved;
+                        }
+
+                        await _repositoryManager.CommitteeMemberRepository.AddAsync(committeeMember);
+                        await _unitOfWork.CommitAsync();
+                    }
+                }
+
 
                 return CreatedAtAction("GetCommitteeById", new { id = committee.Id }, committee);
             }

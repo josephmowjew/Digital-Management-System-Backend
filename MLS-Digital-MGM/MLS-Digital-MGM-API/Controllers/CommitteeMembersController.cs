@@ -51,11 +51,11 @@ namespace MLS_Digital_MGM_API.Controllers
                 var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
                 string userId = user.Id;
 
-                Expression<Func<CommitteeMembership, bool>> predicate;
+                //Expression<Func<CommitteeMembership, bool>> predicate;
 
                 var pagingParameters = new PagingParameters<CommitteeMembership>
                 {
-                    Predicate = cm => cm.CommitteeID == committeeId && cm.Status != Lambda.Deleted && cm.MemberShipId == userId,
+                    Predicate = cm => cm.CommitteeID == committeeId && cm.Status != Lambda.Deleted,
                     PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
                     PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
                     SortColumn = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumn : null,
@@ -139,7 +139,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 if(!currentRole.Equals("member", StringComparison.OrdinalIgnoreCase)){
 
                     //autommatically approve the member if the current user is not a member
-                    committeeMember.MemberShipStatus = "approved";
+                    committeeMember.MemberShipStatus = Lambda.Approved;
                 }
 
                 await _repositoryManager.CommitteeMemberRepository.AddAsync(committeeMember);
