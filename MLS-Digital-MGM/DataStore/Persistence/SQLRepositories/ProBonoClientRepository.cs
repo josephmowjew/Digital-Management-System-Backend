@@ -1,5 +1,6 @@
 using DataStore.Core.Models;
 using DataStore.Data;
+using DataStore.Helpers;
 using DataStore.Persistence.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -19,5 +20,27 @@ namespace DataStore.Persistence.SQLRepositories
             this._context = context;
             this._unitOfWork = unitOfWork;
         }
+
+        public async Task DeleteAsync(ProbonoClient entity)
+        {
+
+            if (entity != null)
+            {
+                entity.DeletedDate = DateTime.Now;
+                entity.Status = Lambda.Deleted;
+
+                // Mark related ProbonoApplications as deleted
+                var applications = _context.Set<ProBono>()
+                                           .Where(app => app.ProbonoClientId == entity.Id && app.Status != "Deleted")
+                                           .ToList();
+
+                foreach (var app in applications)
+                {
+                    app.DeletedDate = DateTime.Now;
+                    app.Status = "Deleted";
+                }
+            }
+        }
     }
+
 }
