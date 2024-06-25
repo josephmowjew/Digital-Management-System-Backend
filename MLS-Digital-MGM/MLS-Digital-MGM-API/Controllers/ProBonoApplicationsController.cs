@@ -272,11 +272,6 @@ namespace MLS_Digital_MGM_API.Controllers
                 // Add ProBonoApplication to repository
                
                 await _unitOfWork.CommitAsync();
-
-                
-
-              
-
                 // Return created ProBonoApplication
                 return CreatedAtAction("GetProBonoApplications", new { id = proBonoApplication.Id }, proBonoApplication);
             }

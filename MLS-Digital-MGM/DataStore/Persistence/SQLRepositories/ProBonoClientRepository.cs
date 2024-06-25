@@ -29,15 +29,32 @@ namespace DataStore.Persistence.SQLRepositories
                 entity.DeletedDate = DateTime.Now;
                 entity.Status = Lambda.Deleted;
 
-                // Mark related ProbonoApplications as deleted
-                var applications = _context.Set<ProBono>()
+                // Mark related Probonocases as deleted
+                var cases = _context.Set<ProBono>()
                                            .Where(app => app.ProbonoClientId == entity.Id && app.Status != "Deleted")
                                            .ToList();
 
-                foreach (var app in applications)
+                // Mark related ProbonoApplications as deleted
+                var applications = _context.Set<ProBonoApplication>()
+                                           .Where(app => app.ProbonoClientId == entity.Id && app.Status != "Deleted")
+                                           .ToList();
+
+                if (cases.Any())
                 {
-                    app.DeletedDate = DateTime.Now;
-                    app.Status = "Deleted";
+                    foreach (var probono in cases)
+                    {
+                        probono.DeletedDate = DateTime.Now;
+                        probono.Status = Lambda.Deleted;
+                    }
+                }
+                
+                if(applications.Any())
+                {
+                    foreach (var app in applications)
+                    {
+                        app.DeletedDate = DateTime.Now;
+                        app.Status = "Deleted";
+                    }
                 }
             }
         }
