@@ -55,7 +55,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 var pagingParameters = new PagingParameters<CommitteeMembership>
                 {
-                    Predicate = cm => cm.CommitteeID == committeeId && cm.Status != Lambda.Deleted,
+                    Predicate = cm => cm.CommitteeID == committeeId && cm.Status != Lambda.Deleted && cm.MemberShipStatus == Lambda.Approved,
                     PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
                     PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
                     SortColumn = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumn : null,
