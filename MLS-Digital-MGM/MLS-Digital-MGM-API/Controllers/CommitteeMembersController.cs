@@ -109,6 +109,76 @@ namespace MLS_Digital_MGM_API.Controllers
             }
         }
 
+        //get committee membership requests
+        [HttpGet("requests")]
+        public async Task<IActionResult> GetCommitteeMembershipRequests(int pageNumber = 1, int pageSize = 10, int committeeId = 0)
+        {
+            try
+            {
+                var dataTableParams = new DataTablesParameters(); // Create DataTables parameters instance
+
+                string username = _httpContextAccessor.HttpContext.User.Identity.Name;
+                var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
+                string userId = user.Id;
+
+                //Expression<Func<CommitteeMembership, bool>> predicate;
+
+                var pagingParameters = new PagingParameters<CommitteeMembership>
+                {
+                    Predicate = cm => cm.CommitteeID == committeeId && cm.Status != Lambda.Deleted && cm.MemberShipStatus == Lambda.Pending,
+                    PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
+                    PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
+                    SortColumn = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumn : null,
+                    SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null,
+                    // Includes should be specified in your PagingParameters
+                    Includes = new Expression<Func<CommitteeMembership, object>>[]{
+                        cm => cm.MemberShip
+                    }
+                };
+
+                var committeeMembers = await _repositoryManager.CommitteeMemberRepository.GetPagedAsync(pagingParameters);
+
+                if (committeeMembers == null || !committeeMembers.Any())
+                {
+                    if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                    {
+                        var draw = dataTableParams.Draw;
+                        return Json(new
+                        {
+                            draw,
+                            recordsFiltered = 0,
+                            recordsTotal = 0,
+                            data = Enumerable.Empty<ReadCommitteeMemberShipDTO>()
+                        });
+                    }
+                    return Ok(Enumerable.Empty<ReadCommitteeMemberShipDTO>());
+                }
+
+                var mappedCommitteeMembers = _mapper.Map<List<ReadCommitteeMemberShipDTO>>(committeeMembers);
+
+                if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                {
+                    var draw = dataTableParams.Draw;
+                    var totalRecords = await _repositoryManager.CommitteeMemberRepository.CountAsync(pagingParameters);
+
+                    return Json(new
+                    {
+                        draw,
+                        recordsFiltered = totalRecords,
+                        recordsTotal = totalRecords,
+                        data = mappedCommitteeMembers
+                    });
+                }
+
+                return Ok(mappedCommitteeMembers);
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
         [HttpPost]
         public async Task<IActionResult> AddCommitteeMember([FromForm] CreateCommitteeMemberShipDTO committeeMemberDTO)
         {
@@ -166,23 +236,37 @@ namespace MLS_Digital_MGM_API.Controllers
                 }
                 string username = _httpContextAccessor.HttpContext.User.Identity.Name;
                 var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
-                var member = await _repositoryManager.CommitteeMemberRepository.GetAsync(cm => cm.MemberShipId == user.Id && cm.CommitteeID == committee.Id);
+                var member = await _repositoryManager.CommitteeMemberRepository.GetAsync(cm => cm.MemberShipId == user.Id && cm.CommitteeID == committee.Id && cm.MemberShipStatus != Lambda.Approved);
                 if (member != null)
                 {
-                    return BadRequest("You are already a member of this committee");
-                }
-                member = new CommitteeMembership
-                {
-                    CommitteeID = committee.Id,
-                    MemberShipId = user.Id,
-                    MemberShipStatus = Lambda.Pending,
-                    Role = "member",
-                    JoinedDate = DateTime.Now
-                };
-                await _repositoryManager.CommitteeMemberRepository.AddAsync(member);
-                await _unitOfWork.CommitAsync();
-                return Ok();
+                    if (member.MemberShipStatus != Lambda.Approved)
+                    {
+                        member.MemberShipStatus = Lambda.Pending;
+                        await _repositoryManager.CommitteeMemberRepository.UpdateAsync(member);
+                        await _unitOfWork.CommitAsync();
+                    }
+                    else
+                    {
+                        return BadRequest("You are already a member of this committee");
+                    }
 
+                }
+                else
+                {
+                    member = new CommitteeMembership
+                    {
+                        CommitteeID = committee.Id,
+                        MemberShipId = user.Id,
+                        MemberShipStatus = Lambda.Pending,
+                        Role = "member",
+                        JoinedDate = DateTime.Now
+                    };
+
+                    await _repositoryManager.CommitteeMemberRepository.AddAsync(member);
+                    await _unitOfWork.CommitAsync();
+                }
+
+                return Ok();
                 //return Ok("You have successfully joined the committee");
             }
             catch (Exception ex)
@@ -331,6 +415,7 @@ namespace MLS_Digital_MGM_API.Controllers
                     return NotFound();
                 }
 
+                committeeMember.MemberShipStatus = Lambda.Deleted;
                 await _repositoryManager.CommitteeMemberRepository.DeleteAsync(committeeMember);
                 await _unitOfWork.CommitAsync();
 
