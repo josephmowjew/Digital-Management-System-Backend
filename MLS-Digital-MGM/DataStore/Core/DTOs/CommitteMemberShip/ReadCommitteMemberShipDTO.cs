@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using DataStore.Core.DTOs.User;
 using DataStore.Core.DTOs.YearOfOperation;
 using DataStore.Core.Models;
 
@@ -13,7 +14,7 @@ namespace DataStore.Core.DTOs.CommitteeMemberShip
 
         public string  MemberShipId { get; set; }
 
-        public ApplicationUser MemberShip { get; set; }
+        public ReadUserDTO MemberShip { get; set; }
 
         [DataType(DataType.Date)]
         public DateTime JoinedDate { get; set; }
