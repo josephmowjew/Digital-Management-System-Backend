@@ -77,6 +77,7 @@ builder.Services.AddTransient<TokenManagerMiddleware>();
 builder.Services.AddScoped<IErrorLogService, ErrorLogService>();
 builder.Services.AddTransient<ITokenManager, TokenManager>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IEntityResolverService,EntityResolverService>();
 builder.Services.AddScoped<IErrorLogRepository, ErrorLogRepository>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddDistributedRedisCache(r => { r.Configuration = builder.Configuration["redis:connectionString"]; });

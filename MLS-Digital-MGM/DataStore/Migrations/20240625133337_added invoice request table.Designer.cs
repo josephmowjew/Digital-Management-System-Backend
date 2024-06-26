@@ -3,6 +3,7 @@ using System;
 using DataStore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240625133337_added invoice request table")]
+    partial class addedinvoicerequesttable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -876,18 +879,11 @@ namespace DataStore.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<double>("Amount")
-                        .HasColumnType("double");
-
                     b.Property<string>("CreatedById")
                         .HasColumnType("varchar(200)");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime(6)");
-
-                    b.Property<string>("CustomerId")
-                        .IsRequired()
-                        .HasColumnType("longtext");
 
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime(6)");
