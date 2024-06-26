@@ -64,7 +64,7 @@ namespace DataStore.Persistence.Interfaces
         ICommitteeMemberRepository CommitteeMemberRepository {get;}
         IMessageRepository MessageRepository {get;}
         IThreadRepository ThreadRepository {get;}
-        IInvoiceRequestTypeRepository InvoiceRequestTypeRepository {get;}
+        //IInvoiceRequestTypeRepository InvoiceRequestTypeRepository {get;}
         IInvoiceRequestRepository InvoiceRequestRepository {get;}
         IEntityResolverService EntityResolverService { get; } 
 

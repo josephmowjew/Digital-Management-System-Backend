@@ -47,7 +47,7 @@ namespace DataStore.Persistence.SQLRepositories
         private ICommitteeMemberRepository _committeeMemberRepository;
         private IMessageRepository _messageRepository;
         private IThreadRepository _threadRepository;
-        private IInvoiceRequestTypeRepository _invoiceRequestTypeRepository;
+        //private IInvoiceRequestTypeRepository _invoiceRequestTypeRepository;
         private IInvoiceRequestRepository _invoiceRequestRepository;
 
         public RepositoryManager(
@@ -98,7 +98,7 @@ namespace DataStore.Persistence.SQLRepositories
         public ICommitteeMemberRepository CommitteeMemberRepository => _committeeMemberRepository ??= new CommitteeMemberRepository(_context, _unitOfWork);
         public IMessageRepository MessageRepository => _messageRepository ??= new MessageRepository(_context, _unitOfWork);
         public IThreadRepository ThreadRepository => _threadRepository ??= new ThreadRepository(_context, _unitOfWork);
-        public IInvoiceRequestTypeRepository InvoiceRequestTypeRepository => _invoiceRequestTypeRepository ??= new InvoiceRequestTypeRepository(_context, _unitOfWork);
+        //public IInvoiceRequestTypeRepository InvoiceRequestTypeRepository => _invoiceRequestTypeRepository ??= new InvoiceRequestTypeRepository(_context, _unitOfWork);
         public IInvoiceRequestRepository InvoiceRequestRepository => _invoiceRequestRepository ??= new InvoiceRequestRepository(_context, _unitOfWork);
         public IEntityResolverService EntityResolverService => _entityResolverService;
        

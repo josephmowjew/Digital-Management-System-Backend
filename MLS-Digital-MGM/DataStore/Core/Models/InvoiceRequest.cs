@@ -10,8 +10,8 @@ namespace DataStore.Core.Models
 {
     public class InvoiceRequest: Meta
     {
-        public int InvoiceRequestTypeId {get; set;} 
-        public InvoiceRequestType InvoiceRequestType { get; set; }
+        // public int InvoiceRequestTypeId {get; set;} 
+        // public InvoiceRequestType InvoiceRequestType { get; set; }
         public string? CreatedById { get; set; }
         public virtual ApplicationUser CreatedBy { get; set; }
         [Required]

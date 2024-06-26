@@ -9,7 +9,7 @@ namespace DataStore.Core.DTOs.InvoiceRequest
         [Required]
         public string CreatedById { get; set; }
         public double Amount { get; set; }
-        public string CustomerId { get; set; }
+        // public string CustomerId { get; set; }
 
         // Polymorphic association properties
         public string ReferencedEntityType { get; set; }

@@ -156,7 +156,7 @@ namespace DataStore.Data
         public DbSet<Thread> Threads { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<InvoiceRequest> InvoiceRequests { get; set; }
-        public DbSet<InvoiceRequestType> InvoiceRequestTypes { get; set; }
+        
         
         
     }

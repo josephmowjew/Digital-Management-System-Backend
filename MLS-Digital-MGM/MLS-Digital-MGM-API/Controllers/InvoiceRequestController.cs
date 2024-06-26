@@ -117,24 +117,37 @@ namespace MLS_Digital_MGM_API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddInvoiceRequest([FromBody] CreateInvoiceRequestDTO invoiceRequestDTO)
+        public async Task<IActionResult> AddInvoiceRequest([FromForm] CreateInvoiceRequestDTO invoiceRequestDTO)
         {
             try
             {
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
 
+                    
+
                 var invoiceRequest = _mapper.Map<InvoiceRequest>(invoiceRequestDTO);
                 string username = _httpContextAccessor.HttpContext.User.Identity.Name;
                 var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
+
+                //set created by
                 invoiceRequest.CreatedById = user.Id;
+
+                //get the current year of operation
+                var currentYearOfOperation = await _repositoryManager.YearOfOperationRepository.GetCurrentYearOfOperation();
+
+                //set current year of operation when available
+                if(currentYearOfOperation != null)
+                {
+                    invoiceRequest.YearOfOperationId = currentYearOfOperation.Id;
+                }
 
                 var existingInvoiceRequest = await _repositoryManager.InvoiceRequestRepository.GetAsync(
                     d => d.ReferencedEntityType.Trim().Equals(invoiceRequest.ReferencedEntityType.Trim(), StringComparison.OrdinalIgnoreCase) && d.ReferencedEntityId == invoiceRequest.ReferencedEntityId && d.YearOfOperationId == invoiceRequest.YearOfOperationId);
 
                 if (existingInvoiceRequest != null)
                 {
-                    ModelState.AddModelError(nameof(invoiceRequestDTO.CustomerId), "An invoice request with the same details already exists");
+                    ModelState.AddModelError("", "An invoice request with the same details already exists");
                     return BadRequest(ModelState);
                 }
 

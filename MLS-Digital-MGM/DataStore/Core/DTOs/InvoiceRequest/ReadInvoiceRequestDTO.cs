@@ -10,8 +10,8 @@ namespace DataStore.Core.DTOs.InvoiceRequest
     public class ReadInvoiceRequestDTO
     {
         public int Id { get; set; }
-        public int InvoiceRequestTypeId { get; set; }
-        public ReadInvoiceRequestTypeDTO InvoiceRequestType { get; set; }
+        //public int InvoiceRequestTypeId { get; set; }
+        //public ReadInvoiceRequestTypeDTO InvoiceRequestType { get; set; }
         public string CreatedById { get; set; }
         public ReadUserDTO CreatedBy { get; set; }
         public double Amount { get; set; }
