@@ -3,6 +3,7 @@ using System;
 using DataStore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240625140723_added invoice request table adding fees")]
+    partial class addedinvoicerequesttableaddingfees
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -892,32 +895,52 @@ namespace DataStore.Migrations
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<string>("ReferencedEntityId")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("ReferencedEntityType")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                    b.Property<int>("InvoiceRequestTypeId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime>("UpdatedDate")
                         .HasColumnType("datetime(6)");
-
-                    b.Property<int>("YearOfOperationId")
-                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CreatedById");
 
-                    b.HasIndex("YearOfOperationId");
+                    b.HasIndex("InvoiceRequestTypeId");
 
                     b.ToTable("InvoiceRequests");
+                });
+
+            modelBuilder.Entity("DataStore.Core.Models.InvoiceRequestType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("InvoiceRequestTypes");
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.License", b =>
@@ -2518,15 +2541,15 @@ namespace DataStore.Migrations
                         .WithMany()
                         .HasForeignKey("CreatedById");
 
-                    b.HasOne("DataStore.Core.Models.YearOfOperation", "YearOfOperation")
+                    b.HasOne("DataStore.Core.Models.InvoiceRequestType", "InvoiceRequestType")
                         .WithMany()
-                        .HasForeignKey("YearOfOperationId")
+                        .HasForeignKey("InvoiceRequestTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("CreatedBy");
 
-                    b.Navigation("YearOfOperation");
+                    b.Navigation("InvoiceRequestType");
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.License", b =>

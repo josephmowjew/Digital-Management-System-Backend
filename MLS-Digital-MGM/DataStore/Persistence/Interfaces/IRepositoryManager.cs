@@ -1,4 +1,6 @@
-﻿using DataStore.Core.Models;
+﻿using DataStore.Core;
+using DataStore.Core.Models;
+using DataStore.Core.Services.Interfaces;
 using DataStore.Data;
 using Microsoft.AspNetCore.Identity;
 using System;
@@ -62,7 +64,9 @@ namespace DataStore.Persistence.Interfaces
         ICommitteeMemberRepository CommitteeMemberRepository {get;}
         IMessageRepository MessageRepository {get;}
         IThreadRepository ThreadRepository {get;}
-        
+        //IInvoiceRequestTypeRepository InvoiceRequestTypeRepository {get;}
+        IInvoiceRequestRepository InvoiceRequestRepository {get;}
+        IEntityResolverService EntityResolverService { get; } 
 
 
     }

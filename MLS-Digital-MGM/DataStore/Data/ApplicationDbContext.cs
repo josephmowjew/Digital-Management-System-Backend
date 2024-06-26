@@ -155,5 +155,9 @@ namespace DataStore.Data
         public DbSet<CommitteeMembership> CommitteeMembers { get; set; }
         public DbSet<Thread> Threads { get; set; }
         public DbSet<Message> Messages { get; set; }
+        public DbSet<InvoiceRequest> InvoiceRequests { get; set; }
+        
+        
+        
     }
 }

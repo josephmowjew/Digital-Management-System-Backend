@@ -1,12 +1,10 @@
-﻿using DataStore.Core.Models;
+﻿
+using DataStore.Core.Models;
+using DataStore.Core.Services;
+using DataStore.Core.Services.Interfaces;
 using DataStore.Data;
 using DataStore.Persistence.Interfaces;
 using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DataStore.Persistence.SQLRepositories
 {
@@ -14,6 +12,9 @@ namespace DataStore.Persistence.SQLRepositories
     {
         private readonly ApplicationDbContext _context;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<Role> _roleManager;
+        private readonly IEntityResolverService _entityResolverService;
 
         private IUserRepository _userRepository;
         private IDepartmentRepository _departmentRepository;
@@ -22,13 +23,11 @@ namespace DataStore.Persistence.SQLRepositories
         private ITitleRepository _titleRepository;
         private IRoleRepository _roleRepository;
         private IIdentityTypeRepository _identityTypeRepository;
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly RoleManager<Role> _roleManager;
         private IYearOfOperationRepository _yearOfOperationRepository;
         private ILicenseApprovalLevelRepository _licenseApprovalLevelRepository;
         private IFirmRepository _firmRepository;
         private IProBonoClientRepository _proBonoClientRepository;
-        private IProBonoApplicationRepository _proBonoApplicationRepository; 
+        private IProBonoApplicationRepository _proBonoApplicationRepository;
         private IAttachmentTypeRepository _attachmentTypeRepository;
         private IProBonoRepository _proBonoRepository;
         private IProBonoReportRepository _proBonoReportRepository;
@@ -48,57 +47,44 @@ namespace DataStore.Persistence.SQLRepositories
         private ICommitteeMemberRepository _committeeMemberRepository;
         private IMessageRepository _messageRepository;
         private IThreadRepository _threadRepository;
+        //private IInvoiceRequestTypeRepository _invoiceRequestTypeRepository;
+        private IInvoiceRequestRepository _invoiceRequestRepository;
 
-        // Add other repository fields here, e.g., private IProductRepository _productRepository;
-
-       
-        public RepositoryManager(ApplicationDbContext context, IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, RoleManager<Role> roleManager)
+        public RepositoryManager(
+            ApplicationDbContext context, 
+            IUnitOfWork unitOfWork, 
+            UserManager<ApplicationUser> userManager, 
+            RoleManager<Role> roleManager,
+            IEntityResolverService entityResolverService)
         {
-            this._context = context;
-            this._unitOfWork = unitOfWork;
-            this._userManager = userManager;
-            this._roleManager = roleManager;
+            _context = context;
+            _unitOfWork = unitOfWork;
+            _userManager = userManager;
+            _roleManager = roleManager;
+            _entityResolverService = entityResolverService;
+           
         }
 
         public IUserRepository UserRepository => _userRepository ??= new UserRepository(_context, _unitOfWork, _userManager, _roleManager);
-
         public IDepartmentRepository DepartmentRepository => _departmentRepository ??= new DepartmentRepository(_context, _unitOfWork);
-
         public IErrorLogRepository ErrorLogRepository => _errorLogRepository ??= new ErrorLogRepository(_context, _unitOfWork);
-
         public ICountryRepository CountryRepository => _countryRepository ??= new CountryRepository(_context, _unitOfWork);
-
         public ITitleRepository TitleRepository => _titleRepository ??= new TitleRepository(_context, _unitOfWork);
-
         public IRoleRepository RoleRepository => _roleRepository ??= new RoleRepository(_context, _unitOfWork);
-
         public IIdentityTypeRepository IdentityTypeRepository => _identityTypeRepository ??= new IdentityTypeRepository(_context, _unitOfWork);
-
         public IUnitOfWork UnitOfWork => _unitOfWork;
-
         public UserManager<ApplicationUser> UserManager => _userManager;
-
         public IYearOfOperationRepository YearOfOperationRepository => _yearOfOperationRepository ??= new YearOfOperationRepository(_context, _unitOfWork);
-
         public ILicenseApprovalLevelRepository LicenseApprovalLevelRepository => _licenseApprovalLevelRepository ??= new LicenseApprovalLevelRepository(_context, _unitOfWork);
         public IFirmRepository FirmRepository => _firmRepository ??= new FirmRepository(_context, _unitOfWork);
-
         public IProBonoClientRepository ProBonoClientRepository => _proBonoClientRepository ??= new ProBonoClientRepository(_context, _unitOfWork);
-
         public IProBonoApplicationRepository ProBonoApplicationRepository => _proBonoApplicationRepository ??= new ProBonoApplicationRepository(_context, _unitOfWork);
-
         public IAttachmentTypeRepository AttachmentTypeRepository => _attachmentTypeRepository ??= new AttachmentTypeRepository(_context, _unitOfWork);
-
         public IProBonoRepository ProBonoRepository => _proBonoRepository ??= new ProBonoRepository(_context, _unitOfWork);
-
         public IProBonoReportRepository ProBonoReportRepository => _proBonoReportRepository ??= new ProBonoReportRepository(_context, _unitOfWork);
-
         public IQualificationTypeRepository QualificationTypeRepository => _qualificationTypeRepository ??= new QualificationTypeRepository(_context, _unitOfWork);
-
         public IMemberRepository MemberRepository => _memberRepository ??= new MemberRepository(_context, _unitOfWork);
-
         public IMemberQualificationRepository MemberQualificationRepository => _memberQualificationRepository ??= new MemberQualificationRepository(_context, _unitOfWork);
-
         public ILicenseApplicationRepository LicenseApplicationRepository => _licenseApplicationRepository ??= new LicenseApplicationRepository(_context, _unitOfWork);
         public ILicenseRepository LicenseRepository => _licenseRepository ??= new LicenseRepository(_context, _unitOfWork);
         public ILicenseApprovalHistoryRepository LicenseApprovalHistoryRepository => _licenseApprovalHistoryRepository ??= new LicenseApprovalHistoryRepository(_context, _unitOfWork);
@@ -112,7 +98,9 @@ namespace DataStore.Persistence.SQLRepositories
         public ICommitteeMemberRepository CommitteeMemberRepository => _committeeMemberRepository ??= new CommitteeMemberRepository(_context, _unitOfWork);
         public IMessageRepository MessageRepository => _messageRepository ??= new MessageRepository(_context, _unitOfWork);
         public IThreadRepository ThreadRepository => _threadRepository ??= new ThreadRepository(_context, _unitOfWork);
-
+        //public IInvoiceRequestTypeRepository InvoiceRequestTypeRepository => _invoiceRequestTypeRepository ??= new InvoiceRequestTypeRepository(_context, _unitOfWork);
+        public IInvoiceRequestRepository InvoiceRequestRepository => _invoiceRequestRepository ??= new InvoiceRequestRepository(_context, _unitOfWork);
+        public IEntityResolverService EntityResolverService => _entityResolverService;
        
     }
 }
