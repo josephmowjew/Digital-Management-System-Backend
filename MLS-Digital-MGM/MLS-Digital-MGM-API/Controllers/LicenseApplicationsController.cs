@@ -216,7 +216,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 // Check if a license application has been made in the same year and it is pending or hasn't been approved yet
                 var existingApplication = await _repositoryManager.LicenseApplicationRepository.GetAsync(
-                    a => a.YearOfOperationId == currentYearOfOperation.Id &&
+                    a => a.YearOfOperationId == currentYearOfOperation.Id && a.MemberId == currentMember.Id &&
                     (a.ApplicationStatus == Lambda.Pending || a.ApplicationStatus == Lambda.Approved)
                 );
 
