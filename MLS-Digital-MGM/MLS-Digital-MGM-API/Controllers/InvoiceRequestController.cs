@@ -142,6 +142,18 @@ namespace MLS_Digital_MGM_API.Controllers
                     invoiceRequest.YearOfOperationId = currentYearOfOperation.Id;
                 }
 
+                //get the member account from the user
+                var memberAccount = await _repositoryManager.MemberRepository.GetMemberByUserId(user.Id);
+
+
+                if(memberAccount != null)
+                {
+                    //set the member account id
+                    //TODO: add a customerId field to the member account and set it here
+                    //invoiceRequest.CustomerId = memberAccount.CustomerId;
+                }
+
+
                 var existingInvoiceRequest = await _repositoryManager.InvoiceRequestRepository.GetAsync(
                     d => d.ReferencedEntityType.Trim().Equals(invoiceRequest.ReferencedEntityType.Trim(), StringComparison.OrdinalIgnoreCase) && d.ReferencedEntityId == invoiceRequest.ReferencedEntityId && d.YearOfOperationId == invoiceRequest.YearOfOperationId);
 
