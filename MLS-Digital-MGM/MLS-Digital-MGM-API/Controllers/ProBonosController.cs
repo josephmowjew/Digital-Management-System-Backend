@@ -255,6 +255,5 @@ namespace MLS_Digital_MGM_API.Controllers
         }
 
     }
-    
 
 }

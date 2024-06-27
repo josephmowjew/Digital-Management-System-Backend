@@ -351,8 +351,7 @@ namespace MLS_Digital_MGM_API.Controllers
             }
         }
 
-
-    private async Task<List<Attachment>> SaveAttachmentsAsync(IEnumerable<IFormFile> attachments, int attachmentTypeId)
+        private async Task<List<Attachment>> SaveAttachmentsAsync(IEnumerable<IFormFile> attachments, int attachmentTypeId)
     {
         var attachmentsList = new List<Attachment>();
         var hostEnvironment = HttpContext.RequestServices.GetRequiredService<IWebHostEnvironment>();
@@ -429,7 +428,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 {
                     string attachmentTypeName = attachment.AttachmentType.Name;
 
-                    string newFilePath = Path.Combine($"http://{HttpContext.Request.Host}/uploads/{Lambda.ProBonoApplicationFolderName}", attachment.FileName);
+                    string newFilePath = Path.Combine($"http://{HttpContext.Request.Host}/Uploads/{Lambda.ProBonoApplicationFolderName}", attachment.FileName);
 
                     attachment.FilePath = newFilePath;
 
@@ -501,7 +500,6 @@ namespace MLS_Digital_MGM_API.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
-
 
     }
 

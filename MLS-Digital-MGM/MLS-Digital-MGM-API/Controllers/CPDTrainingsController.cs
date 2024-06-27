@@ -97,7 +97,7 @@ namespace MLS_Digital_MGM_API.Controllers
                         string attachmentTypeName = attachment.AttachmentType.Name;
 
 
-                        string newfilePath = Path.Combine("/uploads/CPDTrainings/", attachment.FileName);
+                        string newfilePath = Path.Combine("/Uploads/CPDTrainings/", attachment.FileName);
 
                         attachment.FilePath = newfilePath;
                     }

@@ -107,7 +107,7 @@ public class ProBonoReportsController : Controller
                     string attachmentTypeName = attachment.AttachmentType.Name;
 
 
-                      string newfilePath = Path.Combine("/uploads/ProBonoReportAttachments/", attachment.FileName);
+                      string newfilePath = Path.Combine("/Uploads/ProBonoReportAttachments/", attachment.FileName);
 
                     attachment.FilePath = newfilePath;
                 }
@@ -252,8 +252,6 @@ public class ProBonoReportsController : Controller
             return StatusCode(500, "Internal server error");
         }
     }
-
-    
     private async Task<List<Attachment>> SaveAttachmentsAsync(IEnumerable<IFormFile> attachments, int attachmentTypeId)
     {
         var attachmentsList = new List<Attachment>();
@@ -330,7 +328,7 @@ public class ProBonoReportsController : Controller
             {
                 string attachmentTypeName = attachments.AttachmentType.Name;
 
-                string newFilePath = Path.Combine($"http://{HttpContext.Request.Host}/uploads/{Lambda.ProBonoReportFolderName}", attachments.FileName);
+                string newFilePath = Path.Combine($"http://{HttpContext.Request.Host}/Uploads/{Lambda.ProBonoReportFolderName}", attachments.FileName);
 
                 attachments.FilePath = newFilePath;
 

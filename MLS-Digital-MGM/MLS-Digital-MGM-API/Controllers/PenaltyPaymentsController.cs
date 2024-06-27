@@ -35,7 +35,7 @@ namespace MLS_Digital_MGM_API.Controllers
         }
 
         [HttpGet("paged")]
-        public async Task<IActionResult> GetPenaltyPayments(int pageNumber = 1, int pageSize = 10)
+        public async Task<IActionResult> GetPenaltyPayments(int pageNumber = 1, int pageSize = 10, int memberId = 0)
         {
             try
             {
@@ -43,7 +43,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 var pagingParameters = new PagingParameters<PenaltyPayment>
                 {
-                    Predicate = u => u.Status != Lambda.Deleted,
+                    Predicate = u => u.Status != Lambda.Deleted && u.Penalty.MemberId == memberId,
                     PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
                     PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
                     SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
@@ -157,7 +157,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 {
                     string attachmentTypeName = attachment.AttachmentType.Name;
 
-                    string newFilePath = Path.Combine($"{Lambda.https}://{HttpContext.Request.Host}/uploads/{Lambda.PenaltyPaymentFolderName}", attachment.FileName);
+                    string newFilePath = Path.Combine($"{Lambda.https}://{HttpContext.Request.Host}/Uploads/{Lambda.PenaltyPaymentFolderName}", attachment.FileName);
 
 
                     //string newFilePath = Path.Combine($"https://{HttpContext.Request.Host}/uploads/{Lambda.PenaltyPaymentFolderName}", attachment.FileName);
@@ -236,9 +236,7 @@ namespace MLS_Digital_MGM_API.Controllers
             }
         }
 
-
-
-    private async Task<List<Attachment>> SaveAttachmentsAsync(IEnumerable<IFormFile> attachments, int attachmentTypeId)
+        private async Task<List<Attachment>> SaveAttachmentsAsync(IEnumerable<IFormFile> attachments, int attachmentTypeId)
     {
         var attachmentsList = new List<Attachment>();
         var hostEnvironment = HttpContext.RequestServices.GetRequiredService<IWebHostEnvironment>();
@@ -398,16 +396,6 @@ namespace MLS_Digital_MGM_API.Controllers
                 //send email to the user who created the probono application
 
                 string username = _httpContextAccessor.HttpContext.User.Identity.Name;
-
-                //get user id from username
-                //var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
-
-                // Send status details email
-                /*string emailBody = $"Your application for the pro bono application has been denied. <br/> Reason: {denyPenaltyPaymentDTO.Reason}";
-
-
-                BackgroundJob.Enqueue(() => this._emailService.SendCPDStatusEmailsAsync(new List<string> { user.Email }, emailBody, "Pro Bono Application Status"));*/
-
 
                 return Ok();
             }

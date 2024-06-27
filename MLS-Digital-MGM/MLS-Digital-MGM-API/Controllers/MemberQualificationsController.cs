@@ -109,7 +109,7 @@ namespace MLS_Digital_MGM_API.Controllers
                         string attachmentTypeName = attachment.AttachmentType.Name;
 
 
-                        string newfilePath = Path.Combine("/uploads/QualificationAttachments/", attachment.FileName);
+                        string newfilePath = Path.Combine("/Uploads/QualificationAttachments/", attachment.FileName);
 
                         attachment.FilePath = newfilePath;
                     }
