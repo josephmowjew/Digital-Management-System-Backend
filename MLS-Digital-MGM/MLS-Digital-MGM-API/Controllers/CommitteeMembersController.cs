@@ -282,26 +282,24 @@ namespace MLS_Digital_MGM_API.Controllers
         {
             try
             {
-                var committeeMemberShip = await _repositoryManager.CommitteeMemberRepository.GetAsync(c => c.Id  == id);
+                var committeeMemberShip = await _repositoryManager.CommitteeMemberRepository.GetByIdAsync(id);
                 if (committeeMemberShip == null)
                 {
                     return BadRequest("You are not a member of this committee");
                 }
+                else
+                {
+                    committeeMemberShip.MemberShipStatus = Lambda.Approved;
+                    committeeMemberShip.JoinedDate = DateTime.Now;
+                    await _repositoryManager.CommitteeMemberRepository.UpdateAsync(committeeMemberShip);
+                    await _unitOfWork.CommitAsync();
 
-                
+                    //send email to the user that he has been approved
+                    var username = await _repositoryManager.UserRepository.GetSingleUser(committeeMemberShip.MemberShipId);
+                    BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(username.Email, "Committe Membership Status", $"Your committee membership for {committeeMemberShip.Committee.CommitteeName} has been approved"));
 
-                committeeMemberShip.MemberShipStatus = Lambda.Approved;
-                committeeMemberShip.JoinedDate = DateTime.Now;
-                await _repositoryManager.CommitteeMemberRepository.UpdateAsync(committeeMemberShip);
-                
-                await _unitOfWork.CommitAsync();
-
-                //send email to the user that he has been approved
-               
-                
-                BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(committeeMemberShip.MemberShip.Email, "Committe Membership Status", $"Your committee membership for {committeeMemberShip.Committee.CommitteeName} has been approved"));
-                
-                return Ok();
+                    return Ok();
+                }
             }
             catch (Exception ex)
             {
@@ -415,8 +413,8 @@ namespace MLS_Digital_MGM_API.Controllers
                     return NotFound();
                 }
 
-                committeeMember.MemberShipStatus = Lambda.Deleted;
-                await _repositoryManager.CommitteeMemberRepository.DeleteAsync(committeeMember);
+                committeeMember.MemberShipStatus = Lambda.Removed;
+                await _repositoryManager.CommitteeMemberRepository.UpdateAsync(committeeMember);
                 await _unitOfWork.CommitAsync();
 
                 return Ok();

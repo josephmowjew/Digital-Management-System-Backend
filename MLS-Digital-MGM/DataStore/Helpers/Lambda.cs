@@ -58,6 +58,7 @@ namespace DataStore.Helpers
         public static string Revoked =  "Revoked";
 
         public static string Exited = "Exited";
+        public static string Removed = "Removed";
 
         public static int RandomNumber()
         {
