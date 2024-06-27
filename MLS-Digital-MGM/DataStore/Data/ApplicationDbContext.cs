@@ -108,6 +108,7 @@ namespace DataStore.Data
                 entity.Property(u => u.LoginProvider).HasMaxLength(85);
                 entity.Property(u => u.Value).HasMaxLength(200);
             });
+            
 
             
 
@@ -157,6 +158,10 @@ namespace DataStore.Data
         public DbSet<Message> Messages { get; set; }
         public DbSet<InvoiceRequest> InvoiceRequests { get; set; }
         
+        public DbSet<QBInvoice> QBInvoices { get; set; }
+        public DbSet<QBReceipt> QBReceipts { get; set; }
+        public DbSet<QBCustomer> QBCustomers { get; set; }
+        public DbSet<QBPayment> QBPayments { get; set; }
         
         
     }
