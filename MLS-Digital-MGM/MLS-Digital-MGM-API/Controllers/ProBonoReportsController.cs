@@ -30,8 +30,9 @@ public class ProBonoReportsController : Controller
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IWebHostEnvironment _hostingEnvironment;
      private readonly IEmailService _emailService;
+     private readonly IConfiguration _configuration;
 
-    public ProBonoReportsController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor, IWebHostEnvironment hostingEnvironment, IEmailService emailService)
+    public ProBonoReportsController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor, IWebHostEnvironment hostingEnvironment, IEmailService emailService, IConfiguration configuration)
     {
         _repositoryManager = repositoryManager;
         _errorLogService = errorLogService;
@@ -40,6 +41,7 @@ public class ProBonoReportsController : Controller
         _httpContextAccessor = httpContextAccessor;
         _hostingEnvironment = hostingEnvironment;
         _emailService = emailService;
+        _configuration = configuration;
     }
 
     [HttpGet("paged")]
@@ -107,7 +109,7 @@ public class ProBonoReportsController : Controller
                     string attachmentTypeName = attachment.AttachmentType.Name;
 
 
-                      string newfilePath = Path.Combine("/Uploads/ProBonoReportAttachments/", attachment.FileName);
+                      string newfilePath = Path.Combine("Uploads/ProBonoReportAttachments/", attachment.FileName);
 
                     attachment.FilePath = newfilePath;
                 }
@@ -328,7 +330,7 @@ public class ProBonoReportsController : Controller
             {
                 string attachmentTypeName = attachments.AttachmentType.Name;
 
-                string newFilePath = Path.Combine($"http://{HttpContext.Request.Host}/Uploads/{Lambda.ProBonoReportFolderName}", attachments.FileName);
+                string newFilePath = Path.Combine($"http://{HttpContext.Request.Host}{_configuration["APISettings:API_Prefix"]}/Uploads/{Lambda.ProBonoReportFolderName}", attachments.FileName);
 
                 attachments.FilePath = newFilePath;
 

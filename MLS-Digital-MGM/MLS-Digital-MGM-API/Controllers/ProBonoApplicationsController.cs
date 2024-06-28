@@ -30,7 +30,8 @@ namespace MLS_Digital_MGM_API.Controllers
         private readonly IMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IEmailService _emailService;
-        public ProBonoApplicationsController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor, IEmailService emailService)
+        private readonly IConfiguration _configuration;
+        public ProBonoApplicationsController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor, IEmailService emailService, IConfiguration configuration)
         {
             _repositoryManager = repositoryManager;
             _errorLogService = errorLogService;
@@ -38,6 +39,7 @@ namespace MLS_Digital_MGM_API.Controllers
             _mapper = mapper;
             _httpContextAccessor = httpContextAccessor;
             _emailService = emailService;
+            _configuration = configuration;
         }
     
         [HttpGet("paged")]
@@ -109,7 +111,7 @@ namespace MLS_Digital_MGM_API.Controllers
                         string attachmentTypeName = attachment.AttachmentType.Name;
 
 
-                        string newfilePath = Path.Combine("/uploads/ProBonoApplicationAttachments/", attachment.FileName);
+                        string newfilePath = Path.Combine("Uploads/ProBonoApplicationAttachments/", attachment.FileName);
 
                         attachment.FilePath = newfilePath;
                     }
@@ -428,7 +430,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 {
                     string attachmentTypeName = attachment.AttachmentType.Name;
 
-                    string newFilePath = Path.Combine($"http://{HttpContext.Request.Host}/Uploads/{Lambda.ProBonoApplicationFolderName}", attachment.FileName);
+                    string newFilePath = Path.Combine($"http://{HttpContext.Request.Host}{_configuration["APISettings:API_Prefix"]}/Uploads/{Lambda.ProBonoApplicationFolderName}", attachment.FileName);
 
                     attachment.FilePath = newFilePath;
 

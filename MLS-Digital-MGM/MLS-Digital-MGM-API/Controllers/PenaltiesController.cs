@@ -28,14 +28,16 @@ namespace MLS_Digital_MGM_API.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IConfiguration _configuration;
 
-        public PenaltiesController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor)
+        public PenaltiesController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor, IConfiguration configuration)
         {
             _repositoryManager = repositoryManager;
             _errorLogService = errorLogService;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _httpContextAccessor = httpContextAccessor;
+            _configuration = configuration;
         }
 
         [HttpGet("paged")]
@@ -89,7 +91,7 @@ namespace MLS_Digital_MGM_API.Controllers
                     string attachmentTypeName = attachment.AttachmentType.Name;
 
 
-                      string newfilePath = Path.Combine("/uploads/PenaltyAttachments/", attachment.FileName);
+                      string newfilePath = Path.Combine("Uploads/PenaltyAttachments/", attachment.FileName);
 
                     attachment.FilePath = newfilePath;
                 }
@@ -179,7 +181,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 {
                     string attachmentTypeName = attachment.AttachmentType.Name;
 
-                    string newFilePath = Path.Combine($"{Lambda.https}://{HttpContext.Request.Host}/Uploads/{Lambda.PenaltyFolderName}", attachment.FileName);
+                    string newFilePath = Path.Combine($"{Lambda.https}://{HttpContext.Request.Host}{_configuration["APISettings:API_Prefix"]}/Uploads/{Lambda.PenaltyFolderName}", attachment.FileName);
 
                     attachment.FilePath = newFilePath;
 
@@ -210,7 +212,9 @@ namespace MLS_Digital_MGM_API.Controllers
                 {
                     string attachmentTypeName = attachment.AttachmentType.Name;
 
-                    string newFilePath = Path.Combine($"http://{HttpContext.Request.Host}/uploads/{Lambda.PenaltyFolderName}", attachment.FileName);
+                   
+
+                    string newFilePath = Path.Combine($"http://{HttpContext.Request.Host}{_configuration["APISettings:API_Prefix"]}/Uploads/{Lambda.PenaltyFolderName}", attachment.FileName);
 
                     attachment.FilePath = newFilePath;
 

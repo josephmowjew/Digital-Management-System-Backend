@@ -30,8 +30,9 @@ namespace MLS_Digital_MGM_API.Controllers
         private readonly IMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IEmailService _emailService;
+        private readonly IConfiguration _configuration; 
 
-        public LicenseApplicationsController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor, IEmailService emailService)
+        public LicenseApplicationsController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor, IEmailService emailService, IConfiguration configuration)
         {
             _repositoryManager = repositoryManager;
             _errorLogService = errorLogService;
@@ -39,6 +40,7 @@ namespace MLS_Digital_MGM_API.Controllers
             _mapper = mapper;
             _httpContextAccessor = httpContextAccessor;
             _emailService = emailService;
+            _configuration = configuration;
         }
 
         // GET api/licenseapplications/paged
@@ -370,7 +372,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 {
                     string attachmentTypeName = attachment.AttachmentType.Name;
 
-                    string newFilePath = Path.Combine($"/Uploads/{Lambda.LicenseApplicationFolderName}", attachment.FileName);
+                    string newFilePath = Path.Combine($"{Lambda.https}://{HttpContext.Request.Host}{_configuration["APISettings:API_Prefix"]}/Uploads/{Lambda.LicenseApplicationFolderName}", attachment.FileName);
 
                     attachment.FilePath = newFilePath;
                 }

@@ -29,8 +29,9 @@ namespace MLS_Digital_MGM_API.Controllers
         private readonly IMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IEmailService _emailService;
+        private readonly IConfiguration _configuration;
 
-        public CPDTrainingsController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor, IEmailService emailService)
+        public CPDTrainingsController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor, IEmailService emailService, IConfiguration configuration)
         {
             _repositoryManager = repositoryManager;
             _errorLogService = errorLogService;
@@ -38,6 +39,7 @@ namespace MLS_Digital_MGM_API.Controllers
             _mapper = mapper;
             _httpContextAccessor = httpContextAccessor;
             _emailService = emailService;
+            _configuration = configuration;
         }
 
         [HttpGet("paged")]
@@ -239,7 +241,8 @@ namespace MLS_Digital_MGM_API.Controllers
             {
                 string attachmentTypeName = attachment.AttachmentType.Name;
 
-                string newFilePath = Path.Combine($"{Lambda.https}://{HttpContext.Request.Host}/uploads/{Lambda.CPDTrainingFolderName}", attachment.FileName);
+                
+                string newFilePath = $"{Lambda.http}://{HttpContext.Request.Host}{_configuration["APISettings:API_Prefix"]}/Uploads/{Lambda.CPDTrainingFolderName}/{attachment.FileName}";
 
                 attachment.FilePath = newFilePath;
 
