@@ -38,5 +38,7 @@ namespace DataStore.Core.Models
        public virtual List<ApplicationUser> Users {get; set;}
        [StringLength(maximumLength:250)]
        public string? DenialReason { get; set; }
+       public string? CustomerId {get; set;}
+       public QBCustomer Customer {get; set;} 
     }
 }

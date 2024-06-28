@@ -36,7 +36,8 @@ namespace DataStore.Core.Models
         public virtual List<CPDTrainingRegistration> CPDTrainingRegistrations { get; set; }
         public List<License> Licenses { get; set; }
         public List<Penalty> Penalties { get; set; }
-       
+        public string? CustomerId {get; set;}
+        public QBCustomer Customer {get; set;}       
 
 
     }
