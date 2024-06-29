@@ -1,5 +1,6 @@
 using DataStore.Core.Models;
 using DataStore.Data;
+using DataStore.Helpers;
 using DataStore.Persistence.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -29,6 +30,12 @@ namespace DataStore.Persistence.SQLRepositories
             .ThenInclude(t => t.AttachmentType)
             .Include(t => t.YearOfOperation)
             .FirstOrDefaultAsync(t => t.Id == id);
+        }
+
+        public async Task<int> GetProBonoApplicationsCountByUserAsync(string userId)
+        {
+            return await _context.ProBonoApplications
+                .Where(p => p.CreatedById == userId && p.Status != Lambda.Deleted && p.ApplicationStatus != Lambda.Approved).CountAsync(); ;
         }
 
 

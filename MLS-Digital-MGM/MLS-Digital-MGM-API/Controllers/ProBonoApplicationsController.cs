@@ -503,6 +503,29 @@ namespace MLS_Digital_MGM_API.Controllers
             }
         }
 
+        [HttpGet("count")]
+        public async Task<IActionResult> GetAll()
+        {
+            try
+            {
+                string username = _httpContextAccessor.HttpContext.User.Identity.Name;
+
+                //get user id from username
+                var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
+                string CreatedById = user.Id;
+
+                var count = await _repositoryManager.ProBonoApplicationRepository.GetProBonoApplicationsCountByUserAsync(CreatedById);
+
+                return Ok(count);
+            }
+            catch (Exception ex)
+            {
+
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
     }
 
 }
