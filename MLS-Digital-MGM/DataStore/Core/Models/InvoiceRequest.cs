@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
@@ -10,7 +11,6 @@ namespace DataStore.Core.Models
 {
     public class InvoiceRequest: Meta
     {
-       
         public string? CreatedById { get; set; }
         public virtual ApplicationUser CreatedBy { get; set; }
         [Required]
@@ -27,6 +27,10 @@ namespace DataStore.Core.Models
         public string ReferencedEntityType { get; set; }
         public string ReferencedEntityId { get; set; }
 
+        [StringLength(maximumLength:250)]
+        public string Description { get; set; }
+        public string? QBInvoiceId { get; set; }
+        public QBInvoice QBInvoice { get; set; }
     }
 
 }

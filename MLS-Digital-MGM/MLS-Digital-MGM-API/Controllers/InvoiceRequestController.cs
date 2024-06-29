@@ -244,6 +244,8 @@ namespace MLS_Digital_MGM_API.Controllers
                     return BadRequest(ModelState);
                 }
 
+                //add a description of the invoice request
+                invoiceRequest.Description = $"Invoice Request for {invoiceRequest.ReferencedEntityType} {invoiceRequest.ReferencedEntityId}";
                 await _repositoryManager.InvoiceRequestRepository.AddAsync(invoiceRequest);
                 await _unitOfWork.CommitAsync();
 
