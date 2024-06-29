@@ -16,6 +16,9 @@ using DataStore.Core.DTOs.InvoiceRequest;
 using MLS_Digital_MGM.DataStore.Helpers;
 using DataStore.Helpers;
 using System.Linq.Expressions;
+using Hangfire;
+using Newtonsoft.Json;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 
 namespace MLS_Digital_MGM_API.Controllers
 {
@@ -29,6 +32,7 @@ namespace MLS_Digital_MGM_API.Controllers
         private readonly IMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<InvoiceRequestController> _logger;
+        private readonly IEmailService _emailService;
 
         public InvoiceRequestController(
             IRepositoryManager repositoryManager,
@@ -36,7 +40,8 @@ namespace MLS_Digital_MGM_API.Controllers
             IUnitOfWork unitOfWork,
             IMapper mapper,
             IHttpContextAccessor httpContextAccessor,
-            ILogger<InvoiceRequestController> logger)
+            ILogger<InvoiceRequestController> logger,
+            IEmailService emailService)
         {
             _repositoryManager = repositoryManager;
             _errorLogService = errorLogService;
@@ -44,6 +49,7 @@ namespace MLS_Digital_MGM_API.Controllers
             _mapper = mapper;
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
+            _emailService = emailService;
         }
 
         [HttpGet("paged")]
@@ -137,8 +143,7 @@ namespace MLS_Digital_MGM_API.Controllers
                     SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null,
                     Includes = new Expression<Func<InvoiceRequest, object>>[] {
                         p => p.CreatedBy,
-                        p => p.Customer
-                        
+                        p => p.Customer,
                     },
                 };
 
@@ -327,6 +332,39 @@ namespace MLS_Digital_MGM_API.Controllers
                 await _errorLogService.LogErrorAsync(ex);
                 return StatusCode(500, "Internal server error");
             }
+        }
+
+        [HttpPost("MarkAsGenerated/{id}")]
+        public async Task<IActionResult> MarkGenerated(int id, UpdateInvoiceRequestDTO invoiceRequestDTO)
+        {
+            try
+            {
+                var invoiceRequest = await _repositoryManager.InvoiceRequestRepository.GetByIdAsync(id);
+
+                if (invoiceRequest == null)
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    invoiceRequest.Status = Lambda.MarkAsGenerated;
+
+                    await _repositoryManager.InvoiceRequestRepository.UpdateAsync(invoiceRequest);
+                    await _unitOfWork.CommitAsync();
+
+                    BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(invoiceRequest.CreatedBy.Email, "Invoice Request Status", "Your invoice for a CPD has been generated"));
+
+                    return Ok();
+                }
+
+                
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+
         }
 
     }

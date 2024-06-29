@@ -339,8 +339,7 @@ namespace MLS_Digital_MGM_API.Controllers
             }
         }
 
-
-    private async Task<List<Attachment>> SaveAttachmentsAsync(IEnumerable<IFormFile> attachments, int attachmentTypeId)
+        private async Task<List<Attachment>> SaveAttachmentsAsync(IEnumerable<IFormFile> attachments, int attachmentTypeId)
      {
             var attachmentsList = new List<Attachment>();
             var hostEnvironment = HttpContext.RequestServices.GetRequiredService<IWebHostEnvironment>();
@@ -404,9 +403,6 @@ namespace MLS_Digital_MGM_API.Controllers
 
             return attachmentsList;
         }
-
-
-       
 
         //method to accept cpd training registration taking the id of the cpd training registration
         [HttpGet("AcceptCPDTrainingRegistration/{id}")]
@@ -513,7 +509,7 @@ namespace MLS_Digital_MGM_API.Controllers
             
         }
 
-    private double GetMemberFee(CPDTraining cpdTraining, string attendanceMode)
+        private double GetMemberFee(CPDTraining cpdTraining, string attendanceMode)
     {
         return attendanceMode switch
         {
@@ -523,7 +519,7 @@ namespace MLS_Digital_MGM_API.Controllers
         };
     }
 
-    private double GetNonMemberFee(CPDTraining cpdTraining, string attendanceMode)
+        private double GetNonMemberFee(CPDTraining cpdTraining, string attendanceMode)
     {
         return attendanceMode switch
         {

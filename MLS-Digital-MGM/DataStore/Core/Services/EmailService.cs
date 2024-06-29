@@ -77,6 +77,14 @@ namespace DataStore.Core.Services
             }
         }
 
+        public async Task SendCPDInvoiceStatusEmailAsync(List<string> memberEmails, string emailBody, string subject)
+        {
+            foreach (var memberEmail in memberEmails)
+            {
+                await this.SendMailWithKeyVarReturn(memberEmail, subject , emailBody);
+            }
+        }
+
         public Task LogErrorAsync(Exception ex)
         {
             throw new NotImplementedException();

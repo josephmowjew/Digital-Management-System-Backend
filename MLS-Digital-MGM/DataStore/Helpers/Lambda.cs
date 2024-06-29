@@ -60,6 +60,9 @@ namespace DataStore.Helpers
         public static string Exited = "Exited";
         public static string Removed = "Removed";
 
+        //Invoice statuses
+        public static string MarkAsGenerated = "Generated";
+
         public static int RandomNumber()
         {
             // generating a random number

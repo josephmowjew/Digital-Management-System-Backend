@@ -328,7 +328,7 @@ namespace MLS_Digital_MGM_API.Controllers
         }
 
         
-    private async Task<List<Attachment>> SaveAttachmentsAsync(IEnumerable<IFormFile> attachments, int attachmentTypeId)
+        private async Task<List<Attachment>> SaveAttachmentsAsync(IEnumerable<IFormFile> attachments, int attachmentTypeId)
      {
             var attachmentsList = new List<Attachment>();
             var hostEnvironment = HttpContext.RequestServices.GetRequiredService<IWebHostEnvironment>();
