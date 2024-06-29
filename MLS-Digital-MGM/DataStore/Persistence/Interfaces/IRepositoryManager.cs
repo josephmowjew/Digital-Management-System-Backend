@@ -67,6 +67,10 @@ namespace DataStore.Persistence.Interfaces
         //IInvoiceRequestTypeRepository InvoiceRequestTypeRepository {get;}
         IInvoiceRequestRepository InvoiceRequestRepository {get;}
         IEntityResolverService EntityResolverService { get; } 
+        ICustomerRepository CustomerRepository { get; }
+        IInvoiceRepository InvoiceRepository { get; }
+        IPaymentRepository PaymentRepository { get; }
+        IReceiptRepository ReceiptRepository { get; }
 
 
     }
