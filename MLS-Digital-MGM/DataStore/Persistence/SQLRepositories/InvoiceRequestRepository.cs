@@ -19,7 +19,7 @@ namespace DataStore.Persistence.SQLRepositories
 
         public async Task<InvoiceRequest> GetByIdAsync(int id)
         {
-            return await _context.InvoiceRequests.Include(ir => ir.CreatedBy).FirstOrDefaultAsync(ir => ir.Id == id);
+            return await _context.InvoiceRequests.Include(ir => ir.Customer).Include(ir => ir.YearOfOperation).Include(ir => ir.QBInvoice).Include(ir => ir.CreatedBy).FirstOrDefaultAsync(ir => ir.Id == id);
         }
     }
 }

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DataStore.Core.Services.Interfaces;
 using DataStore.Persistence.Interfaces;
 using Microsoft.AspNetCore.Http;
+using System.Text.RegularExpressions;
 
 namespace DataStore.Helpers
 {
@@ -117,6 +118,25 @@ namespace DataStore.Helpers
                   await errorLogService.LogErrorAsync(ex);
                   return "Unknown";
             }
+        }
+
+         //  method to extract invoiceRequestId
+        public static int ExtractInvoiceRequestId(string description)
+        {
+            if (string.IsNullOrWhiteSpace(description))
+            {
+                return 0;
+            }
+
+            // Use regex to match the pattern "MLS-{number}"
+            Match match = Regex.Match(description, @"MLS-(\d+)");
+            
+            if (match.Success && int.TryParse(match.Groups[1].Value, out int invoiceRequestId))
+            {
+                return invoiceRequestId;
+            }
+
+            return 0;
         }
     }
 

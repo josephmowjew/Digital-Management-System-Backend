@@ -24,8 +24,10 @@ namespace DataStore.Core.DTOs.InvoiceRequest
         public string ReferencedEntityId { get; set; }
 
         public object ReferencedEntity { get; set; }
-
+         public string Description { get; set; }
         public DateTime CreatedDate { get; set; }
+         public string? QBInvoiceId { get; set; }
+        public QBInvoice QBInvoice { get; set; }
 
     }
 }

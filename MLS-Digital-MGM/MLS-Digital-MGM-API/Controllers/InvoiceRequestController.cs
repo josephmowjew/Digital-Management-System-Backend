@@ -137,7 +137,8 @@ namespace MLS_Digital_MGM_API.Controllers
                     SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null,
                     Includes = new Expression<Func<InvoiceRequest, object>>[] {
                         p => p.CreatedBy,
-                        p => p.Customer
+                        p => p.Customer,
+                        p => p.QBInvoice,
                         
                     },
                 };
@@ -245,9 +246,13 @@ namespace MLS_Digital_MGM_API.Controllers
                 }
 
                 //add a description of the invoice request
-                invoiceRequest.Description = $"Invoice Request for {invoiceRequest.ReferencedEntityType} {invoiceRequest.ReferencedEntityId}";
+               
                 await _repositoryManager.InvoiceRequestRepository.AddAsync(invoiceRequest);
                 await _unitOfWork.CommitAsync();
+
+                 invoiceRequest.Description = $"MLS-{invoiceRequest.Id}";
+
+                 await _repositoryManager.InvoiceRequestRepository.UpdateAsync(invoiceRequest);
 
                 return CreatedAtAction("GetInvoiceRequestById", new { id = invoiceRequest.Id }, invoiceRequest);
             }

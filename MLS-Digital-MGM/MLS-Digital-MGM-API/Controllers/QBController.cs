@@ -7,6 +7,7 @@ using DataStore.Persistence.Interfaces;
 using DataStore.Core.Services.Interfaces;
 using DataStore.Core.Models;
 using System.Linq;
+using DataStore.Helpers;
 
 namespace MLS_Digital_MGM_API.Controllers
 {
@@ -56,6 +57,29 @@ namespace MLS_Digital_MGM_API.Controllers
             // Add invoices to the database
             _repositoryManager.InvoiceRepository.AddRange(invoices);
             await _unitOfWork.CommitAsync();
+
+            foreach (var invoice in invoiceViewModels)
+            {
+               //extract the invoice request id from the description
+
+                int invoiceRequestId =  Lambda.ExtractInvoiceRequestId(invoice.InvoiceDescription);
+
+                if(invoiceRequestId!= 0)
+                {
+                    //find the invoice request with the id that was submited 
+                    var invoiceRequest = await _repositoryManager.InvoiceRequestRepository.GetByIdAsync(invoiceRequestId);
+
+                    if(invoiceRequest != null)
+                    {
+                        //update the invoice request with the invoice id
+                        invoiceRequest.QBInvoiceId = invoice.Id;
+                        _repositoryManager.InvoiceRequestRepository.UpdateAsync(invoiceRequest);
+                        //save the changes
+                        await _unitOfWork.CommitAsync();
+                    }
+                }
+            }
+
             return Ok();
         }
 
