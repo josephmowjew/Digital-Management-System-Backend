@@ -116,6 +116,77 @@ namespace MLS_Digital_MGM_API.Controllers
             }
         }
 
+        
+        [HttpGet("cpdtrainings")]
+        public async Task<IActionResult> GetCPDTrainings(int cpdTrainingId, int pageNumber = 1, int pageSize = 10)
+        {
+            try
+            {
+                var dataTableParams = new DataTablesParameters();
+                string username = _httpContextAccessor.HttpContext.User.Identity.Name;
+                var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
+                string CreatedById = user.Id;
+
+                var pagingParameters = new PagingParameters<InvoiceRequest>
+                {
+                    Predicate = u => u.Status != Lambda.Deleted && u.ReferencedEntityType == "CPD" && u.ReferencedEntityId == cpdTrainingId.ToString(),
+                    PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
+                    PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
+                    SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
+                    SortColumn = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumn : null,
+                    SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null,
+                    Includes = new Expression<Func<InvoiceRequest, object>>[] {
+                        p => p.CreatedBy
+                    },
+                };
+
+
+
+                var invoiceRequestsPaged = await _repositoryManager.InvoiceRequestRepository.GetPagedAsync(pagingParameters);
+
+                if (invoiceRequestsPaged == null || !invoiceRequestsPaged.Any())
+                {
+                    if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                    {
+                        var draw = dataTableParams.Draw;
+                        return Json(new
+                        {
+                            draw,
+                            recordsFiltered = 0,
+                            recordsTotal = 0,
+                            data = Enumerable.Empty<ReadInvoiceRequestDTO>()
+                        });
+                    }
+                    return Ok(Enumerable.Empty<ReadInvoiceRequestDTO>());
+                }
+
+                var invoiceRequestDTOs = _mapper.Map<List<ReadInvoiceRequestDTO>>(invoiceRequestsPaged);
+
+                if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                {
+                    var draw = dataTableParams.Draw;
+                    var resultTotalFiltered = invoiceRequestDTOs.Count;
+                    var totalRecords = await _repositoryManager.InvoiceRequestRepository.CountAsync(pagingParameters);
+
+                    return Json(new
+                    {
+                        draw,
+                        recordsFiltered = totalRecords,
+                        recordsTotal = totalRecords,
+                        data = invoiceRequestDTOs.ToList()
+                    });
+                }
+
+                return Ok(invoiceRequestDTOs);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in GetCPDTrainings");
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
         [HttpPost]
         public async Task<IActionResult> AddInvoiceRequest([FromForm] CreateInvoiceRequestDTO invoiceRequestDTO)
         {
@@ -149,8 +220,8 @@ namespace MLS_Digital_MGM_API.Controllers
                 if(memberAccount != null)
                 {
                     //set the member account id
-                    //TODO: add a customerId field to the member account and set it here
-                    //invoiceRequest.CustomerId = memberAccount.CustomerId;
+                  
+                    invoiceRequest.CustomerId = memberAccount.CustomerId;
                 }
 
 

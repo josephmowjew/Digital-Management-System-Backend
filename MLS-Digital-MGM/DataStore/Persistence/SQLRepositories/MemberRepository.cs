@@ -24,7 +24,7 @@ namespace DataStore.Persistence.SQLRepositories
 
         public async Task<Member?> GetMemberByUserId(string userId)
         {
-            return await _context.Members.Include(m => m.User).FirstOrDefaultAsync(x => x.UserId == userId);
+            return await _context.Members.Include(m => m.User).Include(m => m.Customer).FirstOrDefaultAsync(x => x.UserId == userId);
         }
 
         public async Task<IEnumerable<Member>> GetAllAsync()

@@ -15,7 +15,6 @@ namespace DataStore.Persistence.SQLRepositories
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<Role> _roleManager;
         private readonly IEntityResolverService _entityResolverService;
-
         private IUserRepository _userRepository;
         private IDepartmentRepository _departmentRepository;
         private IErrorLogRepository _errorLogRepository;
@@ -47,6 +46,10 @@ namespace DataStore.Persistence.SQLRepositories
         private ICommitteeMemberRepository _committeeMemberRepository;
         private IMessageRepository _messageRepository;
         private IThreadRepository _threadRepository;
+        private ICustomerRepository _customerRepository;
+        private IPaymentRepository paymentRepository;
+        private IInvoiceRepository _invoiceRepository;
+        private IReceiptRepository _receiptRepository;
         //private IInvoiceRequestTypeRepository _invoiceRequestTypeRepository;
         private IInvoiceRequestRepository _invoiceRequestRepository;
 
@@ -101,6 +104,10 @@ namespace DataStore.Persistence.SQLRepositories
         //public IInvoiceRequestTypeRepository InvoiceRequestTypeRepository => _invoiceRequestTypeRepository ??= new InvoiceRequestTypeRepository(_context, _unitOfWork);
         public IInvoiceRequestRepository InvoiceRequestRepository => _invoiceRequestRepository ??= new InvoiceRequestRepository(_context, _unitOfWork);
         public IEntityResolverService EntityResolverService => _entityResolverService;
+        public ICustomerRepository CustomerRepository => _customerRepository ??= new CustomerRepository(_context, _unitOfWork);
+        public IPaymentRepository PaymentRepository => paymentRepository ??= new PaymentRepository(_context, _unitOfWork);
+        public IInvoiceRepository InvoiceRepository => _invoiceRepository ??= new InvoiceRepository(_context, _unitOfWork);
+        public IReceiptRepository ReceiptRepository => _receiptRepository ??= new ReceiptRepository(_context, _unitOfWork);
        
     }
 }
