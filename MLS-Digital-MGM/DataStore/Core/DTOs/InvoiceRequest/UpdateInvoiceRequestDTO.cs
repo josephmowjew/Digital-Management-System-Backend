@@ -5,7 +5,7 @@ namespace DataStore.Core.DTOs.InvoiceRequest
     public class UpdateInvoiceRequestDTO
     {
         public int Id { get; set; }
-        public int InvoiceRequestTypeId { get; set; }
+        
         [Required]
         public string CreatedById { get; set; }
         public double Amount { get; set; }

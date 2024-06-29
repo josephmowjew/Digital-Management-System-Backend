@@ -129,14 +129,16 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 var pagingParameters = new PagingParameters<InvoiceRequest>
                 {
-                    Predicate = u => u.Status != Lambda.Deleted && u.ReferencedEntityType == "CPD" && u.ReferencedEntityId == cpdTrainingId.ToString(),
+                    Predicate = u => u.Status != Lambda.Deleted && u.ReferencedEntityType == "CPDTrainings" && u.ReferencedEntityId == cpdTrainingId.ToString(),
                     PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
                     PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
                     SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
                     SortColumn = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumn : null,
                     SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null,
                     Includes = new Expression<Func<InvoiceRequest, object>>[] {
-                        p => p.CreatedBy
+                        p => p.CreatedBy,
+                        p => p.Customer
+                        
                     },
                 };
 
@@ -160,7 +162,15 @@ namespace MLS_Digital_MGM_API.Controllers
                     return Ok(Enumerable.Empty<ReadInvoiceRequestDTO>());
                 }
 
+               
                 var invoiceRequestDTOs = _mapper.Map<List<ReadInvoiceRequestDTO>>(invoiceRequestsPaged);
+                 //loop through the invoice requests and get the invoice and set the referenced entity to a CPDTraining
+                foreach (var invoiceRequest in invoiceRequestDTOs)
+                {
+                    
+                    invoiceRequest.ReferencedEntity = await _repositoryManager.CPDTrainingRepository.GetAsync( ir => ir.Id == int.Parse(invoiceRequest.ReferencedEntityId));
+                }
+
 
                 if (dataTableParams.LoadFromRequest(_httpContextAccessor))
                 {

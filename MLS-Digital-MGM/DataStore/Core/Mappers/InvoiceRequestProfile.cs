@@ -12,6 +12,8 @@ namespace DataStore.Core.Mappers
                 .ForMember(dest => dest.Amount, opt => opt.MapFrom(src => src.Amount))
                 .ForMember(dest => dest.ReferencedEntityType, opt => opt.MapFrom(src => src.ReferencedEntityType))
                 .ForMember(dest => dest.ReferencedEntityId, opt => opt.MapFrom(src => src.ReferencedEntityId));
+
+            CreateMap<InvoiceRequest,ReadInvoiceRequestDTO>();
         }
     }
 }
