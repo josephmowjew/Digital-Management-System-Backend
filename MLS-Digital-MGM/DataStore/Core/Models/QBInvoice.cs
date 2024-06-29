@@ -7,6 +7,8 @@ namespace DataStore.Core.Models
 {
     public class QBInvoice : Meta
     {
+       
+      
         public string Id { get; set; }
         public string InvoiceNumber { get; set; }
         public string CustomerId { get; set; }
@@ -20,5 +22,6 @@ namespace DataStore.Core.Models
         public DateTime CreatedDate { get; set; }
         public DateTime UpdateDate { get; set; }
         public string InvoiceDescription { get; set; }
+          
     }
 }
