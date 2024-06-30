@@ -15,5 +15,7 @@ namespace DataStore.Persistence.Interfaces;
      
 
      Task<IEnumerable<Member>> GetAllAsync();
+
+     Task<Member?> GetByIdAsync(int id);
   
   }

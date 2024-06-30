@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using DataStore.Core.DTOs.Firms;
 using DataStore.Core.DTOs.License;
 using DataStore.Core.DTOs.User;
+using DataStore.Core.Models;
 
 namespace DataStore.Core.DTOs.Member
 {
@@ -36,5 +37,7 @@ namespace DataStore.Core.DTOs.Member
         public List<ReadLicenseDTO> Licenses { get; set; }
 
         public ReadLicenseDTO CurrentLicense { get; set; }
+        public string? CustomerId {get; set;}
+        public QBCustomer Customer {get; set;}  
     }
 }

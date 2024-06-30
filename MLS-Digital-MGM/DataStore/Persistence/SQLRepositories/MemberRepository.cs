@@ -29,7 +29,12 @@ namespace DataStore.Persistence.SQLRepositories
 
         public async Task<IEnumerable<Member>> GetAllAsync()
         {
-            return await _context.Members.Include(m => m.User).Where(q => q.Status != Lambda.Deleted).ToListAsync();
+            return await _context.Members.Include(m => m.User).Include(m => m.Customer).Where(q => q.Status != Lambda.Deleted).ToListAsync();
+        }
+
+        public async Task<Member?> GetByIdAsync(int id)
+        {
+            return await _context.Members.Include(m => m.User).Include(m => m.Customer).FirstOrDefaultAsync(q => q.Id == id && q.Status != Lambda.Deleted);
         }
     }
 }
