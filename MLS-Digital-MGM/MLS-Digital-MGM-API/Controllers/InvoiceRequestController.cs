@@ -443,10 +443,39 @@ namespace MLS_Digital_MGM_API.Controllers
 
                     BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(invoiceRequest.CreatedBy.Email, "Invoice Request Status", "Your invoice for a CPD has been generated"));
 
-                    return Ok();
+                    return Json(new { message = "Invoice Request marked as generated" });
                 }
 
                 
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+
+        }
+        [HttpPost("MarkAsPaid/{id}")]
+        public async Task<IActionResult> MarkPaid(int id, UpdateInvoiceRequestDTO invoiceRequestDTO)
+        {
+            try
+            {
+                var invoiceRequest = await _repositoryManager.InvoiceRequestRepository.GetByIdAsync(id);
+                if (invoiceRequest == null)
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    invoiceRequest.Status = Lambda.MarkAsPaid;
+                    await _repositoryManager.InvoiceRequestRepository.UpdateAsync(invoiceRequest);
+                    await _unitOfWork.CommitAsync();
+
+                    BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(invoiceRequest.CreatedBy.Email, "Invoice Request Status", "Your invoice for a CPD has been paid"));
+
+                    return Json(new { message = "Invoice Request marked as paid" });
+                }
+
             }
             catch (Exception ex)
             {
