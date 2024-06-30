@@ -28,7 +28,7 @@ namespace DataStore.Core.Models
         public string ReferencedEntityId { get; set; }
 
         [StringLength(maximumLength:250)]
-        public string Description { get; set; }
+        public string? Description { get; set; }
         public string? QBInvoiceId { get; set; }
         public QBInvoice QBInvoice { get; set; }
     }

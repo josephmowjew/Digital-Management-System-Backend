@@ -11,6 +11,8 @@ namespace DataStore.Core.DTOs.InvoiceRequest
         // public string CustomerId { get; set; }
         // Polymorphic association properties
         public string ReferencedEntityType { get; set; }
+
+        public string Description { get; set; }
         public string ReferencedEntityId { get; set; }
     }
 }
