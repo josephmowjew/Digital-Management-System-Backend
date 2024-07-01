@@ -358,8 +358,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
-
-        
+      
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(string id, [FromBody]UpdateUserDTO userDTO)
         {
