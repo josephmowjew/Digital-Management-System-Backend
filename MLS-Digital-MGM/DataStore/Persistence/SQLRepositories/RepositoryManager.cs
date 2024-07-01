@@ -50,6 +50,7 @@ namespace DataStore.Persistence.SQLRepositories
         private IPaymentRepository paymentRepository;
         private IInvoiceRepository _invoiceRepository;
         private IReceiptRepository _receiptRepository;
+        private IQBCustomerRepository _qBCustomerRepository;
         //private IInvoiceRequestTypeRepository _invoiceRequestTypeRepository;
         private IInvoiceRequestRepository _invoiceRequestRepository;
 
@@ -108,6 +109,7 @@ namespace DataStore.Persistence.SQLRepositories
         public IPaymentRepository PaymentRepository => paymentRepository ??= new PaymentRepository(_context, _unitOfWork);
         public IInvoiceRepository InvoiceRepository => _invoiceRepository ??= new InvoiceRepository(_context, _unitOfWork);
         public IReceiptRepository ReceiptRepository => _receiptRepository ??= new ReceiptRepository(_context, _unitOfWork);
+        public IQBCustomerRepository QBCustomerRepository => _qBCustomerRepository ??= new QBCustomerRepository(_context, _unitOfWork);
        
     }
 }

@@ -40,5 +40,6 @@ namespace DataStore.Core.Models
        public string? DenialReason { get; set; }
        public string? CustomerId {get; set;}
        public QBCustomer Customer {get; set;} 
+       
     }
 }

@@ -64,6 +64,8 @@ namespace DataStore.Helpers
         //Invoice statuses
         public static string MarkAsGenerated = "Generated";
 
+        public static string MarkAsPaid = "Paid";
+
         public static int RandomNumber()
         {
             // generating a random number

@@ -11,6 +11,7 @@ using DataStore.Core.Services.Interfaces;
 using DataStore.Core.Models;
 using DataStore.Core.DTOs.Member;
 using DataStore.Helpers;
+using System.Linq.Expressions;
 using MLS_Digital_MGM.DataStore.Helpers;
 using Microsoft.CodeAnalysis.Elfie.Serialization;
 using Microsoft.AspNetCore.Authorization;
@@ -50,6 +51,12 @@ namespace MLS_Digital_MGM_API.Controllers
                     SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
                     SortColumn = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumn : null,
                     SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null,
+                    Includes = new Expression<Func<Member, object>>[] {
+                        p => p.Customer,
+                        p => p.User,
+                        p => p.Firm,
+                       
+                    }
                 };
 
                 var members = await _repositoryManager.MemberRepository.GetPagedAsync(pagingParameters);

@@ -32,5 +32,8 @@ namespace DataStore.Core.DTOs.Firms
 
         public ICollection<ApplicationUser> Users { get; set; }
         public string Status {get; set;}
+
+         public string? CustomerId {get; set;}
+        public QBCustomer Customer {get; set;}
     }
 }
