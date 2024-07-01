@@ -216,7 +216,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
             await _repositoryManager.UnitOfWork.CommitAsync();
 
-            return Ok(new { response = "Account confirmed", user = user });
+            return Ok(new {isSuccess=true, response = "Account confirmed", user = user });
 
         }
         [HttpGet]
@@ -252,7 +252,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
            
 
-            return Ok("Check your email for the pin");
+            return Json( new {isSuccess=true, message="Check your email for the pin"});
 
 
         }
@@ -293,7 +293,7 @@ namespace MLS_Digital_MGM_API.Controllers
             // If the password reset is successful, return a success message
             if (result.Succeeded)
             {
-                return Ok("Password reset successfully");
+               return Json(new {isSuccess=true, message = "Password reset successfully" });
             }
 
             // If the password reset fails, return an error
@@ -339,12 +339,15 @@ namespace MLS_Digital_MGM_API.Controllers
             // If the password reset is successful, return a success message
             if (result.Succeeded)
             {
-                return Ok("Password reset successfully");
+                 return Json(new { isSuccess=true, message = "Password  has been reset successfully" });
+            }
+            else{
+                // If the password reset fails, return an error
+                ModelState.AddModelError("GeneralError", "Failed to reset password");
+                return BadRequest(ModelState);
             }
 
-            // If the password reset fails, return an error
-            ModelState.AddModelError("GeneralError", "Failed to reset password");
-            return BadRequest(ModelState);
+           
         }
 
         //generate forgot password link
@@ -369,22 +372,19 @@ namespace MLS_Digital_MGM_API.Controllers
                 return BadRequest(ModelState);
             }
 
-            // generate link
+            // Generate password reset token
             var token = await this._repositoryManager.UserManager.GeneratePasswordResetTokenAsync(user);
 
             var code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
-            var callbackUrl = Url.Page(
-                "/ResetPassword",
-                pageHandler: null,
-                values: new { area = "", code },
-                protocol: Request.Scheme);
+            var callbackUrl = $"{Request.Scheme}://localhost:5002/Home/ResetPassword?code={code}";
 
-            
-               var body = $"Please reset your password by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.";
+            var body = $"Please reset your password by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.";
 
             var pinEmailResult = BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(user.Email, "Reset Password", body));
 
-            return Ok("Password reset link was sent to your email successfully");
+            //return  json with message
+            return Json(new { isSuccess=true, message = "Password reset link was sent to your email successfully" });
+
         }
 
     }
