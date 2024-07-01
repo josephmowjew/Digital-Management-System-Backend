@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using AutoMapper;
-using DataStore.Core.DTOs;
+using DataStore.Core.DTOs.QBInvoicesDTOs;
 using DataStore.Core.Services;
 using DataStore.Persistence.Interfaces;
 using DataStore.Core.Services.Interfaces;
@@ -134,24 +134,32 @@ namespace MLS_Digital_MGM_API.Controllers
                 var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
                 string CreatedById = user.Id;
 
-                var pagingParameters = new PagingParameters<InvoiceRequest>
+                // Fetch the customer ID associated with the user from InvoiceRequest
+                var customer = await _repositoryManager.MemberRepository.GetMemberByUserId(user.Id);
+
+                if (customer == null)
                 {
-                    Predicate = u => u.Status != Lambda.Deleted && u.Status == Lambda.MarkAsGenerated,
+                    return NotFound("No customer found for this user.");
+                }
+
+                var customerId = customer.CustomerId;
+
+                var pagingParameters = new PagingParameters<QBInvoice>
+                {
+                    Predicate = u => u.Status != Lambda.Deleted && u.CustomerId == customerId,
                     PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
                     PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
                     SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
                     SortColumn = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumn : null,
                     SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null,
-                    Includes = new Expression<Func<InvoiceRequest, object>>[] {
-                        p => p.CreatedBy,
-                        p => p.Customer,
-                        p => p.QBInvoice,
+                    Includes = new Expression<Func<QBInvoice, object>>[] {
+                        p => p.Customer
                     },
                 };
 
-                var invoiceRequestsPaged = await _repositoryManager.InvoiceRequestRepository.GetPagedAsync(pagingParameters);
+                var invoicesPaged = await _repositoryManager.QBInvoiceRepository.GetPagedAsync(pagingParameters);
 
-                if (invoiceRequestsPaged == null || !invoiceRequestsPaged.Any())
+                if (invoicesPaged == null || !invoicesPaged.Any())
                 {
                     if (dataTableParams.LoadFromRequest(_httpContextAccessor))
                     {
@@ -161,13 +169,13 @@ namespace MLS_Digital_MGM_API.Controllers
                             draw,
                             recordsFiltered = 0,
                             recordsTotal = 0,
-                            data = Enumerable.Empty<ReadInvoiceRequestDTO>()
+                            data = Enumerable.Empty<ReadQBInvoiceDTO>()
                         });
                     }
-                    return Ok(Enumerable.Empty<ReadInvoiceRequestDTO>());
+                    return Ok(Enumerable.Empty<ReadQBInvoiceDTO>());
                 }
 
-                var invoiceRequestDTOs = _mapper.Map<List<ReadInvoiceRequestDTO>>(invoiceRequestsPaged);
+                var invoiceRequestDTOs = _mapper.Map<List<ReadQBInvoiceDTO>>(invoicesPaged);
 
 
 
@@ -175,7 +183,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 {
                     var draw = dataTableParams.Draw;
                     var resultTotalFiltered = invoiceRequestDTOs.Count;
-                    var totalRecords = await _repositoryManager.InvoiceRequestRepository.CountAsync(pagingParameters);
+                    var totalRecords = await _repositoryManager.QBInvoiceRepository.CountAsync(pagingParameters);
 
                     return Json(new
                     {
@@ -398,7 +406,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
 
                 var existingInvoiceRequest = await _repositoryManager.InvoiceRequestRepository.GetAsync(
-                    d => d.ReferencedEntityType.Trim().Equals(invoiceRequest.ReferencedEntityType.Trim(), StringComparison.OrdinalIgnoreCase) && d.ReferencedEntityId == invoiceRequest.ReferencedEntityId && d.YearOfOperationId == invoiceRequest.YearOfOperationId);
+                    d => d.ReferencedEntityType.Trim().Equals(invoiceRequest.ReferencedEntityType.Trim(), StringComparison.OrdinalIgnoreCase) && d.ReferencedEntityId == invoiceRequest.ReferencedEntityId && d.YearOfOperationId == invoiceRequest.YearOfOperationId && d.CreatedById == invoiceRequest.CreatedById);
 
                 if (existingInvoiceRequest != null)
                 {
@@ -444,6 +452,78 @@ namespace MLS_Digital_MGM_API.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred in GetInvoiceRequestById");
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpGet("byMember")]
+        public async Task<IActionResult> GetInvoiceRequestsByMemberId(int pageNumber = 1, int pageSize = 10)
+        {
+            try
+            {
+                var dataTableParams = new DataTablesParameters();
+                string username = _httpContextAccessor.HttpContext.User.Identity.Name;
+                var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
+                string CreatedById = user.Id;
+
+                var pagingParameters = new PagingParameters<InvoiceRequest>
+                {
+                    Predicate = u => u.Status != Lambda.Deleted && u.CreatedById == CreatedById,
+                    PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
+                    PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
+                    SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
+                    SortColumn = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumn : null,
+                    SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null,
+                    Includes = new Expression<Func<InvoiceRequest, object>>[] {
+                        p => p.CreatedBy,
+                        p => p.Customer,
+                        p => p.QBInvoice,
+                    },
+                };
+
+                var invoiceRequestsPaged = await _repositoryManager.InvoiceRequestRepository.GetPagedAsync(pagingParameters);
+
+                if (invoiceRequestsPaged == null || !invoiceRequestsPaged.Any())
+                {
+                    if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                    {
+                        var draw = dataTableParams.Draw;
+                        return Json(new
+                        {
+                            draw,
+                            recordsFiltered = 0,
+                            recordsTotal = 0,
+                            data = Enumerable.Empty<ReadInvoiceRequestDTO>()
+                        });
+                    }
+                    return Ok(Enumerable.Empty<ReadInvoiceRequestDTO>());
+                }
+
+                var invoiceRequestDTOs = _mapper.Map<List<ReadInvoiceRequestDTO>>(invoiceRequestsPaged);
+
+
+
+                if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                {
+                    var draw = dataTableParams.Draw;
+                    var resultTotalFiltered = invoiceRequestDTOs.Count;
+                    var totalRecords = await _repositoryManager.InvoiceRequestRepository.CountAsync(pagingParameters);
+
+                    return Json(new
+                    {
+                        draw,
+                        recordsFiltered = totalRecords,
+                        recordsTotal = totalRecords,
+                        data = invoiceRequestDTOs.ToList()
+                    });
+                }
+
+                return Ok(invoiceRequestDTOs);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in GetInvoiceRequests");
                 await _errorLogService.LogErrorAsync(ex);
                 return StatusCode(500, "Internal server error");
             }
