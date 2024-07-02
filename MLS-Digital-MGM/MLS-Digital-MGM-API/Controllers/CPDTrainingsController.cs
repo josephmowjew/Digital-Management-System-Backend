@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using DataStore.Core.DTOs.CPDTraining;
 using MLS_Digital_MGM.DataStore.Helpers;
+using DataStore.Core.DTOs.InvoiceRequest;
 
 namespace MLS_Digital_MGM_API.Controllers
 {
@@ -94,6 +95,17 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 foreach (var training in cpdTrainingDTOs)
                 {
+
+                    //search if there is an invoice request beareing the cpd training id 
+                    var invoiceRequest = await _repositoryManager.InvoiceRequestRepository.GetAsync(i => i.ReferencedEntityId == training.Id.ToString() && i.ReferencedEntityType == "CPDTrainings");
+
+                    if (invoiceRequest != null)
+                    {
+                        training.InvoiceRequestId = invoiceRequest.Id;
+                        training.InvoiceRequest = this._mapper.Map<ReadInvoiceRequestDTO>(invoiceRequest);
+                    }
+
+                    //set the file path for the attachments
                     foreach (var attachment in training.Attachments)
                     {
                         string attachmentTypeName = attachment.AttachmentType.Name;
@@ -153,7 +165,10 @@ namespace MLS_Digital_MGM_API.Controllers
                 {
                     cpdTrainingDTO.AccreditingInstitution = "MLS";
                 }
-                //check if it is a free training 
+                //check if it is a free training by getting the prices of all fees
+               
+
+
                 
                 var cpdTraining = _mapper.Map<CPDTraining>(cpdTrainingDTO);
                 string username = _httpContextAccessor.HttpContext.User.Identity.Name;
@@ -183,6 +198,15 @@ namespace MLS_Digital_MGM_API.Controllers
                 if (cpdTrainingDTO.Attachments?.Any() == true)
                 {
                     cpdTraining.Attachments = await SaveAttachmentsAsync(cpdTrainingDTO.Attachments, attachmentType.Id);
+                }
+                //check if it is a free training
+
+               if ((cpdTraining.MemberPhysicalAttendanceFee == null || cpdTraining.MemberPhysicalAttendanceFee < 1) &&
+                    (cpdTraining.MemberVirtualAttendanceFee == null || cpdTraining.MemberVirtualAttendanceFee < 1) &&
+                    (cpdTraining.NonMemberPhysicalAttendanceFee == null || cpdTraining.NonMemberPhysicalAttendanceFee < 1) &&
+                    (cpdTraining.NonMemberVirtualAttandanceFee == null || cpdTraining.NonMemberVirtualAttandanceFee < 1))
+                {
+                    cpdTraining.IsFree = true;
                 }
 
                 //get the current year of operation

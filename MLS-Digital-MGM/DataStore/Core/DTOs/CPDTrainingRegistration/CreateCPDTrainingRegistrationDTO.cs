@@ -16,6 +16,6 @@ namespace DataStore.Core.DTOs.CPDTrainingRegistration
         [Display(Name ="Date of payment")]
         [DateLessThanOrEqualToToday(ErrorMessage = "Date of payment can not be of a future date.")]
         public DateTime? DateOfPayment { get; set; }
-        public string AttendanceMode { get; set; }
+        public int InvoiceRequestId { get; set; }
     }
 }

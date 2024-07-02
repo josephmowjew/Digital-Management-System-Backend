@@ -215,17 +215,27 @@ namespace MLS_Digital_MGM_API.Controllers
                         return BadRequest(ModelState);
                     }
 
-                    // Determine the fee based on the user's role and attendance mode
-                    double fee = currentUserRole switch
-                    {
-                        "Unknown" => GetNonMemberFee(cpdTraining, cpdTrainingRegistrationDTO.AttendanceMode),
-                        "NonMember" => GetNonMemberFee(cpdTraining, cpdTrainingRegistrationDTO.AttendanceMode),
-                        _ => GetMemberFee(cpdTraining, cpdTrainingRegistrationDTO.AttendanceMode)
-                    };
+                    // // Determine the fee based on the user's role and attendance mode
+                    // double fee = currentUserRole switch
+                    // {
+                    //     "Unknown" => GetNonMemberFee(cpdTraining, cpdTrainingRegistrationDTO.AttendanceMode),
+                    //     "NonMember" => GetNonMemberFee(cpdTraining, cpdTrainingRegistrationDTO.AttendanceMode),
+                    //     _ => GetMemberFee(cpdTraining, cpdTrainingRegistrationDTO.AttendanceMode)
+                    // };
 
                     // Set the status of the registration to pending for paid events
                     cpdTrainingRegistration.RegistrationStatus = Lambda.Pending;
-                    cpdTrainingRegistration.Fee = fee;
+
+                    //check for invoice 
+
+                    //search if there is an invoice request beareing the cpd training id 
+                    var invoiceRequest = await _repositoryManager.InvoiceRequestRepository.GetAsync(i => i.ReferencedEntityId == cpdTrainingRegistration.CPDTrainingId.ToString() && i.ReferencedEntityType == "CPDTrainings");
+
+                    if (invoiceRequest != null)
+                    {
+                       cpdTrainingRegistration.Fee = (double)invoiceRequest.Amount;
+                    }
+                    cpdTrainingRegistration.Fee = 0;
                 }
 
 
