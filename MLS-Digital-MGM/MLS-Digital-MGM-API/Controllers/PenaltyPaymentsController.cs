@@ -41,9 +41,20 @@ namespace MLS_Digital_MGM_API.Controllers
             {
                 var dataTableParams = new DataTablesParameters();
 
+                string username = _httpContextAccessor.HttpContext.User.Identity.Name;
+
+                // get user id from username
+                var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
+                string CreatedById = user.Id;
+
+                string currentRole = Lambda.GetCurrentUserRole(_repositoryManager, (user.Id));
+
                 var pagingParameters = new PagingParameters<PenaltyPayment>
                 {
-                    Predicate = u => u.Status != Lambda.Deleted && u.Penalty.MemberId == memberId,
+                    Predicate = u => u.Status != Lambda.Deleted && (
+                        (string.Equals(currentRole, "member", StringComparison.OrdinalIgnoreCase) && u.Penalty.MemberId == memberId) ||
+                        (!string.Equals(currentRole, "member", StringComparison.OrdinalIgnoreCase))
+                    ),
                     PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
                     PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
                     SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
