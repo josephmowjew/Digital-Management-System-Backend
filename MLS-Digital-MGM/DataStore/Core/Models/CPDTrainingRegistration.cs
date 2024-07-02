@@ -27,6 +27,10 @@ namespace DataStore.Core.Models
         public virtual List<Attachment> Attachments { get; set; }
         public DateTime? DateOfPayment { get; set; }
 
+        public int? InvoiceRequestId { get; set; }
+
+        public InvoiceRequest InvoiceRequest { get; set; }
+
        
     }
 }

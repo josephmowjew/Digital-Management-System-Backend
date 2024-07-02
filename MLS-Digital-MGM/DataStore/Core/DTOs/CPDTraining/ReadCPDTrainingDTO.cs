@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using DataStore.Core.DTOs.CPDTrainingRegistration;
 using DataStore.Core.DTOs.CPDUnitsEarned;
+using DataStore.Core.DTOs.InvoiceRequest;
 using DataStore.Core.DTOs.User;
 using DataStore.Core.DTOs.YearOfOperation;
 using DataStore.Core.Models;
@@ -42,5 +43,7 @@ namespace DataStore.Core.DTOs.CPDTraining
         public ICollection<ReadCPDTrainingRegistrationDTO> CPDTrainingRegistration { get; set; }
         public List<DataStore.Core.DTOs.Attachment.ReadAttachmentDTO> Attachments { get; set; }
         public int NumberOfPendingRegistrations { get; set; }
+        public int? InvoiceRequestId { get; set; }
+        public ReadInvoiceRequestDTO InvoiceRequest{ get; set; }
     }
 }
