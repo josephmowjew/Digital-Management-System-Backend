@@ -1,5 +1,6 @@
 using DataStore.Core.Models;
 using DataStore.Data;
+using DataStore.Helpers;
 using DataStore.Persistence.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -28,6 +29,13 @@ namespace DataStore.Persistence.SQLRepositories
             .Include(t => t.Attachments)
             .ThenInclude(t => t.AttachmentType)
             .FirstOrDefaultAsync(t => t.Id == id);
+        }
+
+        public async Task<double> GetProBonoHoursTotalByUserAsync(string memberId)
+        {
+            return await _context.ProBonoReports
+                .Where(p => p.CreatedById == memberId && p.Status != Lambda.Deleted && p.ReportStatus == Lambda.Approved)
+                .SumAsync(p => p.ProBonoHours);
         }
     }
 }

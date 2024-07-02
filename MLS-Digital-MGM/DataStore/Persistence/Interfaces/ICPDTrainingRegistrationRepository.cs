@@ -8,5 +8,6 @@ namespace DataStore.Persistence.Interfaces
     {
         // Additional methods specific to the CPDTrainingRegistration entity, if needed
        Task <List<CPDTrainingRegistration>> GetAll(Expression<Func<CPDTrainingRegistration, bool>> value);
+       Task<int> GetCpdTrainingsAttendedCountByUserAsync(int memberId);
     }
 }

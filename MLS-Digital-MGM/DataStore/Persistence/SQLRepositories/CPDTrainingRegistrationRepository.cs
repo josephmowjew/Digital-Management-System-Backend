@@ -1,5 +1,6 @@
 using DataStore.Core.Models;
 using DataStore.Data;
+using DataStore.Helpers;
 using DataStore.Persistence.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
@@ -26,6 +27,12 @@ namespace DataStore.Persistence.SQLRepositories
         public async Task<CPDTrainingRegistration> GetByIdAsync(int id)
         {
             return await _context.CPDTrainingRegistrations.Include(t => t.CPDTraining).Include(t => t.Member).Include(t => t.Attachments).Include(r => r.CreatedBy).FirstOrDefaultAsync(r => r.Id == id);
+        }
+
+        public async Task<int> GetCpdTrainingsAttendedCountByUserAsync(int memberId)
+        {
+            return await _context.CPDTrainingRegistrations
+                .Where(p => p.MemberId == memberId && p.Status != Lambda.Deleted && p.RegistrationStatus == Lambda.Attended).CountAsync(); ;
         }
     }
 }
