@@ -1,5 +1,6 @@
 using DataStore.Core.Models;
 using DataStore.Data;
+using DataStore.Helpers;
 using DataStore.Persistence.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
@@ -23,7 +24,11 @@ namespace DataStore.Persistence.SQLRepositories
         }
         
         public async Task<QBInvoice> GetQBInvoiceByIdAsync(string id){
-             return await _context.QBInvoices.FindAsync(id);
+            return await _context.QBInvoices.FindAsync(id);
+        }
+
+        public async Task<int> GetPendingInvoiceRequestsCountAsync(){
+            return await _context.InvoiceRequests.CountAsync(ir => ir.Status == Lambda.Pending);
         }
     }
 }

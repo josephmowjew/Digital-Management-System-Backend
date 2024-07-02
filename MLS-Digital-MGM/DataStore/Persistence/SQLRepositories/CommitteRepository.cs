@@ -1,11 +1,8 @@
-using DataStore.Core.Models;
 using DataStore.Data;
+using DataStore.Helpers;
 using DataStore.Persistence.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Text;
+using Microsoft.EntityFrameworkCore;
+using DataStore.Core.Models;
 
 namespace DataStore.Persistence.SQLRepositories
 {
@@ -20,5 +17,10 @@ namespace DataStore.Persistence.SQLRepositories
         }
 
         // Implement additional methods here for committee-specific operations
+
+        public async Task<int> GetCommitteeCount()
+        {
+            return await _context.Committees.CountAsync(c => c.Status == Lambda.Active);
+        }
     }
 }

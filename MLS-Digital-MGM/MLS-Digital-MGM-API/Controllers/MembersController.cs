@@ -255,6 +255,22 @@ namespace MLS_Digital_MGM_API.Controllers
             }
         }
 
+        [HttpGet("count")]
+        public async Task<IActionResult> count()
+        {
+            try
+            {
+                var count = await _repositoryManager.MemberRepository.GetMembersCountAsync();
+
+                return Ok(count);
+            }
+            catch (Exception ex)
+            {
+
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
     
     }
 }

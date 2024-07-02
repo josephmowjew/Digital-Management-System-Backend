@@ -777,5 +777,22 @@ namespace MLS_Digital_MGM_API.Controllers
             BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(licenseApplication.CreatedBy.Email, "License Application Status", emailBody));
 
             }
+    
+        [HttpGet("count")]
+        public async Task<IActionResult> GetAll()
+        {
+            try
+            {
+                var count = await _repositoryManager.LicenseApplicationRepository.GetLicenseApplicationsTotal();
+
+                return Ok(count);
+            }
+            catch (Exception ex)
+            {
+
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
     }
 }

@@ -7,5 +7,6 @@ namespace DataStore.Persistence.Interfaces
         // Additional methods specific to the ProBono entity, if needed
 
         Task<ProBono?> GetLastProBonoAsync();
+        Task<int> GetProBonosCountAsync();
     }
 }

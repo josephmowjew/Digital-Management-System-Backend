@@ -7,5 +7,7 @@ namespace DataStore.Persistence.Interfaces
     {
         // Additional methods specific to the InvoiceRequest entity, if needed
         Task<QBInvoice> GetQBInvoiceByIdAsync(string id);
+
+        Task<int> GetPendingInvoiceRequestsCountAsync();
     }
 }

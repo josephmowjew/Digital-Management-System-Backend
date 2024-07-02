@@ -1,5 +1,6 @@
 using DataStore.Core.Models;
 using DataStore.Data;
+using DataStore.Helpers;
 using DataStore.Persistence.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -24,6 +25,12 @@ namespace DataStore.Persistence.SQLRepositories
         public async Task<Firm> GetByIdAsync(int id)
         {
             return await _context.Firms.Include(f => f.CreatedBy).Include(f => f.Customer).FirstOrDefaultAsync(f => f.Id == id);
+        }
+
+        public async Task<int> GetFirmsCountAsync(){
+            return await _context.Firms
+                .Where(fm => fm.Status == Lambda.Active)
+                .CountAsync();
         }
     }
 }

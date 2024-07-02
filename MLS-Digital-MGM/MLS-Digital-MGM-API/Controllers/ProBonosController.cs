@@ -254,6 +254,23 @@ namespace MLS_Digital_MGM_API.Controllers
             return fileNumber;
         }
 
+        [HttpGet("count")]
+        public async Task<IActionResult> GetAll()
+        {
+            try
+            {
+                var count = await _repositoryManager.ProBonoRepository.GetProBonosCountAsync();
+
+                return Ok(count);
+            }
+            catch (Exception ex)
+            {
+
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
     }
 
 }

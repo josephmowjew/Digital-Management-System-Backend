@@ -36,5 +36,9 @@ namespace DataStore.Persistence.SQLRepositories
         {
             return await _context.Members.Include(m => m.User).Include(m => m.Customer).FirstOrDefaultAsync(q => q.Id == id && q.Status != Lambda.Deleted);
         }
+
+        public async Task<int> GetMembersCountAsync(){
+            return await _context.Members.CountAsync(q => q.Status == Lambda.Active);
+        }
     }
 }

@@ -1,5 +1,6 @@
 using DataStore.Core.Models;
 using DataStore.Data;
+using DataStore.Helpers;
 using DataStore.Persistence.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -21,11 +22,16 @@ namespace DataStore.Persistence.SQLRepositories
             this._unitOfWork = unitOfWork;
         }
 
-         public async Task<ProBono?> GetLastProBonoAsync()
+        public async Task<ProBono?> GetLastProBonoAsync()
         {
             return await _context.ProBonos
                 .OrderByDescending(x => x.Id)
                 .FirstOrDefaultAsync();
+        }
+
+        public async Task<int> GetProBonosCountAsync(){return await _context.ProBonos
+            .Where(pb => pb.Status == Lambda.Active)
+            .CountAsync();
         }
     }
 }

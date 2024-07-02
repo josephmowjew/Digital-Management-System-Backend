@@ -318,7 +318,7 @@ namespace MLS_Digital_MGM_API.Controllers
             }
         }
 
-    private async Task<List<Attachment>> SaveAttachmentsAsync(IEnumerable<IFormFile> attachments, int attachmentTypeId)
+        private async Task<List<Attachment>> SaveAttachmentsAsync(IEnumerable<IFormFile> attachments, int attachmentTypeId)
         {
             var attachmentsList = new List<Attachment>();
             var hostEnvironment = HttpContext.RequestServices.GetRequiredService<IWebHostEnvironment>();
@@ -381,7 +381,22 @@ namespace MLS_Digital_MGM_API.Controllers
             return attachmentsList;
         }
 
+        [HttpGet("count")]
+        public async Task<IActionResult> count()
+        {
+            try
+            {
+                var count = await _repositoryManager.PenaltyRepository.GetPenaltyCountAsync();
 
+                return Ok(count);
+            }
+            catch (Exception ex)
+            {
+
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
         
     }
 

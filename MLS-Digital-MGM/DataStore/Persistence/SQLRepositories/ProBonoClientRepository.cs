@@ -1,12 +1,8 @@
-using DataStore.Core.Models;
 using DataStore.Data;
 using DataStore.Helpers;
 using DataStore.Persistence.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using DataStore.Core.Models;
 
 namespace DataStore.Persistence.SQLRepositories
 {
@@ -57,6 +53,10 @@ namespace DataStore.Persistence.SQLRepositories
                     }
                 }
             }
+        }
+    
+        public async Task<int> GetProBonoClientCount(){
+            return await _context.ProbonoClients.CountAsync(c => c.Status == Lambda.Active);
         }
     }
 

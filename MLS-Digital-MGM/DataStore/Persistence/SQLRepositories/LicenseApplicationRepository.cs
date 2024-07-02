@@ -47,6 +47,12 @@ namespace DataStore.Persistence.SQLRepositories
                             l.ApplicationStatus != Lambda.Denied)
                 .AnyAsync();
         }
+
+        public async Task<int> GetLicenseApplicationsTotal()
+        {
+            return await _context.LicenseApplications
+                .CountAsync(p => p.ApplicationStatus == Lambda.Pending);
+        }
     }
 }
 

@@ -7,5 +7,7 @@ namespace DataStore.Persistence.Interfaces
     {
         // Additional methods specific to the LicenseApplication entity, if needed
         Task<bool> HasPreviousApplicationsAsync(int memberId);
+
+        Task<int> GetLicenseApplicationsTotal();
     }
 }

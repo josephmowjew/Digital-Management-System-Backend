@@ -320,5 +320,21 @@ namespace MLS_Digital_MGM_API.Controllers // Update with your actual namespace
             return Json(dynamicSelect);
         }
     
+        [HttpGet("count")]
+        public async Task<IActionResult> count()
+        {
+            try
+            {
+                var count = await _repositoryManager.ProBonoClientRepository.GetProBonoClientCount();
+
+                return Ok(count);
+            }
+            catch (Exception ex)
+            {
+
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
     }
 }

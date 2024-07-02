@@ -9,6 +9,7 @@ namespace DataStore.Persistence.Interfaces
         Task<List<Penalty>> GetByMemberId(int memberId);
 
         Task<Penalty> DeleteAsync(Penalty penalty);
+        Task<int> GetPenaltyCountAsync();
 
     }
 }

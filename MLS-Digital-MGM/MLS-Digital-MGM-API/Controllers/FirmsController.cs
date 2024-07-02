@@ -334,4 +334,20 @@ public class FirmsController : Controller
             }
         }
 
+    [HttpGet("count")]
+        public async Task<IActionResult> count()
+        {
+            try
+            {
+                var count = await _repositoryManager.FirmRepository.GetFirmsCountAsync();
+
+                return Ok(count);
+            }
+            catch (Exception ex)
+            {
+
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
 }
