@@ -69,7 +69,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 {
                   
 
-                    Predicate = u => u.Status != Lambda.Deleted && (!string.Equals(currentRole, "member", StringComparison.OrdinalIgnoreCase) || u.CreatedById == user.Id),
+                    Predicate = u => u.Status != Lambda.Deleted && (string.Equals(currentRole, "member", StringComparison.OrdinalIgnoreCase) || (u.CreatedById == user.Id && u.Status != Lambda.Draft)),
                     PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
                     PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
                     SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
