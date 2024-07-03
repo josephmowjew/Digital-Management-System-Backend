@@ -67,9 +67,8 @@ namespace MLS_Digital_MGM_API.Controllers
                 // Check if the user is secretariat and approve the application if so
                 pagingParameters = new PagingParameters<LicenseApplication>
                 {
-                  
-
-                    Predicate = u => u.Status != Lambda.Deleted && (string.Equals(currentRole, "member", StringComparison.OrdinalIgnoreCase) || (u.CreatedById == user.Id && u.Status != Lambda.Draft)),
+                    Predicate = u => u.Status != Lambda.Deleted && ((!string.Equals(currentRole, "member", StringComparison.OrdinalIgnoreCase) && u.ApplicationStatus != Lambda.Draft) || 
+                        (string.Equals(currentRole, "member", StringComparison.OrdinalIgnoreCase) && u.CreatedById == user.Id)),
                     PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
                     PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
                     SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
@@ -328,7 +327,8 @@ namespace MLS_Digital_MGM_API.Controllers
                             ApprovalLevelId = licenseApprovalLevel.Id,
                             Status = application.ApplicationStatus,
                             ChangedById = user.Id,
-                            CreatedDate = DateTime.Now
+                            CreatedDate = DateTime.Now,
+                            ChangeDate = DateTime.Now
                         };
 
                         await _repositoryManager.LicenseApprovalHistoryRepository.AddAsync(applicationApprovalHistory);
@@ -641,7 +641,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
                 string currentRole = Lambda.GetCurrentUserRole(_repositoryManager, user.Id);
 
-                   var licenseApplication = await _repositoryManager.LicenseApplicationRepository.GetByIdAsync(id);
+                var licenseApplication = await _repositoryManager.LicenseApplicationRepository.GetByIdAsync(id);
                 if (licenseApplication == null)
                     return NotFound();
 
@@ -668,10 +668,21 @@ namespace MLS_Digital_MGM_API.Controllers
                     }
 
                 await _repositoryManager.LicenseApplicationRepository.UpdateAsync(licenseApplication);
+
+                var currentLicenseApprovalHistory = await _repositoryManager.LicenseApprovalHistoryRepository.GetLicenseApprovalHistoryByLicenseApplication(licenseApplication.Id);
+
+                foreach (var approvalHistory in currentLicenseApprovalHistory)
+                {
+                    approvalHistory.Status = Lambda.Approved;
+                    approvalHistory.ChangeDate = DateTime.UtcNow;
+                    approvalHistory.UpdatedDate = DateTime.UtcNow;
+                    await _repositoryManager.LicenseApprovalHistoryRepository.UpdateAsync(approvalHistory);
+                }
+
                 //add licence approval history record
                 LicenseApprovalHistory appHistory = new LicenseApprovalHistory()
                 {
-                    ApprovalLevelId = currentLicenseApprovalLevel.Id,
+                    ApprovalLevelId = licenseApplication.CurrentApprovalLevelID,
                     LicenseApplicationId = licenseApplication.Id,
                     ChangedById = user.Id,
                     ChangeDate = DateTime.UtcNow,
