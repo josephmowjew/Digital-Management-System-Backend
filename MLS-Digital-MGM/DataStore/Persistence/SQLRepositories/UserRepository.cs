@@ -102,5 +102,11 @@ namespace DataStore.Persistence.SQLRepositories
         {
             return (List<ApplicationUser>)await this._userManager.GetUsersInRoleAsync(finance);
         }
+
+        public async Task<int> GetUsersCountAsync(){
+            return await _context.Users
+                .Where(us => us.EmailConfirmed == true)
+                .CountAsync();
+        }
     }
 }

@@ -258,5 +258,24 @@ namespace MLS_Digital_MGM_API.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+
+        [HttpGet("count")]
+        public async Task<IActionResult> CountCountries()
+        {
+            try
+            {
+                // Get the count of countries from the data layer
+                var count = await _repositoryManager.CountryRepository.GetCountriesCountAsync();
+
+                return Ok(count);
+            }
+            catch (Exception ex)
+            {
+                // Log the error and return an error response
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
     }
 }

@@ -10,5 +10,7 @@ namespace DataStore.Persistence.Interfaces
     public interface IDepartmentRepository: IRepository<Department>
     {
         // Additional methods specific to the Department entity, if needed
+
+        Task<int> GetDepartmentsCountAsync();
     }
 }

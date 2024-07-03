@@ -1,11 +1,13 @@
 ﻿using DataStore.Core.Models;
 using DataStore.Data;
+using DataStore.Helpers;
 using DataStore.Persistence.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace DataStore.Persistence.SQLRepositories
 {
@@ -17,6 +19,12 @@ namespace DataStore.Persistence.SQLRepositories
         {
             this._context = context;
             this._unitOfWork = unitOfWork;
+        }
+
+        public async Task<int> GetDepartmentsCountAsync(){
+            return await _context.Departments
+                .Where(dp => dp.Status == Lambda.Active)
+                .CountAsync();
         }
     }
 }

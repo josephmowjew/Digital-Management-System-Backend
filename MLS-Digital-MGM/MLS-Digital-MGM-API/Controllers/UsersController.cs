@@ -492,6 +492,24 @@ namespace MLS_Digital_MGM_API.Controllers
             }
         }
 
+        [HttpGet("count")]
+        public async Task<IActionResult> CountUsers()
+        {
+            try
+            {
+                // Get the count of countries from the data layer
+                var count = await _repositoryManager.UserRepository.GetUsersCountAsync();
+
+                return Ok(count);
+            }
+            catch (Exception ex)
+            {
+                // Log the error and return an error response
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
     }
 
     
