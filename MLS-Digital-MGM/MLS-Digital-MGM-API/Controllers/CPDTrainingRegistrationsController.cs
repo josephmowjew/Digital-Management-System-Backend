@@ -552,7 +552,13 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 var member = await _repositoryManager.MemberRepository.GetMemberByUserId(CreatedById);
 
-                var count = await _repositoryManager.CPDTrainingRegistrationRepository.GetCpdTrainingsAttendedCountByUserAsync(member.Id);
+                int count;
+
+                if(member == null){
+                    count = 0;
+                }else{
+                    count = await _repositoryManager.CPDTrainingRegistrationRepository.GetCpdTrainingsAttendedCountByUserAsync(member.Id);
+                }
 
                 return Ok(count);
             }
