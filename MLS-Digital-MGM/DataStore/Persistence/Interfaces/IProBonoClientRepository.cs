@@ -12,5 +12,7 @@ namespace DataStore.Persistence.Interfaces
         // Additional methods specific to the ProBonoClient entity, if needed
 
         Task<int> GetProBonoClientCount();
+
+        Task<int> GetProBonoDeleteRequestedClientCount();
     }
 }

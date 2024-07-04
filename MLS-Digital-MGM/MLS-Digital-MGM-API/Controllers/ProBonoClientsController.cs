@@ -128,6 +128,70 @@ namespace MLS_Digital_MGM_API.Controllers // Update with your actual namespace
             }
         }
 
+        [HttpGet("removal")]
+        public async Task<IActionResult> GetProBonoClientsPendingDeletion(int pageNumber = 1, int pageSize = 10)
+        {
+            try
+            {
+
+                // Create a new DataTablesParameters object
+                var dataTableParams = new DataTablesParameters();
+            
+                var pagingParameters = new PagingParameters<ProbonoClient>
+                {
+                    Predicate = u => u.Status != Lambda.Deleted && u.deleteRequest == true,
+                    PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
+                    PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
+                    SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
+                    SortColumn = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumn : null,
+                    SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null,
+                };
+
+                var clients = await _repositoryManager.ProBonoClientRepository.GetPagedAsync(pagingParameters);
+
+                if (clients == null || !clients.Any())
+                {
+                    if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                    {
+                        var draw = dataTableParams.Draw;
+                        return Json(new 
+                        { 
+                            draw, 
+                            recordsFiltered = 0, 
+                            recordsTotal = 0, 
+                            data = Enumerable.Empty<ReadProBonoClientDTO>()
+                        });
+                    }
+                    return Ok(Enumerable.Empty<ReadProBonoClientDTO>()); // Return empty list
+                }
+
+                var mappedClients = _mapper.Map<List<ReadProBonoClientDTO>>(clients);
+                 // Return datatable JSON if the request came from a datatable
+                if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                {
+                    var draw = dataTableParams.Draw;
+                    var resultTotalFiltred = mappedClients.Count;
+                    var totalRecords = await _repositoryManager.ProBonoClientRepository.CountAsync(pagingParameters);
+
+                    return Json(new 
+                    { 
+                        draw, 
+                        recordsFiltered = totalRecords, 
+                        recordsTotal = totalRecords, 
+                        data = mappedClients.ToList() // Materialize the enumerable
+                    });
+                }
+
+
+                return Ok(mappedClients);
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
 
         [HttpPost]
         public async Task<IActionResult> AddProBonoClient([FromBody] CreateProBonoClientDTO clientDTO)
@@ -215,6 +279,10 @@ namespace MLS_Digital_MGM_API.Controllers // Update with your actual namespace
                     return NotFound();
                 }
 
+                client.deleteRequest = false;
+                await _repositoryManager.ProBonoClientRepository.UpdateAsync(client);   
+
+
                 await _repositoryManager.ProBonoClientRepository.DeleteAsync(client);
                 await _unitOfWork.CommitAsync();
 
@@ -283,6 +351,65 @@ namespace MLS_Digital_MGM_API.Controllers // Update with your actual namespace
             }
         }
 
+        [HttpPut("denyDeletion/{id}")]
+        public async Task<IActionResult> denyClientDeletion (int id)
+        {
+             try
+            {
+                // Fetch  clients using the UserRepository
+                var client = await _repositoryManager.ProBonoClientRepository.GetByIdAsync(id);
+
+                if(client != null)
+                {
+                    client.deleteRequest = false;
+                    await _repositoryManager.ProBonoClientRepository.UpdateAsync(client);
+                    await _unitOfWork.CommitAsync();
+                    return Ok();
+                }
+                return BadRequest("user not found");
+
+            }
+            catch (Exception ex)
+            {
+
+                // Log the exception using ErrorLogService
+                await _errorLogService.LogErrorAsync(ex);
+
+                // Return 500 Internal Server Error
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpPut("deleteRequest/{id}")]
+        public async Task<IActionResult> clientDeletionRequest (int id)
+        {
+             try
+            {
+                // Fetch  clients using the UserRepository
+                var client = await _repositoryManager.ProBonoClientRepository.GetByIdAsync(id);
+
+                if(client != null)
+                {
+                    client.deleteRequest = true;
+                    await _repositoryManager.ProBonoClientRepository.UpdateAsync(client);
+                    await _unitOfWork.CommitAsync();
+                    return Ok();
+                }
+                return BadRequest("user not found");
+
+            }
+            catch (Exception ex)
+            {
+
+                // Log the exception using ErrorLogService
+                await _errorLogService.LogErrorAsync(ex);
+
+                // Return 500 Internal Server Error
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+
         [HttpGet("custom_select")]
         public async Task<JsonResult> GetClients(int page = 1, int pageSize = 20, string searchValue = "")
         {
@@ -326,6 +453,23 @@ namespace MLS_Digital_MGM_API.Controllers // Update with your actual namespace
             try
             {
                 var count = await _repositoryManager.ProBonoClientRepository.GetProBonoClientCount();
+
+                return Ok(count);
+            }
+            catch (Exception ex)
+            {
+
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+    
+        [HttpGet("count/deleteRequests")]
+        public async Task<IActionResult> countDeleteRequests()
+        {
+            try
+            {
+                var count = await _repositoryManager.ProBonoClientRepository.GetProBonoDeleteRequestedClientCount();
 
                 return Ok(count);
             }

@@ -38,6 +38,7 @@ namespace DataStore.Core.DTOs.ProBonoClient
         public decimal AnnualIncome { get; set; }
         public string Status { get; set; }
 
-        
+        public string CreatedById { get; set; }
+        public bool deleteRequest;
     }
 }

@@ -58,6 +58,10 @@ namespace DataStore.Persistence.SQLRepositories
         public async Task<int> GetProBonoClientCount(){
             return await _context.ProbonoClients.CountAsync(c => c.Status == Lambda.Active);
         }
+
+        public async Task<int> GetProBonoDeleteRequestedClientCount(){
+            return await _context.ProbonoClients.CountAsync(c => c.deleteRequest == true);
+        }
     }
 
 }

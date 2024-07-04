@@ -33,6 +33,7 @@ namespace DataStore.Core.Models
         public decimal AnnualIncome { get; set; }
         public ApplicationUser CreatedBy { get ; set ; }
         public string CreatedById { get; set; }
+        public bool deleteRequest {get; set;} = false;
         
     }
 }
