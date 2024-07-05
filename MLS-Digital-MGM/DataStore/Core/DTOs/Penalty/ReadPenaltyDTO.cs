@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using DataStore.Core.DTOs.Attachment;
+using DataStore.Core.DTOs.InvoiceRequest;
 using DataStore.Core.DTOs.PenaltyPayment;
 using DataStore.Core.DTOs.YearOfOperation;
 using DataStore.Core.Models;
@@ -31,5 +32,7 @@ namespace DataStore.Core.DTOs.Penalty
         public ReadYearOfOperationDTO YearOfOperation{ get; set; }
         public List<ReadAttachmentDTO> Attachments { get; set; }
         public List<ReadPenaltyPaymentDTO> PenaltyPayments { get; set; }
+        public int? InvoiceRequestId { get; set; }
+        public ReadInvoiceRequestDTO InvoiceRequest { get; set; }
     }
 }

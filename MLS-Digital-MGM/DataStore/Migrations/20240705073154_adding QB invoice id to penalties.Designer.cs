@@ -3,6 +3,7 @@ using System;
 using DataStore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240705073154_adding QB invoice id to penalties")]
+    partial class addingQBinvoiceidtopenalties
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1451,9 +1454,6 @@ namespace DataStore.Migrations
                     b.Property<double>("Fee")
                         .HasColumnType("double");
 
-                    b.Property<int?>("InvoiceRequestId")
-                        .HasColumnType("int");
-
                     b.Property<int>("MemberId")
                         .HasColumnType("int");
 
@@ -1464,6 +1464,9 @@ namespace DataStore.Migrations
 
                     b.Property<int>("PenaltyTypeId")
                         .HasColumnType("int");
+
+                    b.Property<string>("QBInvoiceId")
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("Reason")
                         .IsRequired()
@@ -1487,11 +1490,11 @@ namespace DataStore.Migrations
 
                     b.HasIndex("CreatedById");
 
-                    b.HasIndex("InvoiceRequestId");
-
                     b.HasIndex("MemberId");
 
                     b.HasIndex("PenaltyTypeId");
+
+                    b.HasIndex("QBInvoiceId");
 
                     b.HasIndex("YearOfOperationId");
 
@@ -3078,10 +3081,6 @@ namespace DataStore.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DataStore.Core.Models.InvoiceRequest", "InvoiceRequest")
-                        .WithMany()
-                        .HasForeignKey("InvoiceRequestId");
-
                     b.HasOne("DataStore.Core.Models.Member", "Member")
                         .WithMany("Penalties")
                         .HasForeignKey("MemberId")
@@ -3094,6 +3093,10 @@ namespace DataStore.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("DataStore.Core.Models.QBInvoice", "QBInvoice")
+                        .WithMany()
+                        .HasForeignKey("QBInvoiceId");
+
                     b.HasOne("DataStore.Core.Models.YearOfOperation", "YearOfOperation")
                         .WithMany()
                         .HasForeignKey("YearOfOperationId")
@@ -3102,11 +3105,11 @@ namespace DataStore.Migrations
 
                     b.Navigation("CreatedBy");
 
-                    b.Navigation("InvoiceRequest");
-
                     b.Navigation("Member");
 
                     b.Navigation("PenaltyType");
+
+                    b.Navigation("QBInvoice");
 
                     b.Navigation("YearOfOperation");
                 });

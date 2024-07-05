@@ -28,6 +28,8 @@ namespace DataStore.Core.Models
         [StringLength(maximumLength:250)]
         public string? ResolutionComment { get; set; }
         public List<PenaltyPayment> PenaltyPayments { get; set; }
+        public int? InvoiceRequestId { get; set; }
+        public InvoiceRequest InvoiceRequest { get; set; }
         
     }
 }

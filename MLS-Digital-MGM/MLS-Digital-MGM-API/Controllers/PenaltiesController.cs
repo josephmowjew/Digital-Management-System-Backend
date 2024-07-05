@@ -60,7 +60,8 @@ namespace MLS_Digital_MGM_API.Controllers
                         p => p.Member,
                         p => p.CreatedBy,
                         p => p.PenaltyType,
-                        p => p.Attachments
+                        p => p.Attachments,
+                        p => p.InvoiceRequest,
                     }
                 };
 
@@ -155,6 +156,36 @@ namespace MLS_Digital_MGM_API.Controllers
                 }
 
                 await _repositoryManager.PenaltyRepository.AddAsync(penalty);
+                await _unitOfWork.CommitAsync();
+
+                //properties needed for the creation of an invoice request
+                var member = await _repositoryManager.MemberRepository.GetByIdAsync(penalty.MemberId);
+                var currentYearOfOperation = await _repositoryManager.YearOfOperationRepository.GetCurrentYearOfOperation();
+
+                //add an invoice request for the penalty being created
+                InvoiceRequest penaltyInvoice = new InvoiceRequest()
+                {
+                    CreatedById = member.UserId,
+                    YearOfOperationId = currentYearOfOperation.Id,
+                    CreatedDate = DateTime.UtcNow,
+                    Status = Lambda.Pending,
+                    UpdatedDate = DateTime.UtcNow,
+                    Amount = penalty.Fee,
+                    CustomerId = member.CustomerId,
+                    ReferencedEntityId = "N/A",
+                    ReferencedEntityType = "Penalty",
+                    Description = "MLS",
+                };
+                
+                await _repositoryManager.InvoiceRequestRepository.AddAsync(penaltyInvoice);
+                await _unitOfWork.CommitAsync();
+
+                penaltyInvoice.Description = $"MLS-{penaltyInvoice.Id}";
+                await _repositoryManager.InvoiceRequestRepository.UpdateAsync(penaltyInvoice);
+                await _unitOfWork.CommitAsync();
+
+                penalty.InvoiceRequestId = penaltyInvoice.Id;
+                await _repositoryManager.PenaltyRepository.UpdateAsync(penalty);
                 await _unitOfWork.CommitAsync();
 
                 return CreatedAtAction("GetPenaltyById", new { id = penalty.Id }, penalty);

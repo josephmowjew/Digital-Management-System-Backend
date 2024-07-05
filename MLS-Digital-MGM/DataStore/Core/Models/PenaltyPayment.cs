@@ -18,6 +18,8 @@ namespace DataStore.Core.Models
         public DateTime? DateDenied { get; set; }
         [StringLength(250)]
         public string? ReasonForDenial { get; set; }
+        public string? QBInvoiceId { get; set; }
+        public QBInvoice QBInvoice { get; set; }
 
     }
 }

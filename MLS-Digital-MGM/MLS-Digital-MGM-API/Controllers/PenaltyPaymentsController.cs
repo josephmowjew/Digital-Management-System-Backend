@@ -139,6 +139,8 @@ namespace MLS_Digital_MGM_API.Controllers
                     penaltyPayment.Attachments = await SaveAttachmentsAsync(penaltyPaymentDTO.Attachments, attachmentType.Id);
                 }
 
+                var penalty = await _repositoryManager.PenaltyRepository.GetByIdAsync(penaltyPayment.PenaltyId);
+                penaltyPayment.QBInvoiceId = $"{penalty.InvoiceRequestId}";
                 await _repositoryManager.PenaltyPaymentRepository.AddAsync(penaltyPayment);
                 await _unitOfWork.CommitAsync();
 
