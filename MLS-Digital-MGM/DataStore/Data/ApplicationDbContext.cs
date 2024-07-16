@@ -162,6 +162,9 @@ namespace DataStore.Data
         public DbSet<QBReceipt> QBReceipts { get; set; }
         public DbSet<QBCustomer> QBCustomers { get; set; }
         public DbSet<QBPayment> QBPayments { get; set; }
+
+        public DbSet<LevyDeclaration> LevyDeclarations { get; set; }
+        public DbSet<LevyPercent> LevyPercents { get; set; }
         
         
     }
