@@ -101,6 +101,14 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 var levyDeclaration = _mapper.Map<LevyDeclaration>(levyDeclarationDTO);
 
+                //get firm with the id passed 
+                var firm = await _repositoryManager.FirmRepository.GetByIdAsync(levyDeclaration.FirmId);
+
+                if(firm != null)
+                {
+                    levyDeclaration.Firm = firm;
+                }
+
                 await _repositoryManager.LevyDeclarationRepository.AddAsync(levyDeclaration);
                 await _unitOfWork.CommitAsync();
 

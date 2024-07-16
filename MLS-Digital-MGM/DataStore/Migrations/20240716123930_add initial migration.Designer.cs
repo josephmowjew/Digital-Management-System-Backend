@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240605102427_added physical attendance location")]
-    partial class addedphysicalattendancelocation
+    [Migration("20240716123930_add initial migration")]
+    partial class addinitialmigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -80,6 +80,21 @@ namespace DataStore.Migrations
                     b.HasIndex("MemberQualificationsId");
 
                     b.ToTable("AttachmentMemberQualification");
+                });
+
+            modelBuilder.Entity("AttachmentMessage", b =>
+                {
+                    b.Property<int>("AttachmentsId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MessagesId")
+                        .HasColumnType("int");
+
+                    b.HasKey("AttachmentsId", "MessagesId");
+
+                    b.HasIndex("MessagesId");
+
+                    b.ToTable("AttachmentMessage");
                 });
 
             modelBuilder.Entity("AttachmentPenalty", b =>
@@ -418,10 +433,16 @@ namespace DataStore.Migrations
                     b.Property<bool>("IsFree")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<double?>("NonMemberFee")
+                    b.Property<double?>("MemberPhysicalAttendanceFee")
                         .HasColumnType("double");
 
-                    b.Property<double?>("PhysicalAttendanceFee")
+                    b.Property<double?>("MemberVirtualAttendanceFee")
+                        .HasColumnType("double");
+
+                    b.Property<double?>("NonMemberPhysicalAttendanceFee")
+                        .HasColumnType("double");
+
+                    b.Property<double?>("NonMemberVirtualAttandanceFee")
                         .HasColumnType("double");
 
                     b.Property<string>("PhysicalVenue")
@@ -430,6 +451,9 @@ namespace DataStore.Migrations
 
                     b.Property<int>("ProposedUnits")
                         .HasColumnType("int");
+
+                    b.Property<DateTime>("RegistrationDueDate")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -442,9 +466,6 @@ namespace DataStore.Migrations
 
                     b.Property<DateTime>("UpdatedDate")
                         .HasColumnType("datetime(6)");
-
-                    b.Property<double?>("VirtualAttendanceFee")
-                        .HasColumnType("double");
 
                     b.Property<int>("YearOfOperationId")
                         .HasColumnType("int");
@@ -484,6 +505,12 @@ namespace DataStore.Migrations
                         .HasMaxLength(250)
                         .HasColumnType("varchar(250)");
 
+                    b.Property<double>("Fee")
+                        .HasColumnType("double");
+
+                    b.Property<int?>("InvoiceRequestId")
+                        .HasColumnType("int");
+
                     b.Property<int>("MemberId")
                         .HasColumnType("int");
 
@@ -504,6 +531,8 @@ namespace DataStore.Migrations
                     b.HasIndex("CPDTrainingId");
 
                     b.HasIndex("CreatedById");
+
+                    b.HasIndex("InvoiceRequestId");
 
                     b.HasIndex("MemberId");
 
@@ -550,6 +579,103 @@ namespace DataStore.Migrations
                     b.HasIndex("YearOfOperationId");
 
                     b.ToTable("CPDUnitsEarned");
+                });
+
+            modelBuilder.Entity("DataStore.Core.Models.Committee", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ChairpersonID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CommitteeName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("CreatedById")
+                        .IsRequired()
+                        .HasColumnType("varchar(200)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("CreationDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("YearOfOperationId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChairpersonID");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("YearOfOperationId");
+
+                    b.ToTable("Committees");
+                });
+
+            modelBuilder.Entity("DataStore.Core.Models.CommitteeMembership", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int>("CommitteeID")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("JoinedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("MemberShipId")
+                        .IsRequired()
+                        .HasColumnType("varchar(200)");
+
+                    b.Property<string>("MemberShipStatus")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CommitteeID");
+
+                    b.HasIndex("MemberShipId");
+
+                    b.ToTable("CommitteeMembers");
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.Country", b =>
@@ -667,6 +793,9 @@ namespace DataStore.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<string>("CustomerId")
+                        .HasColumnType("varchar(255)");
+
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime(6)");
 
@@ -720,6 +849,8 @@ namespace DataStore.Migrations
 
                     b.HasIndex("CreatedById");
 
+                    b.HasIndex("CustomerId");
+
                     b.ToTable("Firms");
                 });
 
@@ -750,6 +881,136 @@ namespace DataStore.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("IdentityTypes");
+                });
+
+            modelBuilder.Entity("DataStore.Core.Models.InvoiceRequest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<double?>("Amount")
+                        .IsRequired()
+                        .HasColumnType("double");
+
+                    b.Property<string>("CreatedById")
+                        .HasColumnType("varchar(200)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("CustomerId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(250)
+                        .HasColumnType("varchar(250)");
+
+                    b.Property<string>("QBInvoiceId")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("ReferencedEntityId")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ReferencedEntityType")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("YearOfOperationId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("CustomerId");
+
+                    b.HasIndex("QBInvoiceId");
+
+                    b.HasIndex("YearOfOperationId");
+
+                    b.ToTable("InvoiceRequests");
+                });
+
+            modelBuilder.Entity("DataStore.Core.Models.LevyDeclaration", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("FirmId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("LevyAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("Month")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<decimal>("Percentage")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("Revenue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FirmId");
+
+                    b.ToTable("LevyDeclarations");
+                });
+
+            modelBuilder.Entity("DataStore.Core.Models.LevyPercent", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<double>("PercentageValue")
+                        .HasColumnType("double");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("LevyPercents");
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.License", b =>
@@ -812,6 +1073,9 @@ namespace DataStore.Migrations
                     b.Property<bool>("AttainedMinimumNumberOfCLEUnits")
                         .HasColumnType("tinyint(1)");
 
+                    b.Property<bool>("CertificateOfAdmission")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<bool>("CompliedWithPenaltiesImposedUnderTheAct")
                         .HasColumnType("tinyint(1)");
 
@@ -864,6 +1128,10 @@ namespace DataStore.Migrations
                         .HasColumnType("varchar(250)");
 
                     b.Property<string>("ExplanationForNoValidTaxClearanceCertificate")
+                        .HasMaxLength(250)
+                        .HasColumnType("varchar(250)");
+
+                    b.Property<string>("ExplanationForNotSubmittingCertificateOfAdmission")
                         .HasMaxLength(250)
                         .HasColumnType("varchar(250)");
 
@@ -1087,6 +1355,9 @@ namespace DataStore.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<string>("CustomerId")
+                        .HasColumnType("varchar(255)");
+
                     b.Property<DateTime>("DateOfAdmissionToPractice")
                         .HasColumnType("datetime(6)");
 
@@ -1123,6 +1394,8 @@ namespace DataStore.Migrations
                         .HasColumnType("varchar(200)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CustomerId");
 
                     b.HasIndex("FirmId");
 
@@ -1177,11 +1450,64 @@ namespace DataStore.Migrations
                     b.ToTable("MemberQualifications");
                 });
 
+            modelBuilder.Entity("DataStore.Core.Models.Message", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int>("CommitteeID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("CreatedById")
+                        .IsRequired()
+                        .HasColumnType("varchar(200)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int?>("ThreadId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CommitteeID");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("ThreadId");
+
+                    b.ToTable("Messages");
+                });
+
             modelBuilder.Entity("DataStore.Core.Models.Penalty", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    b.Property<double>("AmountPaid")
+                        .HasColumnType("double");
+
+                    b.Property<double>("AmountRemaining")
+                        .HasColumnType("double");
 
                     b.Property<string>("CreatedById")
                         .IsRequired()
@@ -1195,6 +1521,9 @@ namespace DataStore.Migrations
 
                     b.Property<double>("Fee")
                         .HasColumnType("double");
+
+                    b.Property<int?>("InvoiceRequestId")
+                        .HasColumnType("int");
 
                     b.Property<int>("MemberId")
                         .HasColumnType("int");
@@ -1229,7 +1558,11 @@ namespace DataStore.Migrations
 
                     b.HasIndex("CreatedById");
 
+                    b.HasIndex("InvoiceRequestId");
+
                     b.HasIndex("MemberId");
+
+                    b.HasIndex("PenaltyTypeId");
 
                     b.HasIndex("YearOfOperationId");
 
@@ -1243,6 +1576,12 @@ namespace DataStore.Migrations
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("DateApproved")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("DateDenied")
                         .HasColumnType("datetime(6)");
 
                     b.Property<DateTime?>("DeletedDate")
@@ -1261,6 +1600,13 @@ namespace DataStore.Migrations
                     b.Property<int>("PenaltyId")
                         .HasColumnType("int");
 
+                    b.Property<string>("QBInvoiceId")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("ReasonForDenial")
+                        .HasMaxLength(250)
+                        .HasColumnType("varchar(250)");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -1271,6 +1617,8 @@ namespace DataStore.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("PenaltyId");
+
+                    b.HasIndex("QBInvoiceId");
 
                     b.ToTable("PenaltyPayments");
                 });
@@ -1558,6 +1906,9 @@ namespace DataStore.Migrations
                     b.Property<DateTime>("UpdatedDate")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<bool>("deleteRequest")
+                        .HasColumnType("tinyint(1)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CreatedById");
@@ -1604,6 +1955,270 @@ namespace DataStore.Migrations
                     b.ToTable("PropBonoReportFeedbacks");
                 });
 
+            modelBuilder.Entity("DataStore.Core.Models.QBCustomer", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<decimal>("AccountBalance")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("ActiveStatus")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("BillingAddressLine1")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("BillingAddressLine2")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("BillingAddressLine3")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("BillingAddressLine4")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("BillingAddressLine5")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("City")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("CompanyName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("CustomerName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("EmailAddress")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("JobTitle")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("MiddleName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Province")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("UpdateDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("QBCustomers");
+                });
+
+            modelBuilder.Entity("DataStore.Core.Models.QBInvoice", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("CustomerId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("CustomerName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("ExpiryDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<decimal>("InvoiceAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("InvoiceDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("InvoiceDescription")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("InvoiceNumber")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("InvoiceType")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<decimal>("UnpaidAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("UpdateDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerId");
+
+                    b.ToTable("QBInvoices");
+                });
+
+            modelBuilder.Entity("DataStore.Core.Models.QBPayment", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("CustomerId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("InvoiceId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<decimal>("PaymentAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("UpdateDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerId");
+
+                    b.HasIndex("InvoiceId");
+
+                    b.ToTable("QBPayments");
+                });
+
+            modelBuilder.Entity("DataStore.Core.Models.QBReceipt", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("CustomerId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("InvoiceDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("InvoiceId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("InvoiceNumber")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("PaymentDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("PaymentId")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ReceiptNumber")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<decimal>("TotalPaymentAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("UpdateDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerId");
+
+                    b.HasIndex("InvoiceId");
+
+                    b.ToTable("QBReceipts");
+                });
+
             modelBuilder.Entity("DataStore.Core.Models.QualificationType", b =>
                 {
                     b.Property<int>("Id")
@@ -1631,6 +2246,45 @@ namespace DataStore.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("QualificationTypes");
+                });
+
+            modelBuilder.Entity("DataStore.Core.Models.Thread", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int>("CommitteeId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CreatedById")
+                        .IsRequired()
+                        .HasColumnType("varchar(200)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CommitteeId");
+
+                    b.HasIndex("CreatedById");
+
+                    b.ToTable("Threads");
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.Title", b =>
@@ -1958,6 +2612,21 @@ namespace DataStore.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("AttachmentMessage", b =>
+                {
+                    b.HasOne("DataStore.Core.Models.Attachment", null)
+                        .WithMany()
+                        .HasForeignKey("AttachmentsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataStore.Core.Models.Message", null)
+                        .WithMany()
+                        .HasForeignKey("MessagesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("AttachmentPenalty", b =>
                 {
                     b.HasOne("DataStore.Core.Models.Attachment", null)
@@ -2116,6 +2785,10 @@ namespace DataStore.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("DataStore.Core.Models.InvoiceRequest", "InvoiceRequest")
+                        .WithMany()
+                        .HasForeignKey("InvoiceRequestId");
+
                     b.HasOne("DataStore.Core.Models.Member", "Member")
                         .WithMany("CPDTrainingRegistrations")
                         .HasForeignKey("MemberId")
@@ -2125,6 +2798,8 @@ namespace DataStore.Migrations
                     b.Navigation("CPDTraining");
 
                     b.Navigation("CreatedBy");
+
+                    b.Navigation("InvoiceRequest");
 
                     b.Navigation("Member");
                 });
@@ -2156,6 +2831,50 @@ namespace DataStore.Migrations
                     b.Navigation("YearOfOperation");
                 });
 
+            modelBuilder.Entity("DataStore.Core.Models.Committee", b =>
+                {
+                    b.HasOne("DataStore.Core.Models.Member", "Chairperson")
+                        .WithMany()
+                        .HasForeignKey("ChairpersonID");
+
+                    b.HasOne("DataStore.Core.Models.ApplicationUser", "CreatedBy")
+                        .WithMany("Committees")
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataStore.Core.Models.YearOfOperation", "YearOfOperation")
+                        .WithMany()
+                        .HasForeignKey("YearOfOperationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Chairperson");
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("YearOfOperation");
+                });
+
+            modelBuilder.Entity("DataStore.Core.Models.CommitteeMembership", b =>
+                {
+                    b.HasOne("DataStore.Core.Models.Committee", "Committee")
+                        .WithMany("CommitteeMemberships")
+                        .HasForeignKey("CommitteeID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataStore.Core.Models.ApplicationUser", "MemberShip")
+                        .WithMany()
+                        .HasForeignKey("MemberShipId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Committee");
+
+                    b.Navigation("MemberShip");
+                });
+
             modelBuilder.Entity("DataStore.Core.Models.ErrorLog", b =>
                 {
                     b.HasOne("DataStore.Core.Models.ApplicationUser", "CreatedBy")
@@ -2171,7 +2890,55 @@ namespace DataStore.Migrations
                         .WithMany()
                         .HasForeignKey("CreatedById");
 
+                    b.HasOne("DataStore.Core.Models.QBCustomer", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId");
+
                     b.Navigation("CreatedBy");
+
+                    b.Navigation("Customer");
+                });
+
+            modelBuilder.Entity("DataStore.Core.Models.InvoiceRequest", b =>
+                {
+                    b.HasOne("DataStore.Core.Models.ApplicationUser", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById");
+
+                    b.HasOne("DataStore.Core.Models.QBCustomer", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataStore.Core.Models.QBInvoice", "QBInvoice")
+                        .WithMany()
+                        .HasForeignKey("QBInvoiceId");
+
+                    b.HasOne("DataStore.Core.Models.YearOfOperation", "YearOfOperation")
+                        .WithMany()
+                        .HasForeignKey("YearOfOperationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("QBInvoice");
+
+                    b.Navigation("YearOfOperation");
+                });
+
+            modelBuilder.Entity("DataStore.Core.Models.LevyDeclaration", b =>
+                {
+                    b.HasOne("DataStore.Core.Models.Firm", "Firm")
+                        .WithMany()
+                        .HasForeignKey("FirmId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Firm");
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.License", b =>
@@ -2320,6 +3087,10 @@ namespace DataStore.Migrations
 
             modelBuilder.Entity("DataStore.Core.Models.Member", b =>
                 {
+                    b.HasOne("DataStore.Core.Models.QBCustomer", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId");
+
                     b.HasOne("DataStore.Core.Models.Firm", "Firm")
                         .WithMany()
                         .HasForeignKey("FirmId");
@@ -2329,6 +3100,8 @@ namespace DataStore.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Customer");
 
                     b.Navigation("Firm");
 
@@ -2354,6 +3127,31 @@ namespace DataStore.Migrations
                     b.Navigation("QualificationType");
                 });
 
+            modelBuilder.Entity("DataStore.Core.Models.Message", b =>
+                {
+                    b.HasOne("DataStore.Core.Models.Committee", "Committee")
+                        .WithMany("Messages")
+                        .HasForeignKey("CommitteeID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataStore.Core.Models.ApplicationUser", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataStore.Core.Models.Thread", "Thread")
+                        .WithMany("Messages")
+                        .HasForeignKey("ThreadId");
+
+                    b.Navigation("Committee");
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("Thread");
+                });
+
             modelBuilder.Entity("DataStore.Core.Models.Penalty", b =>
                 {
                     b.HasOne("DataStore.Core.Models.ApplicationUser", "CreatedBy")
@@ -2362,9 +3160,19 @@ namespace DataStore.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("DataStore.Core.Models.InvoiceRequest", "InvoiceRequest")
+                        .WithMany()
+                        .HasForeignKey("InvoiceRequestId");
+
                     b.HasOne("DataStore.Core.Models.Member", "Member")
                         .WithMany("Penalties")
                         .HasForeignKey("MemberId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataStore.Core.Models.PenaltyType", "PenaltyType")
+                        .WithMany("Penalties")
+                        .HasForeignKey("PenaltyTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -2376,7 +3184,11 @@ namespace DataStore.Migrations
 
                     b.Navigation("CreatedBy");
 
+                    b.Navigation("InvoiceRequest");
+
                     b.Navigation("Member");
+
+                    b.Navigation("PenaltyType");
 
                     b.Navigation("YearOfOperation");
                 });
@@ -2389,7 +3201,13 @@ namespace DataStore.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("DataStore.Core.Models.QBInvoice", "QBInvoice")
+                        .WithMany()
+                        .HasForeignKey("QBInvoiceId");
+
                     b.Navigation("Penalty");
+
+                    b.Navigation("QBInvoice");
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.ProBono", b =>
@@ -2503,6 +3321,74 @@ namespace DataStore.Migrations
                     b.Navigation("ProBonoReport");
                 });
 
+            modelBuilder.Entity("DataStore.Core.Models.QBInvoice", b =>
+                {
+                    b.HasOne("DataStore.Core.Models.QBCustomer", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Customer");
+                });
+
+            modelBuilder.Entity("DataStore.Core.Models.QBPayment", b =>
+                {
+                    b.HasOne("DataStore.Core.Models.QBCustomer", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataStore.Core.Models.QBInvoice", "Invoice")
+                        .WithMany()
+                        .HasForeignKey("InvoiceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("Invoice");
+                });
+
+            modelBuilder.Entity("DataStore.Core.Models.QBReceipt", b =>
+                {
+                    b.HasOne("DataStore.Core.Models.QBCustomer", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataStore.Core.Models.QBInvoice", "Invoice")
+                        .WithMany()
+                        .HasForeignKey("InvoiceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("Invoice");
+                });
+
+            modelBuilder.Entity("DataStore.Core.Models.Thread", b =>
+                {
+                    b.HasOne("DataStore.Core.Models.Committee", "Committee")
+                        .WithMany("Threads")
+                        .HasForeignKey("CommitteeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataStore.Core.Models.ApplicationUser", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Committee");
+
+                    b.Navigation("CreatedBy");
+                });
+
             modelBuilder.Entity("MemberProBono", b =>
                 {
                     b.HasOne("DataStore.Core.Models.Member", null)
@@ -2586,6 +3472,8 @@ namespace DataStore.Migrations
 
             modelBuilder.Entity("DataStore.Core.Models.ApplicationUser", b =>
                 {
+                    b.Navigation("Committees");
+
                     b.Navigation("Penalties");
                 });
 
@@ -2594,6 +3482,15 @@ namespace DataStore.Migrations
                     b.Navigation("CPDTrainingRegistration");
 
                     b.Navigation("CPDUnitsEarned");
+                });
+
+            modelBuilder.Entity("DataStore.Core.Models.Committee", b =>
+                {
+                    b.Navigation("CommitteeMemberships");
+
+                    b.Navigation("Messages");
+
+                    b.Navigation("Threads");
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.Department", b =>
@@ -2633,9 +3530,19 @@ namespace DataStore.Migrations
                     b.Navigation("PenaltyPayments");
                 });
 
+            modelBuilder.Entity("DataStore.Core.Models.PenaltyType", b =>
+                {
+                    b.Navigation("Penalties");
+                });
+
             modelBuilder.Entity("DataStore.Core.Models.ProBono", b =>
                 {
                     b.Navigation("ProBonoReports");
+                });
+
+            modelBuilder.Entity("DataStore.Core.Models.Thread", b =>
+                {
+                    b.Navigation("Messages");
                 });
 #pragma warning restore 612, 618
         }

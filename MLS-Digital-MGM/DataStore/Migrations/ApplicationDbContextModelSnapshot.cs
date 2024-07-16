@@ -954,6 +954,9 @@ namespace DataStore.Migrations
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<int>("FirmId")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("LevyAmount")
                         .HasColumnType("decimal(18,2)");
 
@@ -973,12 +976,9 @@ namespace DataStore.Migrations
                     b.Property<DateTime>("UpdatedDate")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int>("firmId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("firmId");
+                    b.HasIndex("FirmId");
 
                     b.ToTable("LevyDeclarations");
                 });
@@ -2931,7 +2931,7 @@ namespace DataStore.Migrations
                 {
                     b.HasOne("DataStore.Core.Models.Firm", "Firm")
                         .WithMany()
-                        .HasForeignKey("firmId")
+                        .HasForeignKey("FirmId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
