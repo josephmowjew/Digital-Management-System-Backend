@@ -3,6 +3,7 @@ using System;
 using DataStore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240711084236_add levy percentages and levy declerations tables")]
+    partial class addlevypercentagesandlevydeclerationstables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -948,12 +951,6 @@ namespace DataStore.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime(6)");
-
                     b.Property<decimal>("LevyAmount")
                         .HasColumnType("decimal(18,2)");
 
@@ -966,19 +963,7 @@ namespace DataStore.Migrations
                     b.Property<decimal>("Revenue")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("firmId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("firmId");
 
                     b.ToTable("LevyDeclarations");
                 });
@@ -2925,17 +2910,6 @@ namespace DataStore.Migrations
                     b.Navigation("QBInvoice");
 
                     b.Navigation("YearOfOperation");
-                });
-
-            modelBuilder.Entity("DataStore.Core.Models.LevyDeclaration", b =>
-                {
-                    b.HasOne("DataStore.Core.Models.Firm", "Firm")
-                        .WithMany()
-                        .HasForeignKey("firmId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Firm");
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.License", b =>
