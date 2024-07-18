@@ -75,6 +75,7 @@ namespace DataStore.Persistence.Interfaces
         IQBInvoiceRepository QBInvoiceRepository { get; }
         ILevyDeclarationRepository LevyDeclarationRepository { get; }
         ILevyPercentRepository LevyPercentRepository { get; }
+        ICommunicationMessageRepository CommunicationMessageRepository { get; }
 
     }
 }

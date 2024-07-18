@@ -56,6 +56,7 @@ namespace DataStore.Persistence.SQLRepositories
         private IInvoiceRequestRepository _invoiceRequestRepository;
         private ILevyDeclarationRepository _levyDeclarationRepository;
         private ILevyPercentRepository _levyPercentRepository;
+        private ICommunicationMessageRepository _communicationMessageRepository;
 
         public RepositoryManager(
             ApplicationDbContext context, 
@@ -116,5 +117,7 @@ namespace DataStore.Persistence.SQLRepositories
         public IQBInvoiceRepository QBInvoiceRepository => _qBInvoiceRepository ??= new QBInvoiceRepository(_context, _unitOfWork);
         public ILevyDeclarationRepository LevyDeclarationRepository => _levyDeclarationRepository ??= new LevyDeclarationRepository(_context, _unitOfWork);
         public ILevyPercentRepository LevyPercentRepository => _levyPercentRepository ??= new LevyPercentRepository(_context, _unitOfWork);
+        public ICommunicationMessageRepository CommunicationMessageRepository => _communicationMessageRepository ??= new CommunicationMessageRepository(_context, _unitOfWork);
+        
     }
 }
