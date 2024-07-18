@@ -69,7 +69,7 @@ namespace MLS_Digital_MGM_API.Controllers
                         p => p.ProbonoClient,
                         p => p.ProBonoReports,
                     },
-                     CreatedById = string.Equals(currentRole, "secretariat", StringComparison.OrdinalIgnoreCase) ? null : CreatedById,
+                     CreatedById = string.Equals(currentRole, "secretariat", StringComparison.OrdinalIgnoreCase) || string.Equals(currentRole, "ceo", StringComparison.OrdinalIgnoreCase) ? null : CreatedById,
                 };
 
  
