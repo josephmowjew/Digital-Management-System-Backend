@@ -129,7 +129,7 @@ namespace DataStore.Migrations
                 name: "QBCustomers",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "varchar(255)", nullable: false),
+                    Id = table.Column<string>(type: "varchar(250)", nullable: false),
                     CustomerName = table.Column<string>(type: "longtext", nullable: false),
                     FirstName = table.Column<string>(type: "longtext", nullable: false),
                     MiddleName = table.Column<string>(type: "longtext", nullable: false),
@@ -293,9 +293,9 @@ namespace DataStore.Migrations
                 name: "QBInvoices",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "varchar(255)", nullable: false),
+                    Id = table.Column<string>(type: "varchar(250)", nullable: false),
                     InvoiceNumber = table.Column<string>(type: "longtext", nullable: false),
-                    CustomerId = table.Column<string>(type: "varchar(255)", nullable: false),
+                    CustomerId = table.Column<string>(type: "varchar(250)", nullable: false),
                     CustomerName = table.Column<string>(type: "longtext", nullable: false),
                     InvoiceDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     InvoiceAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
@@ -347,9 +347,9 @@ namespace DataStore.Migrations
                 name: "QBPayments",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "varchar(255)", nullable: false),
-                    CustomerId = table.Column<string>(type: "varchar(255)", nullable: false),
-                    InvoiceId = table.Column<string>(type: "varchar(255)", nullable: false),
+                    Id = table.Column<string>(type: "varchar(250)", nullable: false),
+                    CustomerId = table.Column<string>(type: "varchar(250)", nullable: false),
+                    InvoiceId = table.Column<string>(type: "varchar(250)", nullable: false),
                     PaymentAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     PaymentMethod = table.Column<string>(type: "longtext", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
@@ -380,13 +380,13 @@ namespace DataStore.Migrations
                 name: "QBReceipts",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "varchar(255)", nullable: false),
-                    CustomerId = table.Column<string>(type: "varchar(255)", nullable: false),
+                    Id = table.Column<string>(type: "varchar(250)", nullable: false),
+                    CustomerId = table.Column<string>(type: "varchar(250)", nullable: false),
                     PaymentDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     ReceiptNumber = table.Column<string>(type: "longtext", nullable: false),
                     TotalPaymentAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     PaymentId = table.Column<string>(type: "longtext", nullable: false),
-                    InvoiceId = table.Column<string>(type: "varchar(255)", nullable: false),
+                    InvoiceId = table.Column<string>(type: "varchar(250)", nullable: false),
                     InvoiceNumber = table.Column<string>(type: "longtext", nullable: false),
                     InvoiceDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
@@ -788,7 +788,7 @@ namespace DataStore.Migrations
                     SecondaryPhoneNumber = table.Column<string>(type: "varchar(15)", maxLength: 15, nullable: false),
                     CreatedById = table.Column<string>(type: "varchar(200)", nullable: true),
                     DenialReason = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: true),
-                    CustomerId = table.Column<string>(type: "varchar(255)", nullable: true),
+                    CustomerId = table.Column<string>(type: "varchar(250)", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     Status = table.Column<string>(type: "longtext", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
@@ -915,13 +915,13 @@ namespace DataStore.Migrations
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     CreatedById = table.Column<string>(type: "varchar(200)", nullable: true),
                     Amount = table.Column<double>(type: "double", nullable: false),
-                    CustomerId = table.Column<string>(type: "varchar(255)", nullable: false),
+                    CustomerId = table.Column<string>(type: "varchar(250)", nullable: false),
                     Status = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
                     YearOfOperationId = table.Column<int>(type: "int", nullable: false),
                     ReferencedEntityType = table.Column<string>(type: "longtext", nullable: false),
                     ReferencedEntityId = table.Column<string>(type: "longtext", nullable: false),
                     Description = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: true),
-                    QBInvoiceId = table.Column<string>(type: "varchar(255)", nullable: true),
+                    QBInvoiceId = table.Column<string>(type: "varchar(250)", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     DeletedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true)
@@ -966,7 +966,7 @@ namespace DataStore.Migrations
                     ResidentialAddress = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: false),
                     DateOfAdmissionToPractice = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     FirmId = table.Column<int>(type: "int", nullable: true),
-                    CustomerId = table.Column<string>(type: "varchar(255)", nullable: true),
+                    CustomerId = table.Column<string>(type: "varchar(250)", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     Status = table.Column<string>(type: "longtext", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
@@ -1140,7 +1140,7 @@ namespace DataStore.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserTokens", x => new { x.UserId, x.LoginProvider, x.Name });
+                    table.PrimaryKey("PK_UserTokens", x => new { x.UserId, x.Name });
                     table.ForeignKey(
                         name: "FK_UserTokens_Users_UserId",
                         column: x => x.UserId,
@@ -1550,7 +1550,7 @@ namespace DataStore.Migrations
                     DateApproved = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     DateDenied = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     ReasonForDenial = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: true),
-                    QBInvoiceId = table.Column<string>(type: "varchar(255)", nullable: true),
+                    QBInvoiceId = table.Column<string>(type: "varchar(250)", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     Status = table.Column<string>(type: "longtext", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
