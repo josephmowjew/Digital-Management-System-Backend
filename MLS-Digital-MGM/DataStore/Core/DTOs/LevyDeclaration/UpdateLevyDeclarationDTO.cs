@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using DataStore.Helpers;
+using Microsoft.AspNetCore.Http;
 
 namespace DataStore.Core.DTOs.LevyDeclaration
 {
@@ -11,10 +12,9 @@ namespace DataStore.Core.DTOs.LevyDeclaration
         public DateTime Month { get; set; }
         [Required]
         public decimal Revenue { get; set; }
-        [Required]
-        public decimal LevyAmount { get; set; }
-        [Required]
-        public decimal Percentage { get; set; }
         public int FirmId { get; set; }
+        [AllowedFileTypes(new[] { ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".txt", "png", "jpg", "jpeg" })]
+        [FileSize(5242880)] // 5 MB
+        public List<IFormFile>? Attachments { get; set; }
     }
 }

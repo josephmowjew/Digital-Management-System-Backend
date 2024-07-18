@@ -13,5 +13,8 @@ namespace DataStore.Core.Models
         public decimal Percentage { get; set; } // The percentage used for this calculation
         public int FirmId { get; set; }
         public Firm Firm { get; set; }
+        public List<Attachment> Attachments { get; set; }
+        public int? InvoiceRequestId { get; set; }
+        public InvoiceRequest InvoiceRequest { get; set; }
     }
 }

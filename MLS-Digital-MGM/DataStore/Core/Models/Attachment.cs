@@ -20,6 +20,7 @@ namespace DataStore.Core.Models
             CPDTrainingRegistrations = new List<CPDTrainingRegistration>();
             Penalties = new List<Penalty>();
             PenaltyPayments = new List<PenaltyPayment>();
+            LevyDeclarations = new List<LevyDeclaration>();
         }
         
         [Required]
@@ -45,6 +46,8 @@ namespace DataStore.Core.Models
         public ICollection<Penalty> Penalties { get; set; }
         public ICollection<PenaltyPayment> PenaltyPayments { get; set; }
         public ICollection<Message> Messages { get; set; }
+
+        public ICollection<LevyDeclaration> LevyDeclarations { get; set; }
 
 
     }

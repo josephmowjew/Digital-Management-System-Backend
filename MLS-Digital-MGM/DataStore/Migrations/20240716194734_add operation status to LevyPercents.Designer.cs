@@ -3,6 +3,7 @@ using System;
 using DataStore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240716194734_add operation status to LevyPercents")]
+    partial class addoperationstatustoLevyPercents
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -47,21 +50,6 @@ namespace DataStore.Migrations
                     b.HasIndex("CPDTrainingRegistrationsId");
 
                     b.ToTable("AttachmentCPDTrainingRegistration");
-                });
-
-            modelBuilder.Entity("AttachmentLevyDeclaration", b =>
-                {
-                    b.Property<int>("AttachmentsId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("LevyDeclarationsId")
-                        .HasColumnType("int");
-
-                    b.HasKey("AttachmentsId", "LevyDeclarationsId");
-
-                    b.HasIndex("LevyDeclarationsId");
-
-                    b.ToTable("AttachmentLevyDeclaration");
                 });
 
             modelBuilder.Entity("AttachmentLicenseApplication", b =>
@@ -972,9 +960,6 @@ namespace DataStore.Migrations
                     b.Property<int>("FirmId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("InvoiceRequestId")
-                        .HasColumnType("int");
-
                     b.Property<decimal>("LevyAmount")
                         .HasColumnType("decimal(18,2)");
 
@@ -997,8 +982,6 @@ namespace DataStore.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("FirmId");
-
-                    b.HasIndex("InvoiceRequestId");
 
                     b.ToTable("LevyDeclarations");
                 });
@@ -2608,21 +2591,6 @@ namespace DataStore.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("AttachmentLevyDeclaration", b =>
-                {
-                    b.HasOne("DataStore.Core.Models.Attachment", null)
-                        .WithMany()
-                        .HasForeignKey("AttachmentsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DataStore.Core.Models.LevyDeclaration", null)
-                        .WithMany()
-                        .HasForeignKey("LevyDeclarationsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("AttachmentLicenseApplication", b =>
                 {
                     b.HasOne("DataStore.Core.Models.Attachment", null)
@@ -2979,13 +2947,7 @@ namespace DataStore.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DataStore.Core.Models.InvoiceRequest", "InvoiceRequest")
-                        .WithMany()
-                        .HasForeignKey("InvoiceRequestId");
-
                     b.Navigation("Firm");
-
-                    b.Navigation("InvoiceRequest");
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.LevyPercent", b =>

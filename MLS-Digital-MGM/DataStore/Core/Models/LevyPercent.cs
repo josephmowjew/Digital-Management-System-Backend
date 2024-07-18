@@ -9,8 +9,8 @@ namespace DataStore.Core.Models
     {
         public int Id { get; set; }
         public double PercentageValue { get; set; }
-        public DateTime CreatedDate { get; set; }
-        public DateTime? UpdatedDate { get; set; }
-        public DateTime? DeletedDate { get; set; }
+        public int YearOfOperationId { get; set; }
+        public YearOfOperation YearOfOperation { get; set; }
+        public string OperationStatus { get; set; }
     }
 }

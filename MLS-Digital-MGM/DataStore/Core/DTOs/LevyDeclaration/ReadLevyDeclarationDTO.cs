@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using DataStore.Core.DTOs.Attachment;
 using DataStore.Core.DTOs.Firms;
+using DataStore.Core.DTOs.InvoiceRequest;
 using DataStore.Core.Models;
 
 namespace DataStore.Core.DTOs.LevyDeclaration
@@ -19,5 +21,8 @@ namespace DataStore.Core.DTOs.LevyDeclaration
         public decimal Percentage { get; set; } // The percentage used for this calculation
         public int FirmId { get; set; }
         public ReadFirmDTO Firm { get; set;}
+        public int? InvoiceRequestId { get; set; }
+        public ReadInvoiceRequestDTO InvoiceRequest { get; set; }
+        public List<ReadAttachmentDTO> Attachments { get; set; }
     }
 }

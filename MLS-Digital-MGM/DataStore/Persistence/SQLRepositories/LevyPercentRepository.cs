@@ -22,7 +22,10 @@ namespace DataStore.Persistence.SQLRepositories
 
         public async Task<LevyPercent> GetByIdAsync(int id)
         {
-            return await _context.LevyPercents.FirstOrDefaultAsync(t => t.Id == id);
+            return await _context.LevyPercents
+            .Include(t => t.YearOfOperation)
+            .Where(t => t.Id == id && t.Status != Lambda.Deleted)
+            .FirstOrDefaultAsync();
         }
 
         public async Task<List<LevyPercent>> GetAllAsync()
@@ -38,6 +41,12 @@ namespace DataStore.Persistence.SQLRepositories
             }
 
             return levyPercent;
+        }
+
+        public async Task<LevyPercent> GetCurrentLevyPercentageAsync()
+        {
+            // get current year of operation based on the current date
+            return await _context.LevyPercents.FirstOrDefaultAsync(l => l.OperationStatus == Lambda.Current && l.Status != Lambda.Deleted);
         }
     }
 }
