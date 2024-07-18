@@ -49,7 +49,7 @@ public class FirmsController : Controller
 
             var pagingParameters = new PagingParameters<Firm>
             {
-                Predicate = u => u.Status != Lambda.Deleted && (string.Equals(currentRole, "administrator", StringComparison.OrdinalIgnoreCase) || string.Equals(currentRole, "Finance Officer", StringComparison.OrdinalIgnoreCase) || u.CreatedById == user.Id),
+                Predicate = u => u.Status != Lambda.Deleted && (string.Equals(currentRole, "administrator", StringComparison.OrdinalIgnoreCase) || string.Equals(currentRole, "CEO", StringComparison.OrdinalIgnoreCase) || string.Equals(currentRole, "Finance Officer", StringComparison.OrdinalIgnoreCase) || u.CreatedById == user.Id),
                 PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
                 PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
                 SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
