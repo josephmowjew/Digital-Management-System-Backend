@@ -26,5 +26,11 @@ namespace DataStore.Persistence.SQLRepositories
                 .Where(dp => dp.Status == Lambda.Active)
                 .CountAsync();
         }
+         public async Task<List<Department>> GetDepartmentsByIdsAsync(IEnumerable<int> departmentIds)
+        {
+            return await _context.Departments
+                .Where(d => departmentIds.Contains(d.Id))
+                .ToListAsync();
+        }
     }
 }
