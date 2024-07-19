@@ -56,7 +56,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 string CreatedById = user.Id;
 
 
-                 string currentRole  = Lambda.GetCurrentUserRole(_repositoryManager,user.Id);
+                string currentRole  = Lambda.GetCurrentUserRole(_repositoryManager,user.Id);
                 
                 var pagingParameters = new PagingParameters<ProBonoApplication>();
 
@@ -244,7 +244,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 // Check if the user is secretariat and approve the application if so
                 if (string.Equals(currentRole, "secretariat", StringComparison.OrdinalIgnoreCase))
                 {
-                    proBonoApplication.ApplicationStatus = Lambda.Approved;
+                    proBonoApplication.ApplicationStatus = Lambda.UnderReview;
                     proBonoApplication.ApprovedDate = DateTime.UtcNow;
 
                     //added a record of an actual pro bono itself as well once the application has been saved
@@ -453,40 +453,45 @@ namespace MLS_Digital_MGM_API.Controllers
                 // Fetch  clients using the UserRepository
                 var application = await _repositoryManager.ProBonoApplicationRepository.GetByIdAsync(id);
 
+                string username = _httpContextAccessor.HttpContext.User.Identity.Name;
+
+                var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
+                string currentRole  = Lambda.GetCurrentUserRole(_repositoryManager,user.Id);
+
                 if(application != null)
                 {
-                    application.ApplicationStatus = Lambda.Approved;
-                    application.ApprovedDate = DateTime.UtcNow;
-                    await _repositoryManager.ProBonoApplicationRepository.UpdateAsync(application);
-                    await _unitOfWork.CommitAsync();
+                    if (currentRole.Equals("secretariat", StringComparison.OrdinalIgnoreCase))
+                    {
+                        application.ApplicationStatus = Lambda.UnderReview;
+                        await _repositoryManager.ProBonoApplicationRepository.UpdateAsync(application);
+                        await _unitOfWork.CommitAsync();
+                    }else{
+                        application.ApplicationStatus = Lambda.Approved;
+                        application.ApprovedDate = DateTime.UtcNow;
+                        await _repositoryManager.ProBonoApplicationRepository.UpdateAsync(application);
+                        await _unitOfWork.CommitAsync();
 
-                    //added a record of an actual pro bono itself as well once the application has been saved
+                        //added a record of an actual pro bono itself as well once the application has been saved
 
-                    var probono = this._mapper.Map<ProBono>(application);
+                        var probono = this._mapper.Map<ProBono>(application);
 
-                    //generate a unique file number
-                    string fileNumber = await GenerateUniqueFileNumber();
-                    probono.ProBonoApplicationId = application.Id;
-                    probono.FileNumber = fileNumber;
+                        //generate a unique file number
+                        string fileNumber = await GenerateUniqueFileNumber();
+                        probono.ProBonoApplicationId = application.Id;
+                        probono.FileNumber = fileNumber;
 
-                    await _repositoryManager.ProBonoRepository.AddAsync(probono);
+                        await _repositoryManager.ProBonoRepository.AddAsync(probono);
 
-                     await _unitOfWork.CommitAsync();
+                        await _unitOfWork.CommitAsync();
 
-                    //send email to the user who created the probono application
-
-                    string username = _httpContextAccessor.HttpContext.User.Identity.Name;
-
-                    //get user id from username
-                    var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
+                        //send email to the user who created the probono application
+                        
+                        // Send status details email
+                        string emailBody = $"Your application for the pro bono application has been accepted. The file number is {fileNumber}";
                     
-                    // Send status details email
-                    string emailBody = $"Your application for the pro bono application has been accepted. The file number is {fileNumber}";
-                   
 
-                    BackgroundJob.Enqueue(() => this._emailService.SendCPDStatusEmailsAsync(new List<string>{user.Email},emailBody,"Pro Bono Application Status"));
-
-
+                        BackgroundJob.Enqueue(() => this._emailService.SendCPDStatusEmailsAsync(new List<string>{user.Email},emailBody,"Pro Bono Application Status"));
+                    }
                     
                     return Ok();
                 }
