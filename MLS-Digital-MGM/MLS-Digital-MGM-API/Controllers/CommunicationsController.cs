@@ -120,94 +120,107 @@ namespace MLS_Digital_MGM_API.Controllers
             }
         }
 
-        [HttpPost("send")]
-        public async Task<IActionResult> SendMessage([FromBody] SendMessageDTO messageDto)
+        
+    [HttpPost("send")]
+    public async Task<IActionResult> SendMessage([FromBody] SendMessageDTO messageDto)
+    {
+        try
         {
-            try
+            if (!ModelState.IsValid)
             {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
-
-                var recipients = await GetRecipients(messageDto);
-
-                if (!recipients.Any())
-                {
-                    return BadRequest("No recipients found based on the provided criteria.");
-                }
-
-                var currentUser = await GetCurrentUser();
-                if (currentUser == null)
-                {
-                    return Unauthorized();
-                }
-
-                var targetedDepartments = new List<string>();
-                if (messageDto.DepartmentIds.Any())
-                {
-                    var departments = await _repositoryManager.DepartmentRepository.GetAllAsync(d => messageDto.DepartmentIds.Contains(d.Id));
-                    targetedDepartments = departments.Select(d => d.Name).ToList();
-                }
-
-                var communicationMessage = new CommunicationMessage
-                {
-                    Subject = messageDto.Subject,
-                    Body = messageDto.Body,
-                    SentByUserId = currentUser.Id,
-                    SentDate = DateTime.UtcNow,
-                    Status = "Sent",
-                    SentToAllUsers = messageDto.SendToAllUsers,
-                    CreatedDate = DateTime.UtcNow
-                };
-
-                communicationMessage.SetTargetedRoles(messageDto.RoleNames);
-                communicationMessage.SetTargetedDepartments(targetedDepartments);
-
-                await _repositoryManager.CommunicationMessageRepository.AddAsync(communicationMessage);
-                await _repositoryManager.UnitOfWork.CommitAsync();
-
-                foreach (var recipient in recipients)
-                {
-                    await _emailService.SendMailWithKeyVarReturn(recipient.Email, messageDto.Subject, messageDto.Body);
-                }
-
-                return Json(new { message = $"Message sent successfully to {recipients.Count} recipients and saved with ID {communicationMessage.Id}." });
+                return BadRequest(ModelState);
             }
-            catch (Exception ex)
+
+            var recipients = await GetRecipientsAsync(messageDto);
+
+            if (!recipients.Any())
             {
-                await _errorLogService.LogErrorAsync(ex);
-                return StatusCode(500, "An error occurred while sending the message.");
+                return BadRequest("No recipients found based on the provided criteria.");
             }
+
+            var currentUser = await GetCurrentUser();
+            if (currentUser == null)
+            {
+                return Unauthorized();
+            }
+
+            var targetedDepartments = await GetTargetedDepartmentsAsync(messageDto.DepartmentIds);
+
+            var communicationMessage = new CommunicationMessage
+            {
+                Subject = messageDto.Subject,
+                Body = messageDto.Body,
+                SentByUserId = currentUser.Id,
+                SentDate = DateTime.Now,
+                Status = "Sent",
+                SentToAllUsers = messageDto.SendToAllUsers,
+                CreatedDate = DateTime.Now
+            };
+
+            communicationMessage.SetTargetedRoles(messageDto.RoleNames);
+            communicationMessage.SetTargetedDepartments(targetedDepartments);
+
+            await _repositoryManager.CommunicationMessageRepository.AddAsync(communicationMessage);
+            await _repositoryManager.UnitOfWork.CommitAsync();
+
+            var emailTasks = recipients.Select(recipient =>
+                _emailService.SendMailWithKeyVarReturn(recipient.Email, messageDto.Subject, messageDto.Body));
+            await Task.WhenAll(emailTasks);
+
+            return Json(new { message = $"Message sent successfully to {recipients.Count} recipients and saved with ID {communicationMessage.Id}." });
         }
-
-       private async Task<List<ApplicationUser>> GetRecipients(SendMessageDTO messageDto)
+        catch (Exception ex)
         {
-            if (messageDto.SendToAllUsers)
-            {
-                return (await _repositoryManager.UserRepository.GetAllAsync()).Where(u => u.EmailConfirmed).ToList();
-            }
+            await _errorLogService.LogErrorAsync(ex);
+            return StatusCode(500, "An error occurred while sending the message.");
+        }
+    }
 
-            var recipients = new HashSet<ApplicationUser>();
+    private async Task<List<ApplicationUser>> GetRecipientsAsync(SendMessageDTO messageDto)
+    {
+        var recipients = new List<ApplicationUser>();
+
+        if (messageDto.SendToAllUsers)
+        {
+            recipients = (await _repositoryManager.UserRepository.GetAllAsync(u => u.EmailConfirmed)).ToList();
+        }
+        else
+        {
+            var tasks = new List<Task<IEnumerable<ApplicationUser>>>();
 
             if (messageDto.DepartmentIds.Any())
             {
-                var usersInDepartments = await _repositoryManager.UserRepository.GetAllAsync(u => messageDto.DepartmentIds.Contains(u.DepartmentId));
-                recipients.UnionWith(usersInDepartments);
+                tasks.Add(_repositoryManager.UserRepository.GetAllAsync(u => messageDto.DepartmentIds.Contains(u.DepartmentId)));
             }
 
             if (messageDto.RoleNames.Any())
             {
-                foreach (var roleName in messageDto.RoleNames)
-                {
-                    var usersInRole = await _repositoryManager.UserManager.GetUsersInRoleAsync(roleName);
-                    recipients.UnionWith(usersInRole);
-                }
+                var roleTasks = messageDto.RoleNames.Select(async roleName => (await _repositoryManager.UserManager.GetUsersInRoleAsync(roleName)).AsEnumerable());
+                tasks.AddRange(roleTasks);
             }
 
-            return recipients.Where(u => u.EmailConfirmed).ToList();
+            var results = await Task.WhenAll(tasks);
+
+            foreach (var result in results)
+            {
+                recipients.AddRange(result.Where(u => u.EmailConfirmed));
+            }
         }
 
+        return recipients;
+    }
+
+
+    private async Task<List<string>> GetTargetedDepartmentsAsync(IEnumerable<int> departmentIds)
+    {
+        if (!departmentIds.Any())
+        {
+            return new List<string>();
+        }
+
+        var departments = await _repositoryManager.DepartmentRepository.GetAllAsync(d => departmentIds.Contains(d.Id));
+        return departments.Select(d => d.Name).ToList();
+    }
 
         private async Task<ApplicationUser> GetCurrentUser()
         {
