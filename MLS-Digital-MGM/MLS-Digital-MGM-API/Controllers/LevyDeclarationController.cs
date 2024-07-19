@@ -9,6 +9,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq.Expressions;
 using MLS_Digital_MGM.DataStore.Helpers;
+using System.Threading.Tasks;
+using System.Linq;
+using System.Linq.Expressions;
 
 
 namespace MLS_Digital_MGM_API.Controllers
@@ -46,6 +49,10 @@ namespace MLS_Digital_MGM_API.Controllers
                     SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
                     SortColumn = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumn : null,
                     SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null,
+                    Includes = new Expression<Func<LevyDeclaration, object>>[] {
+                        p => p.Attachments,
+                        p => p.InvoiceRequest,
+                    },
                 };
 
                 var levyDeclarationsPaged = await _repositoryManager.LevyDeclarationRepository.GetPagedAsync(pagingParameters);
@@ -92,14 +99,25 @@ namespace MLS_Digital_MGM_API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddLevyDeclaration([FromBody] CreateLevyDeclarationDTO levyDeclarationDTO)
+        public async Task<IActionResult> AddLevyDeclaration([FromForm] CreateLevyDeclarationDTO levyDeclarationDTO)
         {
             try
             {
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
 
+                string username = _httpContextAccessor.HttpContext.User.Identity.Name;
+
                 var levyDeclaration = _mapper.Map<LevyDeclaration>(levyDeclarationDTO);
+
+                var currentLevyPercent = await _repositoryManager.LevyPercentRepository.GetCurrentLevyPercentageAsync();
+
+                if (currentLevyPercent!= null)
+                {
+                    levyDeclaration.Percentage = Convert.ToDecimal(currentLevyPercent.PercentageValue);
+                    
+                    levyDeclaration.LevyAmount = levyDeclaration.Percentage / 100m * levyDeclaration.Revenue;
+                }
 
                 //get firm with the id passed 
                 var firm = await _repositoryManager.FirmRepository.GetByIdAsync(levyDeclaration.FirmId);
@@ -109,7 +127,49 @@ namespace MLS_Digital_MGM_API.Controllers
                     levyDeclaration.Firm = firm;
                 }
 
+                 // Get or create attachment type
+                var attachmentType = await _repositoryManager.AttachmentTypeRepository.GetAsync(d => d.Name == "LevyDeclaration")
+                                    ?? new AttachmentType { Name = "LevyDeclaration" };
+
+                // Add attachment type if it doesn't exist
+                if (attachmentType.Id == 0)
+                {
+                    await _repositoryManager.AttachmentTypeRepository.AddAsync(attachmentType);
+                    await _unitOfWork.CommitAsync();
+                }
+                if (levyDeclarationDTO.Attachments != null && levyDeclarationDTO.Attachments.Count > 0)
+                {
+                    levyDeclaration.Attachments = await SaveAttachmentsAsync(levyDeclarationDTO.Attachments, attachmentType.Id);
+                }
+
+                //generate an invoice request for the levy declaration
+
+                var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
+                var currentYearOfOperation = await _repositoryManager.YearOfOperationRepository.GetCurrentYearOfOperation();
+
+                InvoiceRequest levyInvoice = new InvoiceRequest()
+                {
+                    CreatedById = user.Id,
+                    YearOfOperationId = currentYearOfOperation.Id,
+                    CreatedDate = DateTime.UtcNow,
+                    Status = Lambda.Pending,
+                    UpdatedDate = DateTime.UtcNow,
+                    Amount = Convert.ToDouble(levyDeclaration.LevyAmount),
+                    CustomerId = firm.CustomerId,
+                    ReferencedEntityId = "N/A",
+                    ReferencedEntityType = "Levy",
+                    Description = "MLS",
+                };
+
                 await _repositoryManager.LevyDeclarationRepository.AddAsync(levyDeclaration);
+                await _unitOfWork.CommitAsync();
+
+                levyInvoice.Description = $"MLS-{levyInvoice.Id}";
+                await _repositoryManager.InvoiceRequestRepository.UpdateAsync(levyInvoice);
+                await _unitOfWork.CommitAsync();
+
+                levyDeclaration.InvoiceRequestId = levyInvoice.Id;
+                await _repositoryManager.LevyDeclarationRepository.UpdateAsync(levyDeclaration);
                 await _unitOfWork.CommitAsync();
 
                 return CreatedAtAction("GetLevyDeclarationById", new { id = levyDeclaration.Id }, levyDeclaration);
@@ -206,5 +266,68 @@ namespace MLS_Digital_MGM_API.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+
+
+        private async Task<List<Attachment>> SaveAttachmentsAsync(IEnumerable<IFormFile> attachments, int attachmentTypeId)
+        {
+            var attachmentsList = new List<Attachment>();
+            var hostEnvironment = HttpContext.RequestServices.GetRequiredService<IWebHostEnvironment>();
+            var webRootPath = hostEnvironment.WebRootPath;
+
+            // Check if webRootPath is null or empty
+            if (string.IsNullOrWhiteSpace(webRootPath))
+            {
+                throw new ArgumentNullException(nameof(webRootPath), "Web root path cannot be null or empty");
+            }
+
+            var AttachmentsPath = Path.Combine(webRootPath, "Uploads/LevyDeclarationAttachments" );
+
+        
+
+            // Ensure the directory exists
+            if (!Directory.Exists(AttachmentsPath))
+            {
+                Directory.CreateDirectory(AttachmentsPath);
+            
+            }
+
+            foreach (var attachment in attachments)
+            {
+                if (attachment == null || string.IsNullOrWhiteSpace(attachment.FileName))
+                {
+                
+                    continue;
+                }
+
+                var uniqueFileName = FileNameGenerator.GenerateUniqueFileName(attachment.FileName);
+                var filePath = Path.Combine(AttachmentsPath, uniqueFileName);
+
+            
+
+                try
+                {
+                    using (var stream = System.IO.File.Create(filePath))
+                    {
+                        await attachment.CopyToAsync(stream);
+                    }
+
+                    attachmentsList.Add(new Attachment
+                    {
+                        FileName = uniqueFileName,
+                        FilePath = filePath,
+                        AttachmentTypeId = attachmentTypeId,
+                        PropertyName = attachment.Name
+                    });
+                }
+                catch (Exception ex)
+                {
+                
+                    throw;
+                }
+            }
+
+            return attachmentsList;
+        }
+
     }
 }

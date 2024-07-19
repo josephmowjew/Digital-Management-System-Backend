@@ -9,8 +9,10 @@ namespace DataStore.Core.Mappers
         public LevyDeclarationProfile()
         {
             CreateMap<LevyDeclaration, ReadLevyDeclarationDTO>();
-            CreateMap<CreateLevyDeclarationDTO, LevyDeclaration>();
-            CreateMap<UpdateLevyDeclarationDTO, LevyDeclaration>();
+            CreateMap<CreateLevyDeclarationDTO, LevyDeclaration>()
+            .ForMember(dest => dest.Attachments, opt => opt.Ignore());
+            CreateMap<UpdateLevyDeclarationDTO, LevyDeclaration>()
+            .ForMember(dest => dest.Attachments, opt => opt.Ignore());
         }
     }
 }

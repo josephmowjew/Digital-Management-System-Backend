@@ -3,6 +3,7 @@ using System;
 using DataStore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240718195437_add invoice request id to levy declarations")]
+    partial class addinvoicerequestidtolevydeclarations
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -688,58 +691,6 @@ namespace DataStore.Migrations
                     b.HasIndex("MemberShipId");
 
                     b.ToTable("CommitteeMembers");
-                });
-
-            modelBuilder.Entity("DataStore.Core.Models.CommunicationMessage", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<string>("Body")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("SentByUserId")
-                        .IsRequired()
-                        .HasColumnType("varchar(200)");
-
-                    b.Property<DateTime>("SentDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<bool>("SentToAllUsers")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Subject")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("TargetedDepartmentsJson")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("TargetedRolesJson")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SentByUserId");
-
-                    b.ToTable("CommunicationMessages");
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.Country", b =>
@@ -2966,17 +2917,6 @@ namespace DataStore.Migrations
                     b.Navigation("Committee");
 
                     b.Navigation("MemberShip");
-                });
-
-            modelBuilder.Entity("DataStore.Core.Models.CommunicationMessage", b =>
-                {
-                    b.HasOne("DataStore.Core.Models.ApplicationUser", "SentByUser")
-                        .WithMany()
-                        .HasForeignKey("SentByUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("SentByUser");
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.ErrorLog", b =>

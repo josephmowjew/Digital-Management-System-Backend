@@ -7,6 +7,8 @@ using DataStore.Persistence.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MLS_Digital_MGM.DataStore.Helpers;
+using System.Linq.Expressions;
+using System.Threading.Tasks;
 
 namespace MLS_Digital_MGM_API.Controllers
 {
@@ -47,7 +49,10 @@ namespace MLS_Digital_MGM_API.Controllers
                     PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
                     SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
                     SortColumn = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumn : null,
-                    SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null
+                    SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null,
+                    Includes = new Expression<Func<LevyPercent, object>>[] {
+                        p => p.YearOfOperation,
+                    },
                 };
 
                 // Fetch paginated levyPercents using the LevyPercentRepository
@@ -142,6 +147,21 @@ namespace MLS_Digital_MGM_API.Controllers
                 }
 
                 var levyPercent = _mapper.Map<LevyPercent>(levyPercentDTO);
+
+                levyPercent.OperationStatus = Lambda.NotCurrent;
+
+                //get the current year of operation
+                var currentYearOfOperation = await _repositoryManager.YearOfOperationRepository.GetCurrentYearOfOperation();
+
+                if(currentYearOfOperation != null)
+                {
+                    levyPercent.YearOfOperationId = currentYearOfOperation.Id;
+                   
+                }else
+                {
+                    ModelState.AddModelError("", "The current year of operation is not set");
+                    return BadRequest(ModelState);
+                }
 
                 var existingLevyPercent = await _repositoryManager.LevyPercentRepository.GetAsync(c => c.PercentageValue.Equals(levyPercent.PercentageValue));
 
@@ -239,6 +259,46 @@ namespace MLS_Digital_MGM_API.Controllers
                 await _errorLogService.LogErrorAsync(ex);
                 return StatusCode(500, "Internal server error");
             }
+        }
+
+        [HttpGet("currentLevyPercent")]
+        public async Task<JsonResult> GetCurrentLevyPercent()
+        {
+            var levyPercent = await _repositoryManager.LevyPercentRepository.GetCurrentLevyPercentageAsync();
+
+            var mappedLevyPercent = _mapper.Map<ReadLevyPercentDTO>(levyPercent);
+
+            return Json(mappedLevyPercent);
+        }
+
+        [HttpPost("MarkAsCurrentLevyPercent/{id}")]
+        public async Task<IActionResult> MarkAsCurrentLevyPercent(int id){
+            try
+            {
+
+                var levyPercent = await _repositoryManager.LevyPercentRepository.GetByIdAsync(id);
+                if (levyPercent == null)
+                {
+                    return NotFound();
+                }
+                else{
+                    var currentLevyPercent = await _repositoryManager.LevyPercentRepository.GetCurrentLevyPercentageAsync();
+                    currentLevyPercent.OperationStatus = Lambda.NotCurrent;
+                    await _repositoryManager.LevyPercentRepository.UpdateAsync(currentLevyPercent);
+                    await _unitOfWork.CommitAsync();
+
+                    levyPercent.OperationStatus = Lambda.Current;
+                    await _repositoryManager.LevyPercentRepository.UpdateAsync(levyPercent);
+                    await _unitOfWork.CommitAsync();
+                    return Ok();
+                }
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+
         }
     }
 }

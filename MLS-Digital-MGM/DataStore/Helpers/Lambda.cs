@@ -64,6 +64,10 @@ namespace DataStore.Helpers
         //Invoice statuses
         public static string MarkAsGenerated = "Generated";
 
+        //Levy Percents
+        public static string Current = "Current";
+        public static string NotCurrent = "Not Current";
+
         public static string MarkAsPaid = "Paid";
 
         public static int RandomNumber()

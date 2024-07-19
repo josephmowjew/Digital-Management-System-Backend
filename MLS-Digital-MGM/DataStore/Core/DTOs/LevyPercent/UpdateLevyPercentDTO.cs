@@ -8,6 +8,6 @@ namespace DataStore.Core.DTOs.LevyPercent
     {
         public int Id { get; set; }
         [Required]
-        public decimal Percentage { get; set; }
+        public decimal PercentageValue { get; set; }
     }
 }
