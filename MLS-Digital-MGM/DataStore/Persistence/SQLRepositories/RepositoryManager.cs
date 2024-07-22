@@ -57,6 +57,9 @@ namespace DataStore.Persistence.SQLRepositories
         private ILevyDeclarationRepository _levyDeclarationRepository;
         private ILevyPercentRepository _levyPercentRepository;
         private ICommunicationMessageRepository _communicationMessageRepository;
+        private ISubcommitteeMembershipRepository _subcommitteeMembershipRepository;
+        private ISubcommitteeRepository _subcommitteeRepository;
+
 
         public RepositoryManager(
             ApplicationDbContext context, 
@@ -118,6 +121,8 @@ namespace DataStore.Persistence.SQLRepositories
         public ILevyDeclarationRepository LevyDeclarationRepository => _levyDeclarationRepository ??= new LevyDeclarationRepository(_context, _unitOfWork);
         public ILevyPercentRepository LevyPercentRepository => _levyPercentRepository ??= new LevyPercentRepository(_context, _unitOfWork);
         public ICommunicationMessageRepository CommunicationMessageRepository => _communicationMessageRepository ??= new CommunicationMessageRepository(_context, _unitOfWork);
+        public ISubcommitteeMembershipRepository SubcommitteeMembershipRepository => _subcommitteeMembershipRepository ??= new SubcommitteeMembershipRepository(_context, _unitOfWork);
+        public ISubcommitteeRepository SubcommitteeRepository => _subcommitteeRepository ??= new SubcommitteeRepository(_context, _unitOfWork);
         
     }
 }

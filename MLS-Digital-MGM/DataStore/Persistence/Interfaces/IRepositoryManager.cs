@@ -77,5 +77,8 @@ namespace DataStore.Persistence.Interfaces
         ILevyPercentRepository LevyPercentRepository { get; }
         ICommunicationMessageRepository CommunicationMessageRepository { get; }
 
+        ISubcommitteeMembershipRepository SubcommitteeMembershipRepository { get; }
+        ISubcommitteeRepository SubcommitteeRepository { get; }
+
     }
 }
