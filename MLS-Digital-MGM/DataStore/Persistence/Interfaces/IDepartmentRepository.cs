@@ -12,5 +12,6 @@ namespace DataStore.Persistence.Interfaces
         // Additional methods specific to the Department entity, if needed
 
         Task<int> GetDepartmentsCountAsync();
+         Task<List<Department>> GetDepartmentsByIdsAsync(IEnumerable<int> departmentIds);
     }
 }

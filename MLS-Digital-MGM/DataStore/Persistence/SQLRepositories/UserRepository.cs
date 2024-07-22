@@ -108,5 +108,21 @@ namespace DataStore.Persistence.SQLRepositories
                 .Where(us => us.EmailConfirmed == true)
                 .CountAsync();
         }
+
+        public async Task<List<ApplicationUser>> GetUsersByDepartmentIdsAsync(IEnumerable<int> departmentIds)
+        {
+            return await _context.Users
+                .Where(u => departmentIds.Contains(u.DepartmentId))
+                .ToListAsync();
+        }
+
+        public async Task<List<ApplicationUser>> GetAllConfirmedUsersAsync()
+        {
+            return await _context.Users
+                .Where(u => u.EmailConfirmed)
+                .ToListAsync();
+        }
+
+        
     }
 }

@@ -26,5 +26,8 @@ namespace DataStore.Persistence.Interfaces
         string GetRoleName(string roleId);
         Task<List<ApplicationUser>> GetUsersByRoleAsync(string finance);
         Task<int> GetUsersCountAsync();
+        Task<List<ApplicationUser>> GetUsersByDepartmentIdsAsync(IEnumerable<int> departmentIds);
+
+        Task<List<ApplicationUser>> GetAllConfirmedUsersAsync();
     }
 }
