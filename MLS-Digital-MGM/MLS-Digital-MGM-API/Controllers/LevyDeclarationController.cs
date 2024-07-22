@@ -36,7 +36,7 @@ namespace MLS_Digital_MGM_API.Controllers
         }
 
         [HttpGet("paged")]
-        public async Task<IActionResult> GetLevyDeclarations(int pageNumber = 1, int pageSize = 10)
+        public async Task<IActionResult> GetLevyDeclarations(int pageNumber = 1, int pageSize = 10, int firmId = 0)
         {
             try
             {
@@ -44,6 +44,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 var pagingParameters = new PagingParameters<LevyDeclaration>
                 {
+                    Predicate = u => u.Status != Lambda.Deleted && (firmId > 0 ? u.FirmId == firmId : true),
                     PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
                     PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
                     SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
