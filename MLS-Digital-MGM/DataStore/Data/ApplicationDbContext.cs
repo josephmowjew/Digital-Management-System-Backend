@@ -169,6 +169,8 @@ namespace DataStore.Data
 
         public DbSet<Subcommittee> Subcommittees { get; set; }
         public DbSet<SubcommitteeMembership> SubcommitteeMemberships { get; set; }
+        public DbSet<SubcommitteeThread> SubcommitteeThreads { get; set; }
+        public DbSet<SubcommitteeMessage> SubcommitteeMessages { get; set; }
         
         
     }

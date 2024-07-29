@@ -79,6 +79,8 @@ namespace DataStore.Persistence.Interfaces
 
         ISubcommitteeMembershipRepository SubcommitteeMembershipRepository { get; }
         ISubcommitteeRepository SubcommitteeRepository { get; }
+        ISubcommitteeThreadRepository SubcommitteeThreadRepository { get; }
+        ISubcommitteeMessageRepository SubcommitteeMessageRepository { get; }
 
     }
 }

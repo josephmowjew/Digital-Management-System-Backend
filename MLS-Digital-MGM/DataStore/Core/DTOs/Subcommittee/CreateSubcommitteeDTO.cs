@@ -15,7 +15,5 @@ namespace DataStore.Core.DTOs.Subcommittee
 
         [Required]
         public int CommitteeId { get; set; }
-
-        public string CreatedById { get; set; }
     }
 }

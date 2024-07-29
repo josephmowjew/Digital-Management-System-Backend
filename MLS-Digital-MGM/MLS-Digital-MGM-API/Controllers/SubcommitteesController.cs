@@ -38,7 +38,7 @@ namespace MLS_Digital_MGM_API.Controllers
         }
 
         [HttpGet("paged")]
-        public async Task<IActionResult> GetSubcommittees(int pageNumber = 1, int pageSize = 10)
+        public async Task<IActionResult> GetSubcommittees(int pageNumber = 1, int pageSize = 10, string memberId = "")
         {
             try
             {
@@ -46,9 +46,8 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 var pagingParameters = new PagingParameters<Subcommittee>
                 {   
-                    Predicate = u => u.Status != Lambda.Deleted, 
-                    //&& u.ParentCommittee.Id == parentCommitteeId 
-                    //&& u.ParentCommittee.CommitteeMemberships.Any(cm => cm.MemberShipId == currentUserId),
+                    Predicate = u => u.Status != Lambda.Deleted 
+                    && u.ParentCommittee.CommitteeMemberships.Any(cm => cm.MemberShipId == memberId),
                     PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
                     PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
                     SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
@@ -57,7 +56,7 @@ namespace MLS_Digital_MGM_API.Controllers
                     Includes = new Expression<Func<Subcommittee, object>>[] {
                         p => p.Chairperson,
                         p => p.Chairperson.User,
-                        p => p.Threads,
+                        p => p.SubcommitteeThreads,
                         p => p.ParentCommittee,
                         p => p.SubcommitteeMemberships
                     }
@@ -69,7 +68,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 {
                     if (dataTableParams.LoadFromRequest(_httpContextAccessor))
                     {
-                        var draw = dataTableParams.Draw;
+                        var draw = dataTableParams.Draw;    
                         return Json(new
                         {
                             draw,
@@ -181,6 +180,72 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 var mappedSubcommittee = _mapper.Map<ReadSubcommitteeDTO>(subcommittee);
                 return Ok(mappedSubcommittee);
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+       [HttpGet("GetSubcommitteeByCommitteeId")]
+        public async Task<IActionResult> GetSubcommitteeByCommitteeId(int committeeId = 0, int pageNumber = 1, int pageSize = 10)
+        {
+            try
+            {
+                var dataTableParams = new DataTablesParameters();
+
+                var pagingParameters = new PagingParameters<Subcommittee>
+                {   
+                    Predicate = s => s.CommitteeId == committeeId && s.Status != Lambda.Deleted,
+                    PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
+                    PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
+                    SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
+                    SortColumn = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumn : null,
+                    SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null,
+                    Includes = new Expression<Func<Subcommittee, object>>[] {
+                        s => s.Chairperson,
+                        s => s.Chairperson.User,
+                        s => s.ParentCommittee,
+                        s => s.SubcommitteeMemberships
+                    }
+                };
+
+                var subcommitteesPaged = await _repositoryManager.SubcommitteeRepository.GetPagedAsync(pagingParameters);
+
+                if (subcommitteesPaged == null || !subcommitteesPaged.Any())
+                {
+                    if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                    {
+                        var draw = dataTableParams.Draw;    
+                        return Json(new
+                        {
+                            draw,
+                            recordsFiltered = 0,
+                            recordsTotal = 0,
+                            data = Enumerable.Empty<ReadSubcommitteeDTO>()
+                        });
+                    }
+                    return NotFound();
+                }
+
+                var subcommitteeDTOs = _mapper.Map<List<ReadSubcommitteeDTO>>(subcommitteesPaged);
+
+                if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                {
+                    var draw = dataTableParams.Draw;
+                    var totalRecords = await _repositoryManager.SubcommitteeRepository.CountAsync(pagingParameters);
+
+                    return Json(new
+                    {
+                        draw,
+                        recordsFiltered = totalRecords,
+                        recordsTotal = totalRecords,
+                        data = subcommitteeDTOs
+                    });
+                }
+
+                return Ok(subcommitteeDTOs);
             }
             catch (Exception ex)
             {

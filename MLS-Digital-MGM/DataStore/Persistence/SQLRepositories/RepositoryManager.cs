@@ -59,6 +59,8 @@ namespace DataStore.Persistence.SQLRepositories
         private ICommunicationMessageRepository _communicationMessageRepository;
         private ISubcommitteeMembershipRepository _subcommitteeMembershipRepository;
         private ISubcommitteeRepository _subcommitteeRepository;
+        private ISubcommitteeThreadRepository _subcommitteeThreadRepository;
+        private ISubcommitteeMessageRepository _subcommitteeMessageRepository;
 
 
         public RepositoryManager(
@@ -123,6 +125,8 @@ namespace DataStore.Persistence.SQLRepositories
         public ICommunicationMessageRepository CommunicationMessageRepository => _communicationMessageRepository ??= new CommunicationMessageRepository(_context, _unitOfWork);
         public ISubcommitteeMembershipRepository SubcommitteeMembershipRepository => _subcommitteeMembershipRepository ??= new SubcommitteeMembershipRepository(_context, _unitOfWork);
         public ISubcommitteeRepository SubcommitteeRepository => _subcommitteeRepository ??= new SubcommitteeRepository(_context, _unitOfWork);
+        public ISubcommitteeThreadRepository SubcommitteeThreadRepository => _subcommitteeThreadRepository ??= new SubcommitteeThreadRepository(_context, _unitOfWork);
+        public ISubcommitteeMessageRepository SubcommitteeMessageRepository => _subcommitteeMessageRepository ??= new SubcommitteeMessageRepository(_context, _unitOfWork);
         
     }
 }

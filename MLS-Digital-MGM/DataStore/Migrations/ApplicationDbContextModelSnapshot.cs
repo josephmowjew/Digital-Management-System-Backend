@@ -364,12 +364,17 @@ namespace DataStore.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<int?>("SubcommitteeMessageId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("UpdatedDate")
                         .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("AttachmentTypeId");
+
+                    b.HasIndex("SubcommitteeMessageId");
 
                     b.ToTable("Attachments");
                 });
@@ -1555,9 +1560,6 @@ namespace DataStore.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<int?>("SubcommitteeId")
-                        .HasColumnType("int");
-
                     b.Property<int?>("ThreadId")
                         .HasColumnType("int");
 
@@ -1572,8 +1574,6 @@ namespace DataStore.Migrations
                     b.HasIndex("CommitteeID");
 
                     b.HasIndex("CreatedById");
-
-                    b.HasIndex("SubcommitteeId");
 
                     b.HasIndex("ThreadId");
 
@@ -2425,6 +2425,92 @@ namespace DataStore.Migrations
                     b.ToTable("SubcommitteeMemberships");
                 });
 
+            modelBuilder.Entity("DataStore.Core.Models.SubcommitteeMessage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("CreatedById")
+                        .IsRequired()
+                        .HasColumnType("varchar(200)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("SubcommitteeID")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SubcommitteeThreadId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("SubcommitteeID");
+
+                    b.HasIndex("SubcommitteeThreadId");
+
+                    b.ToTable("SubcommitteeMessages");
+                });
+
+            modelBuilder.Entity("DataStore.Core.Models.SubcommitteeThread", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("CreatedById")
+                        .IsRequired()
+                        .HasColumnType("varchar(200)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("SubcommitteeId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("SubcommitteeId");
+
+                    b.ToTable("SubcommitteeThreads");
+                });
+
             modelBuilder.Entity("DataStore.Core.Models.Thread", b =>
                 {
                     b.Property<int>("Id")
@@ -2448,9 +2534,6 @@ namespace DataStore.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<int?>("SubcommitteeId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Subject")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -2463,8 +2546,6 @@ namespace DataStore.Migrations
                     b.HasIndex("CommitteeId");
 
                     b.HasIndex("CreatedById");
-
-                    b.HasIndex("SubcommitteeId");
 
                     b.ToTable("Threads");
                 });
@@ -2946,6 +3027,10 @@ namespace DataStore.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("DataStore.Core.Models.SubcommitteeMessage", null)
+                        .WithMany("Attachments")
+                        .HasForeignKey("SubcommitteeMessageId");
+
                     b.Navigation("AttachmentType");
                 });
 
@@ -3366,10 +3451,6 @@ namespace DataStore.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DataStore.Core.Models.Subcommittee", null)
-                        .WithMany("Messages")
-                        .HasForeignKey("SubcommitteeId");
-
                     b.HasOne("DataStore.Core.Models.Thread", "Thread")
                         .WithMany("Messages")
                         .HasForeignKey("ThreadId");
@@ -3643,6 +3724,50 @@ namespace DataStore.Migrations
                     b.Navigation("Subcommittee");
                 });
 
+            modelBuilder.Entity("DataStore.Core.Models.SubcommitteeMessage", b =>
+                {
+                    b.HasOne("DataStore.Core.Models.ApplicationUser", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataStore.Core.Models.Subcommittee", "Subcommittee")
+                        .WithMany("SubcommitteeMessages")
+                        .HasForeignKey("SubcommitteeID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataStore.Core.Models.SubcommitteeThread", "SubcommitteeThread")
+                        .WithMany("SubcommitteeMessages")
+                        .HasForeignKey("SubcommitteeThreadId");
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("Subcommittee");
+
+                    b.Navigation("SubcommitteeThread");
+                });
+
+            modelBuilder.Entity("DataStore.Core.Models.SubcommitteeThread", b =>
+                {
+                    b.HasOne("DataStore.Core.Models.ApplicationUser", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataStore.Core.Models.Subcommittee", "Subcommittee")
+                        .WithMany("SubcommitteeThreads")
+                        .HasForeignKey("SubcommitteeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("Subcommittee");
+                });
+
             modelBuilder.Entity("DataStore.Core.Models.Thread", b =>
                 {
                     b.HasOne("DataStore.Core.Models.Committee", "Committee")
@@ -3656,10 +3781,6 @@ namespace DataStore.Migrations
                         .HasForeignKey("CreatedById")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("DataStore.Core.Models.Subcommittee", null)
-                        .WithMany("Threads")
-                        .HasForeignKey("SubcommitteeId");
 
                     b.Navigation("Committee");
 
@@ -3819,11 +3940,21 @@ namespace DataStore.Migrations
 
             modelBuilder.Entity("DataStore.Core.Models.Subcommittee", b =>
                 {
-                    b.Navigation("Messages");
-
                     b.Navigation("SubcommitteeMemberships");
 
-                    b.Navigation("Threads");
+                    b.Navigation("SubcommitteeMessages");
+
+                    b.Navigation("SubcommitteeThreads");
+                });
+
+            modelBuilder.Entity("DataStore.Core.Models.SubcommitteeMessage", b =>
+                {
+                    b.Navigation("Attachments");
+                });
+
+            modelBuilder.Entity("DataStore.Core.Models.SubcommitteeThread", b =>
+                {
+                    b.Navigation("SubcommitteeMessages");
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.Thread", b =>

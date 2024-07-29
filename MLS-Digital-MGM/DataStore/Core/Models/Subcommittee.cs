@@ -15,8 +15,8 @@ public class Subcommittee : Meta
     // Navigation Properties
     public Committee ParentCommittee { get; set; }
     public ICollection<SubcommitteeMembership> SubcommitteeMemberships { get; set; }
-    public ICollection<Message> Messages { get; set; }
-    public ICollection<Thread> Threads { get; set; }
+    public ICollection<SubcommitteeMessage> SubcommitteeMessages { get; set; }
+    public ICollection<SubcommitteeThread> SubcommitteeThreads { get; set; }
     public string CreatedById { get; set; }
     public ApplicationUser CreatedBy { get; set; }
 }
