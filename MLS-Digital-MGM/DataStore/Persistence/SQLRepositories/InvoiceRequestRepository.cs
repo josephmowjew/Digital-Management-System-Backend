@@ -30,5 +30,17 @@ namespace DataStore.Persistence.SQLRepositories
         public async Task<int> GetPendingInvoiceRequestsCountAsync(){
             return await _context.InvoiceRequests.CountAsync(ir => ir.Status == Lambda.Pending);
         }
+        public async Task<IEnumerable<InvoiceRequest>> GetInvoiceRequestsForReportAsync(DateTime startDate, DateTime endDate, string referencedEntityType = null)
+        {
+            var query = _context.InvoiceRequests
+                .Where(ir => ir.CreatedDate >= startDate && ir.CreatedDate <= endDate);
+
+            if (!string.IsNullOrEmpty(referencedEntityType))
+            {
+                query = query.Where(ir => ir.ReferencedEntityType == referencedEntityType);
+            }
+
+            return await query.ToListAsync();
+        }
     }
 }

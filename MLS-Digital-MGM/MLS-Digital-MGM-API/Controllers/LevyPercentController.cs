@@ -283,14 +283,26 @@ namespace MLS_Digital_MGM_API.Controllers
                 }
                 else{
                     var currentLevyPercent = await _repositoryManager.LevyPercentRepository.GetCurrentLevyPercentageAsync();
-                    currentLevyPercent.OperationStatus = Lambda.NotCurrent;
-                    await _repositoryManager.LevyPercentRepository.UpdateAsync(currentLevyPercent);
-                    await _unitOfWork.CommitAsync();
 
-                    levyPercent.OperationStatus = Lambda.Current;
-                    await _repositoryManager.LevyPercentRepository.UpdateAsync(levyPercent);
-                    await _unitOfWork.CommitAsync();
-                    return Ok();
+                    if(currentLevyPercent == null){
+
+                        levyPercent.OperationStatus = Lambda.Current;
+                        await _repositoryManager.LevyPercentRepository.UpdateAsync(levyPercent);
+                        await _unitOfWork.CommitAsync();
+                        return Ok();
+                    }
+                    else{
+
+                        currentLevyPercent.OperationStatus = Lambda.NotCurrent;
+                        await _repositoryManager.LevyPercentRepository.UpdateAsync(currentLevyPercent);
+                        await _unitOfWork.CommitAsync();
+
+                        levyPercent.OperationStatus = Lambda.Current;
+                        await _repositoryManager.LevyPercentRepository.UpdateAsync(levyPercent);
+                        await _unitOfWork.CommitAsync();
+                        return Ok();
+                    }
+                    
                 }
             }
             catch (Exception ex)

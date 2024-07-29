@@ -6,5 +6,8 @@ namespace DataStore.Persistence.Interfaces
     public interface IInvoiceRepository : IRepository<QBInvoice>
     {
         // Additional methods specific to the Invoice entity, if needed
+
     }
+
+    
 }

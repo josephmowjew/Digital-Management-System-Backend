@@ -9,5 +9,8 @@ namespace DataStore.Persistence.Interfaces
         Task<QBInvoice> GetQBInvoiceByIdAsync(string id);
 
         Task<int> GetPendingInvoiceRequestsCountAsync();
+
+        Task<IEnumerable<InvoiceRequest>> GetInvoiceRequestsForReportAsync(DateTime startDate, DateTime endDate, string referencedEntityType = null);
+
     }
 }
