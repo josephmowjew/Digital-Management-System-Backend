@@ -7,7 +7,7 @@ using MySql.EntityFrameworkCore.Metadata;
 namespace DataStore.Migrations
 {
     /// <inheritdoc />
-    public partial class addinitialmigration : Migration
+    public partial class initialmigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -89,24 +89,6 @@ namespace DataStore.Migrations
                 .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "LevyPercents",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
-                    PercentageValue = table.Column<double>(type: "double", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
-                    DeletedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
-                    Status = table.Column<string>(type: "longtext", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_LevyPercents", x => x.Id);
-                })
-                .Annotation("MySQL:Charset", "utf8mb4");
-
-            migrationBuilder.CreateTable(
                 name: "PenaltyTypes",
                 columns: table => new
                 {
@@ -129,7 +111,7 @@ namespace DataStore.Migrations
                 name: "QBCustomers",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "varchar(250)", nullable: false),
+                    Id = table.Column<string>(type: "varchar(255)", nullable: false),
                     CustomerName = table.Column<string>(type: "longtext", nullable: false),
                     FirstName = table.Column<string>(type: "longtext", nullable: false),
                     MiddleName = table.Column<string>(type: "longtext", nullable: false),
@@ -238,33 +220,6 @@ namespace DataStore.Migrations
                 .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Attachments",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
-                    FileName = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false),
-                    FilePath = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: false),
-                    PropertyName = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: true),
-                    AttachmentTypeId = table.Column<int>(type: "int", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    Status = table.Column<string>(type: "longtext", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    DeletedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Attachments", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Attachments_AttachmentTypes_AttachmentTypeId",
-                        column: x => x.AttachmentTypeId,
-                        principalTable: "AttachmentTypes",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySQL:Charset", "utf8mb4");
-
-            migrationBuilder.CreateTable(
                 name: "LicenseApprovalLevels",
                 columns: table => new
                 {
@@ -293,9 +248,9 @@ namespace DataStore.Migrations
                 name: "QBInvoices",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "varchar(250)", nullable: false),
+                    Id = table.Column<string>(type: "varchar(255)", nullable: false),
                     InvoiceNumber = table.Column<string>(type: "longtext", nullable: false),
-                    CustomerId = table.Column<string>(type: "varchar(250)", nullable: false),
+                    CustomerId = table.Column<string>(type: "varchar(255)", nullable: false),
                     CustomerName = table.Column<string>(type: "longtext", nullable: false),
                     InvoiceDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     InvoiceAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
@@ -344,12 +299,38 @@ namespace DataStore.Migrations
                 .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "LevyPercents",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    PercentageValue = table.Column<double>(type: "double", nullable: false),
+                    YearOfOperationId = table.Column<int>(type: "int", nullable: false),
+                    OperationStatus = table.Column<string>(type: "longtext", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    Status = table.Column<string>(type: "longtext", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    DeletedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LevyPercents", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_LevyPercents_YearOfOperations_YearOfOperationId",
+                        column: x => x.YearOfOperationId,
+                        principalTable: "YearOfOperations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "QBPayments",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "varchar(250)", nullable: false),
-                    CustomerId = table.Column<string>(type: "varchar(250)", nullable: false),
-                    InvoiceId = table.Column<string>(type: "varchar(250)", nullable: false),
+                    Id = table.Column<string>(type: "varchar(255)", nullable: false),
+                    CustomerId = table.Column<string>(type: "varchar(255)", nullable: false),
+                    InvoiceId = table.Column<string>(type: "varchar(255)", nullable: false),
                     PaymentAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     PaymentMethod = table.Column<string>(type: "longtext", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
@@ -380,13 +361,13 @@ namespace DataStore.Migrations
                 name: "QBReceipts",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "varchar(250)", nullable: false),
-                    CustomerId = table.Column<string>(type: "varchar(250)", nullable: false),
+                    Id = table.Column<string>(type: "varchar(255)", nullable: false),
+                    CustomerId = table.Column<string>(type: "varchar(255)", nullable: false),
                     PaymentDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     ReceiptNumber = table.Column<string>(type: "longtext", nullable: false),
                     TotalPaymentAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     PaymentId = table.Column<string>(type: "longtext", nullable: false),
-                    InvoiceId = table.Column<string>(type: "varchar(250)", nullable: false),
+                    InvoiceId = table.Column<string>(type: "varchar(255)", nullable: false),
                     InvoiceNumber = table.Column<string>(type: "longtext", nullable: false),
                     InvoiceDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
@@ -423,12 +404,6 @@ namespace DataStore.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AttachmentCPDTraining", x => new { x.AttachmentsId, x.CPDTrainingsId });
-                    table.ForeignKey(
-                        name: "FK_AttachmentCPDTraining_Attachments_AttachmentsId",
-                        column: x => x.AttachmentsId,
-                        principalTable: "Attachments",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
 
@@ -442,12 +417,19 @@ namespace DataStore.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AttachmentCPDTrainingRegistration", x => new { x.AttachmentsId, x.CPDTrainingRegistrationsId });
-                    table.ForeignKey(
-                        name: "FK_AttachmentCPDTrainingRegistration_Attachments_AttachmentsId",
-                        column: x => x.AttachmentsId,
-                        principalTable: "Attachments",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "AttachmentLevyDeclaration",
+                columns: table => new
+                {
+                    AttachmentsId = table.Column<int>(type: "int", nullable: false),
+                    LevyDeclarationsId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AttachmentLevyDeclaration", x => new { x.AttachmentsId, x.LevyDeclarationsId });
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
 
@@ -461,12 +443,6 @@ namespace DataStore.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AttachmentLicenseApplication", x => new { x.AttachmentsId, x.LicenseApplicationsId });
-                    table.ForeignKey(
-                        name: "FK_AttachmentLicenseApplication_Attachments_AttachmentsId",
-                        column: x => x.AttachmentsId,
-                        principalTable: "Attachments",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
 
@@ -480,12 +456,6 @@ namespace DataStore.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AttachmentMemberQualification", x => new { x.AttachmentsId, x.MemberQualificationsId });
-                    table.ForeignKey(
-                        name: "FK_AttachmentMemberQualification_Attachments_AttachmentsId",
-                        column: x => x.AttachmentsId,
-                        principalTable: "Attachments",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
 
@@ -499,12 +469,6 @@ namespace DataStore.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AttachmentMessage", x => new { x.AttachmentsId, x.MessagesId });
-                    table.ForeignKey(
-                        name: "FK_AttachmentMessage_Attachments_AttachmentsId",
-                        column: x => x.AttachmentsId,
-                        principalTable: "Attachments",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
 
@@ -518,12 +482,6 @@ namespace DataStore.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AttachmentPenalty", x => new { x.AttachmentsId, x.PenaltiesId });
-                    table.ForeignKey(
-                        name: "FK_AttachmentPenalty_Attachments_AttachmentsId",
-                        column: x => x.AttachmentsId,
-                        principalTable: "Attachments",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
 
@@ -537,12 +495,6 @@ namespace DataStore.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AttachmentPenaltyPayment", x => new { x.AttachmentsId, x.PenaltyPaymentsId });
-                    table.ForeignKey(
-                        name: "FK_AttachmentPenaltyPayment_Attachments_AttachmentsId",
-                        column: x => x.AttachmentsId,
-                        principalTable: "Attachments",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
 
@@ -556,12 +508,6 @@ namespace DataStore.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AttachmentProBono", x => new { x.AttachmentsId, x.ProBonosId });
-                    table.ForeignKey(
-                        name: "FK_AttachmentProBono_Attachments_AttachmentsId",
-                        column: x => x.AttachmentsId,
-                        principalTable: "Attachments",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
 
@@ -575,12 +521,6 @@ namespace DataStore.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AttachmentProBonoApplication", x => new { x.AttachmentsId, x.ProBonosApplicationsId });
-                    table.ForeignKey(
-                        name: "FK_AttachmentProBonoApplication_Attachments_AttachmentsId",
-                        column: x => x.AttachmentsId,
-                        principalTable: "Attachments",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
 
@@ -594,10 +534,32 @@ namespace DataStore.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AttachmentProBonoReport", x => new { x.AttachmentsId, x.ProBonoReportsId });
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "Attachments",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    FileName = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false),
+                    FilePath = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: false),
+                    PropertyName = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: true),
+                    AttachmentTypeId = table.Column<int>(type: "int", nullable: false),
+                    SubcommitteeMessageId = table.Column<int>(type: "int", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    Status = table.Column<string>(type: "longtext", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    DeletedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Attachments", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_AttachmentProBonoReport_Attachments_AttachmentsId",
-                        column: x => x.AttachmentsId,
-                        principalTable: "Attachments",
+                        name: "FK_Attachments_AttachmentTypes_AttachmentTypeId",
+                        column: x => x.AttachmentTypeId,
+                        principalTable: "AttachmentTypes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 })
@@ -651,6 +613,30 @@ namespace DataStore.Migrations
                         principalTable: "YearOfOperations",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "CommunicationMessages",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    Subject = table.Column<string>(type: "longtext", nullable: false),
+                    Body = table.Column<string>(type: "longtext", nullable: false),
+                    SentByUserId = table.Column<string>(type: "varchar(200)", nullable: false),
+                    SentDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    Status = table.Column<string>(type: "longtext", nullable: false),
+                    SentToAllUsers = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    TargetedRolesJson = table.Column<string>(type: "longtext", nullable: false),
+                    TargetedDepartmentsJson = table.Column<string>(type: "longtext", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    DeletedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CommunicationMessages", x => x.Id);
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
 
@@ -788,7 +774,7 @@ namespace DataStore.Migrations
                     SecondaryPhoneNumber = table.Column<string>(type: "varchar(15)", maxLength: 15, nullable: false),
                     CreatedById = table.Column<string>(type: "varchar(200)", nullable: true),
                     DenialReason = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: true),
-                    CustomerId = table.Column<string>(type: "varchar(250)", nullable: true),
+                    CustomerId = table.Column<string>(type: "varchar(255)", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     Status = table.Column<string>(type: "longtext", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
@@ -802,34 +788,6 @@ namespace DataStore.Migrations
                         column: x => x.CustomerId,
                         principalTable: "QBCustomers",
                         principalColumn: "Id");
-                })
-                .Annotation("MySQL:Charset", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "LevyDeclarations",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
-                    Month = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    Revenue = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    LevyAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Percentage = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    FirmId = table.Column<int>(type: "int", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    Status = table.Column<string>(type: "longtext", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    DeletedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_LevyDeclarations", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_LevyDeclarations_Firms_FirmId",
-                        column: x => x.FirmId,
-                        principalTable: "Firms",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
 
@@ -915,13 +873,13 @@ namespace DataStore.Migrations
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     CreatedById = table.Column<string>(type: "varchar(200)", nullable: true),
                     Amount = table.Column<double>(type: "double", nullable: false),
-                    CustomerId = table.Column<string>(type: "varchar(250)", nullable: false),
+                    CustomerId = table.Column<string>(type: "varchar(255)", nullable: false),
                     Status = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
                     YearOfOperationId = table.Column<int>(type: "int", nullable: false),
                     ReferencedEntityType = table.Column<string>(type: "longtext", nullable: false),
                     ReferencedEntityId = table.Column<string>(type: "longtext", nullable: false),
                     Description = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: true),
-                    QBInvoiceId = table.Column<string>(type: "varchar(250)", nullable: true),
+                    QBInvoiceId = table.Column<string>(type: "varchar(255)", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     DeletedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true)
@@ -966,7 +924,7 @@ namespace DataStore.Migrations
                     ResidentialAddress = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: false),
                     DateOfAdmissionToPractice = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     FirmId = table.Column<int>(type: "int", nullable: true),
-                    CustomerId = table.Column<string>(type: "varchar(250)", nullable: true),
+                    CustomerId = table.Column<string>(type: "varchar(255)", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     Status = table.Column<string>(type: "longtext", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
@@ -1140,13 +1098,47 @@ namespace DataStore.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserTokens", x => new { x.UserId, x.Name });
+                    table.PrimaryKey("PK_UserTokens", x => new { x.UserId, x.LoginProvider, x.Name });
                     table.ForeignKey(
                         name: "FK_UserTokens_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "LevyDeclarations",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    Month = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    Revenue = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    LevyAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Percentage = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    FirmId = table.Column<int>(type: "int", nullable: false),
+                    InvoiceRequestId = table.Column<int>(type: "int", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    Status = table.Column<string>(type: "longtext", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    DeletedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LevyDeclarations", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_LevyDeclarations_Firms_FirmId",
+                        column: x => x.FirmId,
+                        principalTable: "Firms",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_LevyDeclarations_InvoiceRequests_InvoiceRequestId",
+                        column: x => x.InvoiceRequestId,
+                        principalTable: "InvoiceRequests",
+                        principalColumn: "Id");
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
 
@@ -1332,6 +1324,45 @@ namespace DataStore.Migrations
                         name: "FK_Penalties_YearOfOperations_YearOfOperationId",
                         column: x => x.YearOfOperationId,
                         principalTable: "YearOfOperations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "Subcommittees",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    SubcommitteeName = table.Column<string>(type: "longtext", nullable: false),
+                    Description = table.Column<string>(type: "longtext", nullable: false),
+                    ChairpersonId = table.Column<int>(type: "int", nullable: true),
+                    CommitteeId = table.Column<int>(type: "int", nullable: false),
+                    CreatedById = table.Column<string>(type: "varchar(200)", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    Status = table.Column<string>(type: "longtext", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    DeletedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Subcommittees", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Subcommittees_Committees_CommitteeId",
+                        column: x => x.CommitteeId,
+                        principalTable: "Committees",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Subcommittees_Members_ChairpersonId",
+                        column: x => x.ChairpersonId,
+                        principalTable: "Members",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Subcommittees_Users_CreatedById",
+                        column: x => x.CreatedById,
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 })
@@ -1550,7 +1581,7 @@ namespace DataStore.Migrations
                     DateApproved = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     DateDenied = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     ReasonForDenial = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: true),
-                    QBInvoiceId = table.Column<string>(type: "varchar(250)", nullable: true),
+                    QBInvoiceId = table.Column<string>(type: "varchar(255)", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     Status = table.Column<string>(type: "longtext", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
@@ -1570,6 +1601,72 @@ namespace DataStore.Migrations
                         column: x => x.QBInvoiceId,
                         principalTable: "QBInvoices",
                         principalColumn: "Id");
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "SubcommitteeMemberships",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    SubcommitteeID = table.Column<int>(type: "int", nullable: false),
+                    MemberShipId = table.Column<string>(type: "varchar(200)", nullable: false),
+                    MemberShipStatus = table.Column<string>(type: "longtext", nullable: true),
+                    JoinedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    Role = table.Column<string>(type: "varchar(150)", maxLength: 150, nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    Status = table.Column<string>(type: "longtext", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    DeletedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SubcommitteeMemberships", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_SubcommitteeMemberships_Subcommittees_SubcommitteeID",
+                        column: x => x.SubcommitteeID,
+                        principalTable: "Subcommittees",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_SubcommitteeMemberships_Users_MemberShipId",
+                        column: x => x.MemberShipId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "SubcommitteeThreads",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    SubcommitteeId = table.Column<int>(type: "int", nullable: false),
+                    Subject = table.Column<string>(type: "longtext", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    CreatedById = table.Column<string>(type: "varchar(200)", nullable: false),
+                    Status = table.Column<string>(type: "longtext", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    DeletedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SubcommitteeThreads", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_SubcommitteeThreads_Subcommittees_SubcommitteeId",
+                        column: x => x.SubcommitteeId,
+                        principalTable: "Subcommittees",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_SubcommitteeThreads_Users_CreatedById",
+                        column: x => x.CreatedById,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
 
@@ -1644,6 +1741,45 @@ namespace DataStore.Migrations
                     table.ForeignKey(
                         name: "FK_LicenseApprovalComments_Users_CommentedById",
                         column: x => x.CommentedById,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "SubcommitteeMessages",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    SubcommitteeID = table.Column<int>(type: "int", nullable: false),
+                    CreatedById = table.Column<string>(type: "varchar(200)", nullable: false),
+                    Timestamp = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    Content = table.Column<string>(type: "longtext", nullable: false),
+                    SubcommitteeThreadId = table.Column<int>(type: "int", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    Status = table.Column<string>(type: "longtext", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    DeletedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SubcommitteeMessages", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_SubcommitteeMessages_SubcommitteeThreads_SubcommitteeThreadId",
+                        column: x => x.SubcommitteeThreadId,
+                        principalTable: "SubcommitteeThreads",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_SubcommitteeMessages_Subcommittees_SubcommitteeID",
+                        column: x => x.SubcommitteeID,
+                        principalTable: "Subcommittees",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_SubcommitteeMessages_Users_CreatedById",
+                        column: x => x.CreatedById,
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -1758,6 +1894,11 @@ namespace DataStore.Migrations
                 column: "CPDTrainingRegistrationsId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_AttachmentLevyDeclaration_LevyDeclarationsId",
+                table: "AttachmentLevyDeclaration",
+                column: "LevyDeclarationsId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_AttachmentLicenseApplication_LicenseApplicationsId",
                 table: "AttachmentLicenseApplication",
                 column: "LicenseApplicationsId");
@@ -1803,6 +1944,11 @@ namespace DataStore.Migrations
                 column: "AttachmentTypeId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Attachments_SubcommitteeMessageId",
+                table: "Attachments",
+                column: "SubcommitteeMessageId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_CommitteeMembers_CommitteeID",
                 table: "CommitteeMembers",
                 column: "CommitteeID");
@@ -1826,6 +1972,11 @@ namespace DataStore.Migrations
                 name: "IX_Committees_YearOfOperationId",
                 table: "Committees",
                 column: "YearOfOperationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CommunicationMessages_SentByUserId",
+                table: "CommunicationMessages",
+                column: "SentByUserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CPDTrainingRegistrations_CPDTrainingId",
@@ -1911,6 +2062,16 @@ namespace DataStore.Migrations
                 name: "IX_LevyDeclarations_FirmId",
                 table: "LevyDeclarations",
                 column: "FirmId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LevyDeclarations_InvoiceRequestId",
+                table: "LevyDeclarations",
+                column: "InvoiceRequestId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LevyPercents_YearOfOperationId",
+                table: "LevyPercents",
+                column: "YearOfOperationId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_LicenseApplicationApprovals_CreatedById",
@@ -2180,6 +2341,56 @@ namespace DataStore.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_SubcommitteeMemberships_MemberShipId",
+                table: "SubcommitteeMemberships",
+                column: "MemberShipId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SubcommitteeMemberships_SubcommitteeID",
+                table: "SubcommitteeMemberships",
+                column: "SubcommitteeID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SubcommitteeMessages_CreatedById",
+                table: "SubcommitteeMessages",
+                column: "CreatedById");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SubcommitteeMessages_SubcommitteeID",
+                table: "SubcommitteeMessages",
+                column: "SubcommitteeID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SubcommitteeMessages_SubcommitteeThreadId",
+                table: "SubcommitteeMessages",
+                column: "SubcommitteeThreadId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Subcommittees_ChairpersonId",
+                table: "Subcommittees",
+                column: "ChairpersonId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Subcommittees_CommitteeId",
+                table: "Subcommittees",
+                column: "CommitteeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Subcommittees_CreatedById",
+                table: "Subcommittees",
+                column: "CreatedById");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SubcommitteeThreads_CreatedById",
+                table: "SubcommitteeThreads",
+                column: "CreatedById");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SubcommitteeThreads_SubcommitteeId",
+                table: "SubcommitteeThreads",
+                column: "SubcommitteeId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Threads_CommitteeId",
                 table: "Threads",
                 column: "CommitteeId");
@@ -2241,10 +2452,26 @@ namespace DataStore.Migrations
                 unique: true);
 
             migrationBuilder.AddForeignKey(
+                name: "FK_AttachmentCPDTraining_Attachments_AttachmentsId",
+                table: "AttachmentCPDTraining",
+                column: "AttachmentsId",
+                principalTable: "Attachments",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
                 name: "FK_AttachmentCPDTraining_CPDTrainings_CPDTrainingsId",
                 table: "AttachmentCPDTraining",
                 column: "CPDTrainingsId",
                 principalTable: "CPDTrainings",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_AttachmentCPDTrainingRegistration_Attachments_AttachmentsId",
+                table: "AttachmentCPDTrainingRegistration",
+                column: "AttachmentsId",
+                principalTable: "Attachments",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
 
@@ -2257,10 +2484,42 @@ namespace DataStore.Migrations
                 onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
+                name: "FK_AttachmentLevyDeclaration_Attachments_AttachmentsId",
+                table: "AttachmentLevyDeclaration",
+                column: "AttachmentsId",
+                principalTable: "Attachments",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_AttachmentLevyDeclaration_LevyDeclarations_LevyDeclarationsId",
+                table: "AttachmentLevyDeclaration",
+                column: "LevyDeclarationsId",
+                principalTable: "LevyDeclarations",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_AttachmentLicenseApplication_Attachments_AttachmentsId",
+                table: "AttachmentLicenseApplication",
+                column: "AttachmentsId",
+                principalTable: "Attachments",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
                 name: "FK_AttachmentLicenseApplication_LicenseApplications_LicenseAppl~",
                 table: "AttachmentLicenseApplication",
                 column: "LicenseApplicationsId",
                 principalTable: "LicenseApplications",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_AttachmentMemberQualification_Attachments_AttachmentsId",
+                table: "AttachmentMemberQualification",
+                column: "AttachmentsId",
+                principalTable: "Attachments",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
 
@@ -2273,10 +2532,26 @@ namespace DataStore.Migrations
                 onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
+                name: "FK_AttachmentMessage_Attachments_AttachmentsId",
+                table: "AttachmentMessage",
+                column: "AttachmentsId",
+                principalTable: "Attachments",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
                 name: "FK_AttachmentMessage_Messages_MessagesId",
                 table: "AttachmentMessage",
                 column: "MessagesId",
                 principalTable: "Messages",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_AttachmentPenalty_Attachments_AttachmentsId",
+                table: "AttachmentPenalty",
+                column: "AttachmentsId",
+                principalTable: "Attachments",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
 
@@ -2289,10 +2564,26 @@ namespace DataStore.Migrations
                 onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
+                name: "FK_AttachmentPenaltyPayment_Attachments_AttachmentsId",
+                table: "AttachmentPenaltyPayment",
+                column: "AttachmentsId",
+                principalTable: "Attachments",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
                 name: "FK_AttachmentPenaltyPayment_PenaltyPayments_PenaltyPaymentsId",
                 table: "AttachmentPenaltyPayment",
                 column: "PenaltyPaymentsId",
                 principalTable: "PenaltyPayments",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_AttachmentProBono_Attachments_AttachmentsId",
+                table: "AttachmentProBono",
+                column: "AttachmentsId",
+                principalTable: "Attachments",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
 
@@ -2305,10 +2596,26 @@ namespace DataStore.Migrations
                 onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
+                name: "FK_AttachmentProBonoApplication_Attachments_AttachmentsId",
+                table: "AttachmentProBonoApplication",
+                column: "AttachmentsId",
+                principalTable: "Attachments",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
                 name: "FK_AttachmentProBonoApplication_ProBonoApplications_ProBonosApp~",
                 table: "AttachmentProBonoApplication",
                 column: "ProBonosApplicationsId",
                 principalTable: "ProBonoApplications",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_AttachmentProBonoReport_Attachments_AttachmentsId",
+                table: "AttachmentProBonoReport",
+                column: "AttachmentsId",
+                principalTable: "Attachments",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
 
@@ -2319,6 +2626,13 @@ namespace DataStore.Migrations
                 principalTable: "ProBonoReports",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Attachments_SubcommitteeMessages_SubcommitteeMessageId",
+                table: "Attachments",
+                column: "SubcommitteeMessageId",
+                principalTable: "SubcommitteeMessages",
+                principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_CommitteeMembers_Committees_CommitteeID",
@@ -2347,6 +2661,14 @@ namespace DataStore.Migrations
                 name: "FK_Committees_Users_CreatedById",
                 table: "Committees",
                 column: "CreatedById",
+                principalTable: "Users",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_CommunicationMessages_Users_SentByUserId",
+                table: "CommunicationMessages",
+                column: "SentByUserId",
                 principalTable: "Users",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
@@ -2427,6 +2749,9 @@ namespace DataStore.Migrations
                 name: "AttachmentCPDTrainingRegistration");
 
             migrationBuilder.DropTable(
+                name: "AttachmentLevyDeclaration");
+
+            migrationBuilder.DropTable(
                 name: "AttachmentLicenseApplication");
 
             migrationBuilder.DropTable(
@@ -2454,13 +2779,13 @@ namespace DataStore.Migrations
                 name: "CommitteeMembers");
 
             migrationBuilder.DropTable(
+                name: "CommunicationMessages");
+
+            migrationBuilder.DropTable(
                 name: "CPDUnitsEarned");
 
             migrationBuilder.DropTable(
                 name: "ErrorLogs");
-
-            migrationBuilder.DropTable(
-                name: "LevyDeclarations");
 
             migrationBuilder.DropTable(
                 name: "LevyPercents");
@@ -2493,6 +2818,9 @@ namespace DataStore.Migrations
                 name: "RoleClaims");
 
             migrationBuilder.DropTable(
+                name: "SubcommitteeMemberships");
+
+            migrationBuilder.DropTable(
                 name: "UserClaims");
 
             migrationBuilder.DropTable(
@@ -2506,6 +2834,9 @@ namespace DataStore.Migrations
 
             migrationBuilder.DropTable(
                 name: "CPDTrainingRegistrations");
+
+            migrationBuilder.DropTable(
+                name: "LevyDeclarations");
 
             migrationBuilder.DropTable(
                 name: "MemberQualifications");
@@ -2544,13 +2875,13 @@ namespace DataStore.Migrations
                 name: "AttachmentTypes");
 
             migrationBuilder.DropTable(
+                name: "SubcommitteeMessages");
+
+            migrationBuilder.DropTable(
                 name: "LicenseApplications");
 
             migrationBuilder.DropTable(
                 name: "ProBonos");
-
-            migrationBuilder.DropTable(
-                name: "Committees");
 
             migrationBuilder.DropTable(
                 name: "InvoiceRequests");
@@ -2559,19 +2890,28 @@ namespace DataStore.Migrations
                 name: "PenaltyTypes");
 
             migrationBuilder.DropTable(
+                name: "SubcommitteeThreads");
+
+            migrationBuilder.DropTable(
                 name: "LicenseApprovalLevels");
 
             migrationBuilder.DropTable(
                 name: "ProBonoApplications");
 
             migrationBuilder.DropTable(
-                name: "Members");
-
-            migrationBuilder.DropTable(
                 name: "QBInvoices");
 
             migrationBuilder.DropTable(
+                name: "Subcommittees");
+
+            migrationBuilder.DropTable(
                 name: "ProbonoClients");
+
+            migrationBuilder.DropTable(
+                name: "Committees");
+
+            migrationBuilder.DropTable(
+                name: "Members");
 
             migrationBuilder.DropTable(
                 name: "YearOfOperations");

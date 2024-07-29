@@ -57,6 +57,11 @@ namespace DataStore.Persistence.SQLRepositories
         private ILevyDeclarationRepository _levyDeclarationRepository;
         private ILevyPercentRepository _levyPercentRepository;
         private ICommunicationMessageRepository _communicationMessageRepository;
+        private ISubcommitteeMembershipRepository _subcommitteeMembershipRepository;
+        private ISubcommitteeRepository _subcommitteeRepository;
+        private ISubcommitteeThreadRepository _subcommitteeThreadRepository;
+        private ISubcommitteeMessageRepository _subcommitteeMessageRepository;
+
 
         public RepositoryManager(
             ApplicationDbContext context, 
@@ -118,6 +123,10 @@ namespace DataStore.Persistence.SQLRepositories
         public ILevyDeclarationRepository LevyDeclarationRepository => _levyDeclarationRepository ??= new LevyDeclarationRepository(_context, _unitOfWork);
         public ILevyPercentRepository LevyPercentRepository => _levyPercentRepository ??= new LevyPercentRepository(_context, _unitOfWork);
         public ICommunicationMessageRepository CommunicationMessageRepository => _communicationMessageRepository ??= new CommunicationMessageRepository(_context, _unitOfWork);
+        public ISubcommitteeMembershipRepository SubcommitteeMembershipRepository => _subcommitteeMembershipRepository ??= new SubcommitteeMembershipRepository(_context, _unitOfWork);
+        public ISubcommitteeRepository SubcommitteeRepository => _subcommitteeRepository ??= new SubcommitteeRepository(_context, _unitOfWork);
+        public ISubcommitteeThreadRepository SubcommitteeThreadRepository => _subcommitteeThreadRepository ??= new SubcommitteeThreadRepository(_context, _unitOfWork);
+        public ISubcommitteeMessageRepository SubcommitteeMessageRepository => _subcommitteeMessageRepository ??= new SubcommitteeMessageRepository(_context, _unitOfWork);
         
     }
 }

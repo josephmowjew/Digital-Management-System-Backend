@@ -166,6 +166,11 @@ namespace DataStore.Data
         public DbSet<LevyDeclaration> LevyDeclarations { get; set; }
         public DbSet<LevyPercent> LevyPercents { get; set; }
         public DbSet<CommunicationMessage> CommunicationMessages { get; set; }
+
+        public DbSet<Subcommittee> Subcommittees { get; set; }
+        public DbSet<SubcommitteeMembership> SubcommitteeMemberships { get; set; }
+        public DbSet<SubcommitteeThread> SubcommitteeThreads { get; set; }
+        public DbSet<SubcommitteeMessage> SubcommitteeMessages { get; set; }
         
         
     }
