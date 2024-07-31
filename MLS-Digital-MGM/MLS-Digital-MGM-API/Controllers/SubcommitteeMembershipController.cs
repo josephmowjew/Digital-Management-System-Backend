@@ -192,6 +192,8 @@ namespace MLS_Digital_MGM_API.Controllers
                 {
                     ModelState.AddModelError(nameof(subcommitteeMemberDTO.MembershipId), "Member already exists in the subcommittee");
                     return BadRequest(ModelState);
+                }else{
+                    subcommitteeMember.MemberShipStatus = Lambda.Approved;
                 }
 
                 string username = _httpContextAccessor.HttpContext.User.Identity.Name;

@@ -151,6 +151,8 @@ namespace MLS_Digital_MGM_API.Controllers
                         if (!currentRole.Equals("member", StringComparison.OrdinalIgnoreCase))
                         {
                             subcommitteeMember.MemberShipStatus = Lambda.Approved;
+                        }else{
+                            subcommitteeMember.MemberShipStatus = Lambda.Approved;
                         }
 
                         await _repositoryManager.SubcommitteeMembershipRepository.AddAsync(subcommitteeMember);

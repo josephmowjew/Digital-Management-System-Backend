@@ -200,7 +200,10 @@ namespace MLS_Digital_MGM_API.Controllers
                     //add the error to model state 
                     ModelState.AddModelError(nameof(committeeMemberDTO.MemberShipId), "Member already exists in the committee");
                     return BadRequest(ModelState);
+                }else{
+                    committeeMember.MemberShipStatus = Lambda.Approved;
                 }
+
 
                 string username = _httpContextAccessor.HttpContext.User.Identity.Name;
                 var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);

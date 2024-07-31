@@ -305,7 +305,7 @@ namespace MLS_Digital_MGM_API.Controllers
         //user password
         [HttpPost]
         [Route("PasswordReset")]
-        public async Task<IActionResult> PasswordReset(PasswordResetModel model)
+        public async Task<IActionResult> PasswordReset([FromBody] PasswordResetModel model)
         {
             // Check if the model state is valid
             if (!ModelState.IsValid)
@@ -376,7 +376,7 @@ namespace MLS_Digital_MGM_API.Controllers
             var token = await this._repositoryManager.UserManager.GeneratePasswordResetTokenAsync(user);
 
             var code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
-            var callbackUrl = $"{Request.Scheme}://localhost:5002/Home/ResetPassword?code={code}";
+            var callbackUrl = $"{Request.Scheme}://{Request.Host}/Home/ResetPassword?code={code}";
 
             var body = $"Please reset your password by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.";
 
@@ -386,6 +386,37 @@ namespace MLS_Digital_MGM_API.Controllers
             return Json(new { isSuccess=true, message = "Password reset link was sent to your email successfully" });
 
         }
+
+        [HttpPost]
+        [Route("ChangePassword")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordModel model)
+        {   
+           
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            
+            var user = await this._repositoryManager.UserRepository.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            var changePasswordResult = await this._repositoryManager.UserManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+            if (!changePasswordResult.Succeeded)
+            {
+                foreach (var error in changePasswordResult.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+                //return BadRequest(ModelState);
+                return Json(new { isSuccess = false, message = "Make sure your password meets the minimum requirements" });
+            }
+
+            return Json(new { isSuccess = true, message = "Password has been changed successfully" });
+        }
+
 
     }
 }
