@@ -45,5 +45,7 @@ namespace DataStore.Core.Models
         public virtual List<CPDTrainingRegistration> CPDTrainingRegistration { get; set;}
 
         public List<Attachment> Attachments { get; set; }
+
+        //public List<Attachment> Signature { get; set; }
     }
 }

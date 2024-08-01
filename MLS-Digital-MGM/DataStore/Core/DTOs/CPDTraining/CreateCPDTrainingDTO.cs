@@ -36,6 +36,8 @@ namespace DataStore.Core.DTOs.CPDTraining
         [StringLength(maximumLength: 200)]
         public string? AccreditingInstitution { get; set; }
 
+        public string? AccreditingInstitutionRepresentativePosition { get; set; }
+
         [AllowedFileTypes(new[] { ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".txt",".jpg",".png",".jpeg" })]
         [FileSize(5242880)] // 5 MB
         public List<IFormFile?> Attachments { get; set; }  
