@@ -139,10 +139,21 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 if (customer == null)
                 {
-                    return NotFound("No customer found for this user.");
+                    dataTableParams.LoadFromRequest(_httpContextAccessor);
+                    var draw = dataTableParams.Draw;
+                    //return NotFound("No customer found for this user.");
+                    return Json(new
+                        {
+                            draw,
+                            recordsFiltered = 0,
+                            recordsTotal = 0,
+                            data = Enumerable.Empty<ReadQBInvoiceDTO>()
+                        });
+
+                        
                 }
 
-                var customerId = customer.CustomerId;
+                var customerId = customer?.CustomerId;
 
                 var pagingParameters = new PagingParameters<QBInvoice>
                 {
