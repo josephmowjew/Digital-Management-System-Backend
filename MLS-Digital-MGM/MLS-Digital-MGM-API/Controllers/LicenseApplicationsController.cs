@@ -17,6 +17,7 @@ using System.Linq.Expressions;
 using Microsoft.AspNetCore.Authorization;
 using System.Reflection;
 using Hangfire;
+using DataStore.Core.DTOs.License;
 
 namespace MLS_Digital_MGM_API.Controllers
 {
@@ -385,8 +386,6 @@ namespace MLS_Digital_MGM_API.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
-
-        
         // PUT api/licenseapplications/{id}
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateLicenseApplication(int id, [FromBody] UpdateLicenseApplicationDTO updateLicenseApplicationDTO)
@@ -520,10 +519,10 @@ namespace MLS_Digital_MGM_API.Controllers
             }
 
         private void Log(string message)
-    {
-        // Implement your logging mechanism here
-        Console.WriteLine(message);
-    }
+        {
+            // Implement your logging mechanism here
+            Console.WriteLine(message);
+        }
 
         // POST api/licenseapplications/deny// POST api/licenseapplications/deny
         [HttpPost("deny")]

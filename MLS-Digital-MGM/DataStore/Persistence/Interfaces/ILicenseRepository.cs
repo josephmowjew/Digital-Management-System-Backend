@@ -11,5 +11,9 @@ namespace DataStore.Persistence.Interfaces
         // Additional methods specific to the License entity, if needed
         Task<License?> GetLastLicenseNumber(int id);
         Task<License?> GetSingleAsync(Expression<Func<License, bool>> predicate);
+        Task<License?> GetLicenseByLicenseNumber(string licenseNumber);
+        Task<int> CountAsync();
+
+        Task<License?> GetLicenseById(int id);
     }
 }

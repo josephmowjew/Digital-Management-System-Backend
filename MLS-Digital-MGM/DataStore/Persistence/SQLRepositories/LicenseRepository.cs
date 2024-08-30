@@ -1,5 +1,6 @@
 using DataStore.Core.Models;
 using DataStore.Data;
+using DataStore.Helpers;
 using DataStore.Persistence.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -22,6 +23,15 @@ namespace DataStore.Persistence.SQLRepositories
             this._unitOfWork = unitOfWork;
         }
 
+        public async Task<License?> GetLicenseById(int id){
+            return await this._context.Licenses
+           .Include(l => l.Member)
+           .ThenInclude(m => m.User)
+           .Include(m => m.Member.Firm)
+           .Where(l => l.Id == id && l.Status != Lambda.Deleted)
+           .FirstOrDefaultAsync();
+        }
+
        public async Task<License?> GetLastLicenseNumber(int YearOfOperationId)
         {
             return await _context.Licenses
@@ -34,5 +44,19 @@ namespace DataStore.Persistence.SQLRepositories
         {
             return await _context.Licenses.FirstOrDefaultAsync(predicate);
         }
+
+       public async Task<License?> GetLicenseByLicenseNumber(string licenseNumber)
+        {
+            return await _context.Licenses
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.LicenseNumber == licenseNumber);
+        }
+
+       public async Task<int> CountAsync()
+        {
+            return await _context.Licenses
+                .CountAsync(l => l.Status == Lambda.Active);
+        }
+
     }
 }

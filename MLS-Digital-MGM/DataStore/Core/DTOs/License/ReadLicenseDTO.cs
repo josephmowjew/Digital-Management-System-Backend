@@ -14,6 +14,7 @@ namespace DataStore.Core.DTOs.License
             // Initialize any collections if needed
         }
 
+        public int Id { get; set; }
         public string LicenseNumber { get; set; }
         public int MemberId { get; set; }
         public ReadMemberDTO Member { get; set; }
@@ -22,5 +23,6 @@ namespace DataStore.Core.DTOs.License
         public ReadYearOfOperationDTO YearOfOperation { get; set; }
         public int LicenseApplicationId { get; set; }
         public ReadLicenseApplicationDTO LicenseApplication { get; set; }
+        public DateTime CreatedDate { get; set; }
     }
 }
