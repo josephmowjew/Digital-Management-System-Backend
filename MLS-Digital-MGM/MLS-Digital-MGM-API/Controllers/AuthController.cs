@@ -131,7 +131,7 @@ namespace MLS_Digital_MGM_API.Controllers
             }
 
             // Send login details email
-            string passwordBody = $"Your account has been created on Malawi Law Society. Your login details are as follows: <br /> Email: {model.Email} <br /> Password: {model.Password} <br /> Login to Sparc Rides. Your password is {model.Password}";
+            string passwordBody = $"Your account has been created on Malawi Law Society. Your login details are as follows: <br /> Email: {model.Email} <br /> Password: {model.Password} <br /> Login to Malawi Law Society. Your password is {model.Password}";
             var passwordEmailResult = BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(user.Email, "Login Details", passwordBody));
           
             // Send OTP email
@@ -247,7 +247,7 @@ namespace MLS_Digital_MGM_API.Controllers
             await _repositoryManager.UnitOfWork.CommitAsync();
 
             // sending an email
-            string PinBody = "Your OTP for Sparc Rides Account is " + pin + " <br /> Enter the OTP, email address and the new password to reset your account";
+            string PinBody = "Your OTP for Malawi Law Society Account is " + pin + " <br /> Enter the OTP, email address and the new password to reset your account";
             var pinEmailResult = BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(user.Email, "Account Reset Details", PinBody));
 
            
