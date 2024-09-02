@@ -15,6 +15,7 @@ using System.Linq.Expressions;
 using MLS_Digital_MGM.DataStore.Helpers;
 using Microsoft.CodeAnalysis.Elfie.Serialization;
 using Microsoft.AspNetCore.Authorization;
+using DataStore.Data;
 
 namespace MLS_Digital_MGM_API.Controllers 
 {
@@ -27,14 +28,17 @@ namespace MLS_Digital_MGM_API.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ApplicationDbContext _context;
         
-        public MembersController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor)
+        public MembersController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor, ApplicationDbContext context)
         {
             _repositoryManager = repositoryManager;
             _errorLogService = errorLogService;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _httpContextAccessor = httpContextAccessor;
+            _context = context;
+
         }
 
        [HttpGet("paged")]
@@ -271,6 +275,139 @@ namespace MLS_Digital_MGM_API.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
-    
+
+        
+        [HttpGet("getLicensedMembers")]
+        public async Task<IActionResult> GetLicensedMembers(int pageNumber = 1, int pageSize = 10)
+        {
+            try
+            {
+                var dataTableParams = new DataTablesParameters();
+
+                var pagingParameters = new PagingParameters<Member>
+                {
+                    Predicate = u => u.Status != Lambda.Deleted && _context.Licenses.Any(l => l.MemberId == u.Id),
+                    PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
+                    PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
+                    SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
+                    SortColumn = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumn : null,
+                    SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null,
+                    Includes = new Expression<Func<Member, object>>[] {
+                        p => p.Customer,
+                        p => p.User,
+                        p => p.Firm,
+                    }
+                };
+
+                var members = await _repositoryManager.MemberRepository.GetPagedAsync(pagingParameters);
+
+                if (members == null || !members.Any())
+                {
+                    if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                    {
+                        var draw = dataTableParams.Draw;
+                        return Json(new 
+                        { 
+                            draw, 
+                            recordsFiltered = 0, 
+                            recordsTotal = 0, 
+                            data = Enumerable.Empty<ReadMemberDTO>()
+                        });
+                    }
+                    return Ok(Enumerable.Empty<ReadMemberDTO>());
+                }
+
+                var mappedMembers = _mapper.Map<List<ReadMemberDTO>>(members);
+
+                if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                {
+                    var draw = dataTableParams.Draw;
+                    var resultTotalFiltred = mappedMembers.Count;
+                    var totalRecords = await _repositoryManager.MemberRepository.CountAsync(pagingParameters);
+
+                    return Json(new 
+                    { 
+                        draw, 
+                        recordsFiltered = totalRecords, 
+                        recordsTotal = totalRecords, 
+                        data = mappedMembers.ToList() 
+                    });
+                }
+
+                return Ok(mappedMembers);
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpGet("getUnlicensedMembers")]
+        public async Task<IActionResult> GetUnlicensedMembers(int pageNumber = 1, int pageSize = 10)
+        {
+            try
+            {
+                var dataTableParams = new DataTablesParameters();
+
+                var pagingParameters = new PagingParameters<Member>
+                {
+                    Predicate = u => u.Status != Lambda.Deleted && !_context.Licenses.Any(l => l.MemberId == u.Id),
+                    PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
+                    PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
+                    SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
+                    SortColumn = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumn : null,
+                    SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null,
+                    Includes = new Expression<Func<Member, object>>[] {
+                        p => p.Customer,
+                        p => p.User,
+                        p => p.Firm,
+                    }
+                };
+
+                var members = await _repositoryManager.MemberRepository.GetPagedAsync(pagingParameters);
+
+                if (members == null || !members.Any())
+                {
+                    if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                    {
+                        var draw = dataTableParams.Draw;
+                        return Json(new 
+                        { 
+                            draw, 
+                            recordsFiltered = 0, 
+                            recordsTotal = 0, 
+                            data = Enumerable.Empty<ReadMemberDTO>()
+                        });
+                    }
+                    return Ok(Enumerable.Empty<ReadMemberDTO>());
+                }
+
+                var mappedMembers = _mapper.Map<List<ReadMemberDTO>>(members);
+
+                if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                {
+                    var draw = dataTableParams.Draw;
+                    var resultTotalFiltred = mappedMembers.Count;
+                    var totalRecords = await _repositoryManager.MemberRepository.CountAsync(pagingParameters);
+
+                    return Json(new 
+                    { 
+                        draw, 
+                        recordsFiltered = totalRecords, 
+                        recordsTotal = totalRecords, 
+                        data = mappedMembers.ToList() 
+                    });
+                }
+
+                return Ok(mappedMembers);
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }        
+        
     }
 }
