@@ -13,6 +13,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Hangfire;
 using Hangfire.MemoryStorage;
+using Microsoft.Extensions.FileProviders;
 //using MLS_Digital_MGM_API.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -62,12 +63,13 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(name: "AllowAllOrigins",
+   options.AddPolicy(name: "AllowFrontend",
                       builder =>
                       {
-                          builder.AllowAnyOrigin()
+                          builder.WithOrigins("http://localhost:5002")
                                  .AllowAnyMethod()
-                                 .AllowAnyHeader();
+                                 .AllowAnyHeader()
+                                 .AllowCredentials();
                       });
 });
 //add repository services
@@ -107,8 +109,23 @@ builder.Services.AddSignalR();
 
 
 var app = builder.Build();
-app.UseCors("AllowAllOrigins");
-app.UseStaticFiles();
+// Use the CORS policy
+app.UseCors("AllowFrontend");
+// Serve static files from the "Uploads" directory
+
+app.UseStaticFiles(new StaticFileOptions
+{
+   
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(builder.Environment.WebRootPath, "Uploads")),
+    RequestPath = "/Uploads",
+     OnPrepareResponse = ctx =>
+    {
+        ctx.Context.Response.Headers.Append("Access-Control-Allow-Origin", "http://localhost:5002");
+        ctx.Context.Response.Headers.Append("Access-Control-Allow-Headers", "Content-Type");
+        ctx.Context.Response.Headers.Append("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    }
+});
 // Configure the HTTP request pipeline.
 //if (app.Environment.IsDevelopment())
 //{

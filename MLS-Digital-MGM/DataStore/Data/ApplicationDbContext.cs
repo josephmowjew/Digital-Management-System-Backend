@@ -171,7 +171,7 @@ namespace DataStore.Data
         public DbSet<SubcommitteeMembership> SubcommitteeMemberships { get; set; }
         public DbSet<SubcommitteeThread> SubcommitteeThreads { get; set; }
         public DbSet<SubcommitteeMessage> SubcommitteeMessages { get; set; }
-        
-        
+        public DbSet<Stamp> Stamps { get; set; }
+        public DbSet<Signature> Signatures { get; set; }
     }
 }

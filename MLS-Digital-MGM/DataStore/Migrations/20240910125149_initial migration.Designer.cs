@@ -3,6 +3,7 @@ using System;
 using DataStore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240910125149_initial migration")]
+    partial class initialmigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -182,21 +185,6 @@ namespace DataStore.Migrations
                     b.HasIndex("ProBonoReportsId");
 
                     b.ToTable("AttachmentProBonoReport");
-                });
-
-            modelBuilder.Entity("AttachmentSignature", b =>
-                {
-                    b.Property<int>("AttachmentsId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SignaturesId")
-                        .HasColumnType("int");
-
-                    b.HasKey("AttachmentsId", "SignaturesId");
-
-                    b.HasIndex("SignaturesId");
-
-                    b.ToTable("AttachmentSignature");
                 });
 
             modelBuilder.Entity("AttachmentStamp", b =>
@@ -2361,45 +2349,6 @@ namespace DataStore.Migrations
                     b.ToTable("QualificationTypes");
                 });
 
-            modelBuilder.Entity("DataStore.Core.Models.Signature", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<string>("CreatedById")
-                        .IsRequired()
-                        .HasColumnType("varchar(200)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("YearOfOperationId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedById");
-
-                    b.HasIndex("YearOfOperationId");
-
-                    b.ToTable("Signatures");
-                });
-
             modelBuilder.Entity("DataStore.Core.Models.Stamp", b =>
                 {
                     b.Property<int>("Id")
@@ -3078,21 +3027,6 @@ namespace DataStore.Migrations
                     b.HasOne("DataStore.Core.Models.ProBonoReport", null)
                         .WithMany()
                         .HasForeignKey("ProBonoReportsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("AttachmentSignature", b =>
-                {
-                    b.HasOne("DataStore.Core.Models.Attachment", null)
-                        .WithMany()
-                        .HasForeignKey("AttachmentsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DataStore.Core.Models.Signature", null)
-                        .WithMany()
-                        .HasForeignKey("SignaturesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -3810,25 +3744,6 @@ namespace DataStore.Migrations
                     b.Navigation("Customer");
 
                     b.Navigation("Invoice");
-                });
-
-            modelBuilder.Entity("DataStore.Core.Models.Signature", b =>
-                {
-                    b.HasOne("DataStore.Core.Models.ApplicationUser", "CreatedBy")
-                        .WithMany()
-                        .HasForeignKey("CreatedById")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DataStore.Core.Models.YearOfOperation", "YearOfOperation")
-                        .WithMany()
-                        .HasForeignKey("YearOfOperationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CreatedBy");
-
-                    b.Navigation("YearOfOperation");
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.Stamp", b =>

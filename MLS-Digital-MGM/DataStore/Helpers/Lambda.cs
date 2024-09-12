@@ -36,7 +36,8 @@ namespace DataStore.Helpers
         public static string PenaltyFolderName = "PenaltiesAttachments";
         public static string PenaltyPaymentFolderName = "PenaltyPaymentsAttachments ";
         public static string MemberQualificationFolderName = "QualificationAttachments";
-
+        public static string StampFolderName = "StampAttachments";
+        public static string SignatureFolderName = "SignatureAttachments";
 
         private static Random _random = new Random(); // declaring it as static and initiating it once
 
@@ -69,6 +70,9 @@ namespace DataStore.Helpers
         public static string NotCurrent = "Not Current";
 
         public static string MarkAsPaid = "Paid";
+
+        public static string HonorarySecretarySignature = "Honorary Secretary Signature";
+        public static string PresidentSignature = "President Signature";
 
         public static int RandomNumber()
         {

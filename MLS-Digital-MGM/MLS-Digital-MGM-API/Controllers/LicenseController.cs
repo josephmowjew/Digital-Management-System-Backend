@@ -16,6 +16,7 @@ using MLS_Digital_MGM.DataStore.Helpers;
 using System.Linq.Expressions;
 using Microsoft.AspNetCore.Authorization;
 using Hangfire;
+using DataStore.Core.DTOs.Attachment;
 
 namespace MLS_Digital_MGM_API.Controllers
 {
@@ -108,7 +109,42 @@ namespace MLS_Digital_MGM_API.Controllers
                     return NotFound();
                 }
                 var licenseDTO = _mapper.Map<ReadLicenseDTO>(license);
+
+                List<ReadAttachmentDTO> signatures = new List<ReadAttachmentDTO>();
+
+                //get the honorary sec signatue 
+                var honorarySignature = await _repositoryManager.SignatureRepository.GetSignatureByNameAsync(Lambda.HonorarySecretarySignature);
+
+               if (honorarySignature != null)
+                {
+                    var attachment = honorarySignature.Attachments.FirstOrDefault();
+                    if (attachment != null)
+                    {
+                        var attachmentDTO = _mapper.Map<ReadAttachmentDTO>(attachment);
+                        attachmentDTO.FilePath = Path.Combine($"{Lambda.http}://{HttpContext.Request.Host}{_configuration["APISettings:API_Prefix"]}/Uploads/{Lambda.SignatureFolderName}", attachment.FileName);
+                        signatures.Add(attachmentDTO);
+                    }
+                }
+
+                //get the president signature
+                var presidentSignature = await _repositoryManager.SignatureRepository.GetSignatureByNameAsync(Lambda.PresidentSignature);
+                if (presidentSignature != null)
+                {
+                    var attachment = presidentSignature.Attachments.FirstOrDefault();
+                    if (attachment != null)
+                    {
+                        var attachmentDTO = _mapper.Map<ReadAttachmentDTO>(attachment);
+                        attachmentDTO.FilePath = Path.Combine($"{Lambda.http}://{HttpContext.Request.Host}{_configuration["APISettings:API_Prefix"]}/Uploads/{Lambda.SignatureFolderName}", attachment.FileName);
+                        signatures.Add(attachmentDTO);
+                    }
+                }
+
+                licenseDTO.Attachments.AddRange(signatures);
+
                 return Ok(licenseDTO);
+               
+
+               
             }
             catch (Exception ex)
             {

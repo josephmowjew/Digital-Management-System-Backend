@@ -81,6 +81,7 @@ namespace DataStore.Persistence.Interfaces
         ISubcommitteeRepository SubcommitteeRepository { get; }
         ISubcommitteeThreadRepository SubcommitteeThreadRepository { get; }
         ISubcommitteeMessageRepository SubcommitteeMessageRepository { get; }
-
+        IStampRepository StampRepository { get; }
+        ISignatureRepository SignatureRepository { get; }
     }
 }

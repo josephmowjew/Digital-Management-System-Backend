@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using DataStore.Core.DTOs.Attachment;
 using DataStore.Core.DTOs.LicenseApplication;
 using DataStore.Core.DTOs.Member;
 using DataStore.Core.DTOs.YearOfOperation;
@@ -12,6 +13,8 @@ namespace DataStore.Core.DTOs.License
         public ReadLicenseDTO()
         {
             // Initialize any collections if needed
+
+            Attachments = new List<ReadAttachmentDTO>();
         }
 
         public int Id { get; set; }
@@ -24,5 +27,7 @@ namespace DataStore.Core.DTOs.License
         public int LicenseApplicationId { get; set; }
         public ReadLicenseApplicationDTO LicenseApplication { get; set; }
         public DateTime CreatedDate { get; set; }
+         public List<ReadAttachmentDTO> Attachments { get; set; }
+
     }
 }

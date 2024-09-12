@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240729133303_initial migration")]
-    partial class initialmigration
+    [Migration("20240911142910_create signatures table")]
+    partial class createsignaturestable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -185,6 +185,21 @@ namespace DataStore.Migrations
                     b.HasIndex("ProBonoReportsId");
 
                     b.ToTable("AttachmentProBonoReport");
+                });
+
+            modelBuilder.Entity("AttachmentStamp", b =>
+                {
+                    b.Property<int>("AttachmentsId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StampsId")
+                        .HasColumnType("int");
+
+                    b.HasKey("AttachmentsId", "StampsId");
+
+                    b.HasIndex("StampsId");
+
+                    b.ToTable("AttachmentStamp");
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.ApplicationUser", b =>
@@ -363,6 +378,9 @@ namespace DataStore.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("varchar(200)");
 
+                    b.Property<int?>("SignatureId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -376,6 +394,8 @@ namespace DataStore.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AttachmentTypeId");
+
+                    b.HasIndex("SignatureId");
 
                     b.HasIndex("SubcommitteeMessageId");
 
@@ -2334,6 +2354,78 @@ namespace DataStore.Migrations
                     b.ToTable("QualificationTypes");
                 });
 
+            modelBuilder.Entity("DataStore.Core.Models.Signature", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("CreatedById")
+                        .IsRequired()
+                        .HasColumnType("varchar(200)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("YearOfOperationId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("YearOfOperationId");
+
+                    b.ToTable("Signatures");
+                });
+
+            modelBuilder.Entity("DataStore.Core.Models.Stamp", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("YearOfOperationId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("YearOfOperationId");
+
+                    b.ToTable("Stamps");
+                });
+
             modelBuilder.Entity("DataStore.Core.Models.Subcommittee", b =>
                 {
                     b.Property<int>("Id")
@@ -2983,6 +3075,21 @@ namespace DataStore.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("AttachmentStamp", b =>
+                {
+                    b.HasOne("DataStore.Core.Models.Attachment", null)
+                        .WithMany()
+                        .HasForeignKey("AttachmentsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataStore.Core.Models.Stamp", null)
+                        .WithMany()
+                        .HasForeignKey("StampsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("DataStore.Core.Models.ApplicationUser", b =>
                 {
                     b.HasOne("DataStore.Core.Models.Country", "Country")
@@ -3029,6 +3136,10 @@ namespace DataStore.Migrations
                         .HasForeignKey("AttachmentTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("DataStore.Core.Models.Signature", null)
+                        .WithMany("Attachments")
+                        .HasForeignKey("SignatureId");
 
                     b.HasOne("DataStore.Core.Models.SubcommitteeMessage", null)
                         .WithMany("Attachments")
@@ -3683,6 +3794,36 @@ namespace DataStore.Migrations
                     b.Navigation("Invoice");
                 });
 
+            modelBuilder.Entity("DataStore.Core.Models.Signature", b =>
+                {
+                    b.HasOne("DataStore.Core.Models.ApplicationUser", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataStore.Core.Models.YearOfOperation", "YearOfOperation")
+                        .WithMany()
+                        .HasForeignKey("YearOfOperationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("YearOfOperation");
+                });
+
+            modelBuilder.Entity("DataStore.Core.Models.Stamp", b =>
+                {
+                    b.HasOne("DataStore.Core.Models.YearOfOperation", "YearOfOperation")
+                        .WithMany()
+                        .HasForeignKey("YearOfOperationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("YearOfOperation");
+                });
+
             modelBuilder.Entity("DataStore.Core.Models.Subcommittee", b =>
                 {
                     b.HasOne("DataStore.Core.Models.Member", "Chairperson")
@@ -3939,6 +4080,11 @@ namespace DataStore.Migrations
             modelBuilder.Entity("DataStore.Core.Models.ProBono", b =>
                 {
                     b.Navigation("ProBonoReports");
+                });
+
+            modelBuilder.Entity("DataStore.Core.Models.Signature", b =>
+                {
+                    b.Navigation("Attachments");
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.Subcommittee", b =>

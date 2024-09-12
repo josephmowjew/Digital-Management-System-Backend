@@ -21,6 +21,8 @@ namespace DataStore.Core.Models
             Penalties = new List<Penalty>();
             PenaltyPayments = new List<PenaltyPayment>();
             LevyDeclarations = new List<LevyDeclaration>();
+            Stamps = new List<Stamp>();
+            Signatures = new List<Signature>();
         }
         
         [Required]
@@ -47,7 +49,8 @@ namespace DataStore.Core.Models
         public ICollection<PenaltyPayment> PenaltyPayments { get; set; }
         public ICollection<Message> Messages { get; set; }
         public ICollection<LevyDeclaration> LevyDeclarations { get; set; }
-
+        public ICollection<Stamp> Stamps { get; set; }
+        public ICollection<Signature> Signatures { get; set; }
 
     }
 }

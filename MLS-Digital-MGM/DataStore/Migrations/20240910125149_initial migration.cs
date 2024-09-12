@@ -325,6 +325,31 @@ namespace DataStore.Migrations
                 .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "Stamps",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    Name = table.Column<string>(type: "longtext", nullable: false),
+                    YearOfOperationId = table.Column<int>(type: "int", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    Status = table.Column<string>(type: "longtext", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    DeletedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Stamps", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Stamps_YearOfOperations_YearOfOperationId",
+                        column: x => x.YearOfOperationId,
+                        principalTable: "YearOfOperations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "QBPayments",
                 columns: table => new
                 {
@@ -560,6 +585,31 @@ namespace DataStore.Migrations
                         name: "FK_Attachments_AttachmentTypes_AttachmentTypeId",
                         column: x => x.AttachmentTypeId,
                         principalTable: "AttachmentTypes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "AttachmentStamp",
+                columns: table => new
+                {
+                    AttachmentsId = table.Column<int>(type: "int", nullable: false),
+                    StampsId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AttachmentStamp", x => new { x.AttachmentsId, x.StampsId });
+                    table.ForeignKey(
+                        name: "FK_AttachmentStamp_Attachments_AttachmentsId",
+                        column: x => x.AttachmentsId,
+                        principalTable: "Attachments",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AttachmentStamp_Stamps_StampsId",
+                        column: x => x.StampsId,
+                        principalTable: "Stamps",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 })
@@ -1949,6 +1999,11 @@ namespace DataStore.Migrations
                 column: "SubcommitteeMessageId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_AttachmentStamp_StampsId",
+                table: "AttachmentStamp",
+                column: "StampsId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_CommitteeMembers_CommitteeID",
                 table: "CommitteeMembers",
                 column: "CommitteeID");
@@ -2339,6 +2394,11 @@ namespace DataStore.Migrations
                 table: "Roles",
                 column: "NormalizedName",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Stamps_YearOfOperationId",
+                table: "Stamps",
+                column: "YearOfOperationId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_SubcommitteeMemberships_MemberShipId",
@@ -2776,6 +2836,9 @@ namespace DataStore.Migrations
                 name: "AttachmentProBonoReport");
 
             migrationBuilder.DropTable(
+                name: "AttachmentStamp");
+
+            migrationBuilder.DropTable(
                 name: "CommitteeMembers");
 
             migrationBuilder.DropTable(
@@ -2849,6 +2912,9 @@ namespace DataStore.Migrations
 
             migrationBuilder.DropTable(
                 name: "Attachments");
+
+            migrationBuilder.DropTable(
+                name: "Stamps");
 
             migrationBuilder.DropTable(
                 name: "LicenseApprovalHistories");
