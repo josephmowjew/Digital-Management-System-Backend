@@ -37,6 +37,7 @@ namespace DataStore.Core.Models
         public int CPDUnitsAwarded { get; set; }
         [StringLength(maximumLength:200)]
         public string AccreditingInstitution { get; set; }
+        public string AccreditingInstitutionRepresentativePosition { get; set; }
         public string CreatedById { get; set; }
         public ApplicationUser CreatedBy { get; set; }
         public int YearOfOperationId { get; set; }

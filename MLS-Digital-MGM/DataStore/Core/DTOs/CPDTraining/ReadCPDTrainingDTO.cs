@@ -27,6 +27,7 @@ namespace DataStore.Core.DTOs.CPDTraining
         public int ProposedUnits { get; set; }
         public int CPDUnitsAwarded { get; set; }
         public string AccreditingInstitution { get; set; }
+        public string? AccreditingInstitutionRepresentativePosition { get; set; }
         public string CreatedById { get; set; }
         public double? MemberPhysicalAttendanceFee { get; set; } = 0;
         public double? MemberVirtualAttendanceFee { get; set; } = 0;

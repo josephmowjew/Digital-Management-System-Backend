@@ -37,7 +37,11 @@ namespace DataStore.Persistence.SQLRepositories
 
         public Task<Stamp> GetStampByNameAsync(string stampName)
         {
-            return _context.Stamps.FirstOrDefaultAsync(x => x.Name == stampName);
+            return _context.Stamps
+            .Include(t => t.Attachments)
+            .ThenInclude(t => t.AttachmentType)
+            .Include(t => t.YearOfOperation)
+            .FirstOrDefaultAsync(x => x.Name == stampName);
         }
     }
 }

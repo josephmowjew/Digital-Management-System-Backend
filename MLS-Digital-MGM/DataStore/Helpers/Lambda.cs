@@ -71,8 +71,11 @@ namespace DataStore.Helpers
 
         public static string MarkAsPaid = "Paid";
 
+        //stamps and signatures
         public static string HonorarySecretarySignature = "Honorary Secretary Signature";
         public static string PresidentSignature = "President Signature";
+        public static string Seal = "Seal";
+
 
         public static int RandomNumber()
         {

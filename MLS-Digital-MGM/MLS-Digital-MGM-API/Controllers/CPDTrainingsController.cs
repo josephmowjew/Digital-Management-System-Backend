@@ -96,7 +96,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 foreach (var training in cpdTrainingDTOs)
                 {
 
-                    //search if there is an invoice request beareing the cpd training id 
+                    //search if there is an invoice request beareing the cpd training id
                     var invoiceRequest = await _repositoryManager.InvoiceRequestRepository.GetAsync(i => i.ReferencedEntityId == training.Id.ToString() && i.ReferencedEntityType == "CPDTrainings");
 
                     if (invoiceRequest != null)
@@ -166,10 +166,10 @@ namespace MLS_Digital_MGM_API.Controllers
                     cpdTrainingDTO.AccreditingInstitution = "MLS";
                 }
                 //check if it is a free training by getting the prices of all fees
-               
 
 
-                
+
+
                 var cpdTraining = _mapper.Map<CPDTraining>(cpdTrainingDTO);
                 string username = _httpContextAccessor.HttpContext.User.Identity.Name;
                 var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
@@ -186,7 +186,7 @@ namespace MLS_Digital_MGM_API.Controllers
                     return BadRequest(ModelState);
                 }
 
-                var attachmentType = await _repositoryManager.AttachmentTypeRepository.GetAsync(d => d.Name == "CPDTraining") 
+                var attachmentType = await _repositoryManager.AttachmentTypeRepository.GetAsync(d => d.Name == "CPDTraining")
                                     ?? new AttachmentType { Name = "CPDTraining" };
 
                 if (attachmentType.Id == 0)
@@ -220,23 +220,23 @@ namespace MLS_Digital_MGM_API.Controllers
                     cpdTraining.YearOfOperationId = currentYear.Id;
                 }
 
-                //set created by 
+                //set created by
                 cpdTraining.CreatedBy = user;
                 cpdTraining.CreatedById = user.Id;
 
-               
+
 
                 string currentRole = Lambda.GetCurrentUserRole(_repositoryManager, user.Id);
                 if (!string.Equals(currentRole, "member", StringComparison.OrdinalIgnoreCase))
                 {
                     cpdTraining.ApprovalStatus = Lambda.Approved;
                     cpdTraining.ProposedUnits = cpdTraining.CPDUnitsAwarded;
-                   
+
                 }
                 else{
                     cpdTraining.ApprovalStatus = Lambda.Pending;
                 }
-                
+
 
                 await _repositoryManager.CPDTrainingRepository.AddAsync(cpdTraining);
                 await _unitOfWork.CommitAsync();
@@ -261,16 +261,43 @@ namespace MLS_Digital_MGM_API.Controllers
                     return NotFound();
                 }
 
-            foreach (var attachment in cPDTraining.Attachments)
-            {
-                string attachmentTypeName = attachment.AttachmentType.Name;
+                foreach (var attachment in cPDTraining.Attachments)
+                {
+                    string attachmentTypeName = attachment.AttachmentType.Name;
 
-                
-                string newFilePath = $"{Lambda.http}://{HttpContext.Request.Host}{_configuration["APISettings:API_Prefix"]}/Uploads/{Lambda.CPDTrainingFolderName}/{attachment.FileName}";
 
-                attachment.FilePath = newFilePath;
+                    string newFilePath = $"{Lambda.http}://{HttpContext.Request.Host}{_configuration["APISettings:API_Prefix"]}/Uploads/{Lambda.CPDTrainingFolderName}/{attachment.FileName}";
 
-            }
+                    attachment.FilePath = newFilePath;
+
+                }
+                //add stamp to the attachments from stamps folder
+                var stamp = await _repositoryManager.StampRepository.GetStampByNameAsync(Lambda.Seal);
+                if (stamp != null)
+                {
+                    string stampFilePath = $"{Lambda.http}://{HttpContext.Request.Host}{_configuration["APISettings:API_Prefix"]}/Uploads/{Lambda.StampFolderName}/{stamp.Attachments[0].FileName}";
+                    cPDTraining.Attachments.Add(new Attachment
+                    {
+                        FileName = stamp.Attachments[0].FileName,
+                        FilePath = stampFilePath,
+                        AttachmentTypeId = stamp.Attachments.FirstOrDefault().AttachmentTypeId,
+                        PropertyName = stamp.Attachments.FirstOrDefault()?.PropertyName
+                    });
+                }
+
+                //add signature to the attachments from signatures folder
+                var signature = await _repositoryManager.SignatureRepository.GetSignatureByNameAsync(Lambda.PresidentSignature);
+                if (signature != null)
+                {
+                    string signatureFilePath = $"{Lambda.http}://{HttpContext.Request.Host}{_configuration["APISettings:API_Prefix"]}/Uploads/{Lambda.SignatureFolderName}/{signature.Attachments[0].FileName}";
+                    cPDTraining.Attachments.Add(new Attachment
+                    {
+                        FileName = signature.Attachments[0].FileName,
+                        FilePath = signatureFilePath,
+                        AttachmentTypeId = signature.Attachments.FirstOrDefault().AttachmentTypeId,
+                        PropertyName = signature.Attachments.FirstOrDefault()?.PropertyName
+                    });
+                }
 
                 var mappedCPDTraining = _mapper.Map<ReadCPDTrainingDTO>(cPDTraining);
                 return Ok(mappedCPDTraining);
@@ -315,7 +342,7 @@ namespace MLS_Digital_MGM_API.Controllers
                     cpdTrainingDTO.AccreditingInstitution = "MLS";
                 }
 
-                
+
 
                 _mapper.Map(cpdTrainingDTO, cpdTraining);
                 await _repositoryManager.CPDTrainingRepository.UpdateAsync(cpdTraining);
@@ -366,27 +393,27 @@ namespace MLS_Digital_MGM_API.Controllers
 
             var AttachmentsPath = Path.Combine(webRootPath, "Uploads/CPDTrainingsAttachments" );
 
-           
+
 
             // Ensure the directory exists
             if (!Directory.Exists(AttachmentsPath))
             {
                 Directory.CreateDirectory(AttachmentsPath);
-                
+
             }
 
             foreach (var attachment in attachments)
             {
                 if (attachment == null || string.IsNullOrWhiteSpace(attachment.FileName))
                 {
-                    
+
                     continue;
                 }
 
                 var uniqueFileName = FileNameGenerator.GenerateUniqueFileName(attachment.FileName);
                 var filePath = Path.Combine(AttachmentsPath, uniqueFileName);
 
-               
+
 
                 try
                 {
@@ -405,7 +432,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 }
                 catch (Exception ex)
                 {
-                    
+
                     throw;
                 }
             }
@@ -415,3 +442,4 @@ namespace MLS_Digital_MGM_API.Controllers
 
     }
 }
+

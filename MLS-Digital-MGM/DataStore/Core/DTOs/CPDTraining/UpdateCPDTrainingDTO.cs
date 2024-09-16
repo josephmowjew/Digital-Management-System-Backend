@@ -28,6 +28,7 @@ namespace DataStore.Core.DTOs.CPDTraining
         public int CPDUnitsAwarded { get; set; }
         [StringLength(200)]
         public string? AccreditingInstitution { get; set; }
+        public string? AccreditingInstitutionRepresentativePosition { get; set; }
 
         public List<IFormFile> Attachments  { get; set; }
 
