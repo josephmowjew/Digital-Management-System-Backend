@@ -329,13 +329,25 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 if (cpdTrainingDTO.Attachments?.Any() == true)
                 {
-                        var attachmentsList = await SaveAttachmentsAsync(cpdTrainingDTO.Attachments, attachmentType.Id);
-                      // Remove old attachments with the same name as the new ones
-                        cpdTraining.Attachments.RemoveAll(a => attachmentsList.Any(b => b.PropertyName == a.PropertyName));
+                      
+                       //get attachments from the cpdTrainingDTO that have at least greater than zero kb
+                       var attachmentsToUpdate = cpdTrainingDTO.Attachments.Where(a => a.Length > 0).ToList();
+                     
+                        if(attachmentsToUpdate.Any())
+                        {
+                             var attachmentsList = await SaveAttachmentsAsync(attachmentsToUpdate, attachmentType.Id);
 
-                        // Add fresh list of attachments
-                        cpdTraining.Attachments.AddRange(attachmentsList);
+                             
+                            // Remove old attachments with the same name as the new ones
+                            cpdTraining.Attachments.RemoveAll(a => attachmentsList.Any(b => b.PropertyName == a.PropertyName));
+
+                            // Add fresh list of attachments
+                            cpdTraining.Attachments.AddRange(attachmentsList);
+
+
+                        }
                 }
+                       
 
                 if(string.IsNullOrEmpty(cpdTrainingDTO.AccreditingInstitution))
                 {
