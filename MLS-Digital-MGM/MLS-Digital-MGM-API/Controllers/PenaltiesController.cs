@@ -292,11 +292,21 @@ namespace MLS_Digital_MGM_API.Controllers
                     await _repositoryManager.AttachmentTypeRepository.AddAsync(attachmentType);
                     await _unitOfWork.CommitAsync();
                 }
-                if (penaltyDTO.Attachments != null && penalty.Attachments.Count > 0)
+                if (penaltyDTO.Attachments?.Any() == true)
                 {
-                    penalty.Attachments = await SaveAttachmentsAsync(penaltyDTO.Attachments, attachmentType.Id);
-                }
+                    var attachmentsToUpdate = penaltyDTO.Attachments.Where(a => a.Length > 0).ToList();
+        
+                    if (attachmentsToUpdate.Any())
+                    {
+                        var attachmentsList = await SaveAttachmentsAsync(attachmentsToUpdate, attachmentType.Id);
 
+                        // Remove old attachments with the same name as the new ones
+                        penalty.Attachments.RemoveAll(a => attachmentsList.Any(b => b.PropertyName == a.PropertyName));
+
+                        // Add fresh list of attachments
+                        penalty.Attachments.AddRange(attachmentsList);
+                    }
+                }
                 await _repositoryManager.PenaltyRepository.UpdateAsync(penalty);
                 await _unitOfWork.CommitAsync();
 

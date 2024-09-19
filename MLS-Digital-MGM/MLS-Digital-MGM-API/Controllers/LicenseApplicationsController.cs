@@ -261,15 +261,23 @@ namespace MLS_Digital_MGM_API.Controllers
                     // Save attachments if any
                     if (formFileProperties.Any())
                     {
-                        var attachmentsList = await SaveAttachmentsAsync((IEnumerable<IFormFile>)formFileProperties, attachmentType.Id);
-
+                       
                         existingApplication = await this._repositoryManager.LicenseApplicationRepository.GetByIdAsync(application.Id);
 
                       if (existingApplication != null)
                         {
-                            // Remove old attachments with the same name as the new ones
-                            existingApplication.Attachments.RemoveAll(a => attachmentsList.Any(b => b.PropertyName == a.PropertyName));
 
+                             //get attachments from the cpdTrainingDTO that have at least greater than zero kb
+                            var attachmentsToUpdate = formFileProperties.Where(a => a.Length > 0).ToList();
+
+                             //save attachments
+                            var attachmentsList = await SaveAttachmentsAsync(attachmentsToUpdate, attachmentType.Id);
+
+
+                            // Remove old attachments with the same name as the new ones
+                            existingApplication.Attachments.RemoveAll(a => attachmentsToUpdate.Any(b => b.Name == a.PropertyName));
+
+                           
                             // Add fresh list of attachments
                             existingApplication.Attachments.AddRange(attachmentsList);
 
