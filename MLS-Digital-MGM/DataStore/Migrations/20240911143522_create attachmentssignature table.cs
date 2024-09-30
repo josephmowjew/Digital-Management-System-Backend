@@ -10,9 +10,9 @@ namespace DataStore.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Attachments_Signatures_SignatureId",
-                table: "Attachments");
+            // migrationBuilder.DropForeignKey(
+            //     name: "FK_Attachments_Signatures_SignatureId",
+            //     table: "Attachments");
 
             migrationBuilder.DropIndex(
                 name: "IX_Attachments_SignatureId",

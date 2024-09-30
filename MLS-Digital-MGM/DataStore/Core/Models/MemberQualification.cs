@@ -17,7 +17,7 @@ namespace DataStore.Core.Models
     [Required]
     [StringLength(maximumLength: 250)]
     public string IssuingInstitution { get; set; }
-    public DateTime DateObtained { get; set; }
+    public DateTime? DateObtained { get; set; }
     public Member Member { get; set; }
     public int QualificationTypeId { get; set; }
     public QualificationType QualificationType { get; set; }

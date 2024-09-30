@@ -32,19 +32,18 @@ namespace DataStore.Core.Models
         [StringLength(maximumLength: 15)]
         public string Gender { get; set; }
         [StringLength(maximumLength: 15, MinimumLength = 10)]
-        public string PhoneNumber { get; set; }
-        [Required]
+        public string? PhoneNumber { get; set; }
+       
         [StringLength(maximumLength: 50)]
-        public string IdentityNumber { get; set; }
-        public DateTime IdentityExpiryDate { get; set; }
-        [Required]
-        public DateTime DateOfBirth { get; set; }
+        public string? IdentityNumber { get; set; }
+        public DateTime? IdentityExpiryDate { get; set; }
+        public DateTime? DateOfBirth { get; set; }
         //add association to Department
         public int DepartmentId { get; set; }
         public Department Department { get; set; }
 
         //add association to IdentityType
-        public int IdentityTypeId { get; set; }
+        public int? IdentityTypeId { get; set; }
         public IdentityType IdentityType { get; set; }
 
         //add association to Title
@@ -52,7 +51,7 @@ namespace DataStore.Core.Models
         public Title Title { get; set; }
 
         //add association to Country
-        public int CountryId { get; set; }
+        public int? CountryId { get; set; }
         public Country Country { get; set; }
 
         //Meta properties

@@ -16,7 +16,7 @@ namespace DataStore.Core.Mappers
         public MemberProfile() 
         {
             CreateMap<Member, ReadMemberDTO>()
-             .ForMember(dest => dest.DateOfAdmissionToPractice, opt => opt.MapFrom(src => DateOnly.FromDateTime(src.DateOfAdmissionToPractice)));
+             .ForMember(dest => dest.DateOfAdmissionToPractice, opt => opt.MapFrom(src => DateOnly.FromDateTime(src.DateOfAdmissionToPractice ?? DateTime.Now)));
             CreateMap<CreateMemberDTO, Member>();
             CreateMap<UpdateMemberDTO, Member>();
         }

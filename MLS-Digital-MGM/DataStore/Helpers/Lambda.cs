@@ -22,7 +22,7 @@ namespace DataStore.Helpers
         public static string Incomplete = "Incomplete";
         public static string Draft = "Draft";
         public static string Submit = "Submit";
-
+        public static string MemberDepartment = "Member Department";
         public static string https = "https";
         public static string http = "http";
 

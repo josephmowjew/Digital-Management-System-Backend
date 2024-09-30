@@ -17,7 +17,7 @@ namespace DataStore.Core.Mappers
     public MemberQualificationProfile()
     {
       CreateMap<MemberQualification, ReadMemberQualificationDTO>()
-      .ForMember(dest => dest.DateObtained, opt => opt.MapFrom(src => DateOnly.FromDateTime(src.DateObtained)));;
+      .ForMember(dest => dest.DateObtained, opt => opt.MapFrom(src => src.DateObtained.HasValue ? DateOnly.FromDateTime(src.DateObtained.Value) : (DateOnly?)null));
       CreateMap<CreateMemberQualificationDTO, MemberQualification>()
        .ForMember(dest => dest.Attachments, opt => opt.Ignore());; 
       CreateMap<UpdateMemberQualificationDTO, MemberQualification>()

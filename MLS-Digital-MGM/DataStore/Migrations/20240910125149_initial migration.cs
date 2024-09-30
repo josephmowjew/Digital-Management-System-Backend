@@ -111,7 +111,7 @@ namespace DataStore.Migrations
                 name: "QBCustomers",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "varchar(255)", nullable: false),
+                    Id = table.Column<string>(type: "varchar(150)", nullable: false),
                     CustomerName = table.Column<string>(type: "longtext", nullable: false),
                     FirstName = table.Column<string>(type: "longtext", nullable: false),
                     MiddleName = table.Column<string>(type: "longtext", nullable: false),
@@ -248,7 +248,7 @@ namespace DataStore.Migrations
                 name: "QBInvoices",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "varchar(255)", nullable: false),
+                    Id = table.Column<string>(type: "varchar(150)", nullable: false),
                     InvoiceNumber = table.Column<string>(type: "longtext", nullable: false),
                     CustomerId = table.Column<string>(type: "varchar(255)", nullable: false),
                     CustomerName = table.Column<string>(type: "longtext", nullable: false),
@@ -353,7 +353,7 @@ namespace DataStore.Migrations
                 name: "QBPayments",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "varchar(255)", nullable: false),
+                    Id = table.Column<string>(type: "varchar(150)", nullable: false),
                     CustomerId = table.Column<string>(type: "varchar(255)", nullable: false),
                     InvoiceId = table.Column<string>(type: "varchar(255)", nullable: false),
                     PaymentAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
@@ -386,7 +386,7 @@ namespace DataStore.Migrations
                 name: "QBReceipts",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "varchar(255)", nullable: false),
+                    Id = table.Column<string>(type: "varchar(150)", nullable: false),
                     CustomerId = table.Column<string>(type: "varchar(255)", nullable: false),
                     PaymentDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     ReceiptNumber = table.Column<string>(type: "longtext", nullable: false),
@@ -1148,7 +1148,7 @@ namespace DataStore.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserTokens", x => new { x.UserId, x.LoginProvider, x.Name });
+                    table.PrimaryKey("PK_UserTokens", x => new { x.UserId, x.Name });
                     table.ForeignKey(
                         name: "FK_UserTokens_Users_UserId",
                         column: x => x.UserId,

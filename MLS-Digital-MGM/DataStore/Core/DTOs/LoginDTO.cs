@@ -21,7 +21,7 @@ namespace DataStore.Core.DTOs
 
 
         [Column(TypeName = "Date")]
-        public DateTime DateOfBirth { get; set; }
+        public DateTime? DateOfBirth { get; set; }
 
     }
 }
