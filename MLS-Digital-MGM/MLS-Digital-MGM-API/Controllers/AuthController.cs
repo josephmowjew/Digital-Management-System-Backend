@@ -141,12 +141,29 @@ namespace MLS_Digital_MGM_API.Controllers
             }
 
             // Send login details email
-            string passwordBody = $"Your account has been created on Malawi Law Society. Your login details are as follows: <br /> Email: {model.Email} <br /> Password: {model.Password} <br /> Login to Malawi Law Society. Your password is {model.Password}";
+            string passwordBody = $@"Dear Member,
+
+            Welcome to Malawi Law Society!
+
+            Your account has been successfully created. Here are your login details:
+
+            Email: {model.Email}
+            Password: {model.Password}
+
+            To access your account, please visit our member portal at:
+            https://members.malawilawsociety.net
+
+            For security reasons, we recommend changing your password after your first login.
+
+            If you have any questions or need assistance, please don't hesitate to contact our support team.
+
+            Best regards,
+            Malawi Law Society";
             var passwordEmailResult = BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(user.Email, "Login Details", passwordBody));
           
-            // Send OTP email
-            string pinBody = $"An account has been created on Malawi Law Society. Your OTP is {pin} <br /> Enter the OTP to activate your account <br /> You can activate your account by clicking <a href='https://mls.sparcsystems.africa'>here</a>";
-            var pinEmailResult = BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(user.Email, "Login Details", pinBody));
+            // // Send OTP email
+            // string pinBody = $"An account has been created on Malawi Law Society. Your OTP is {pin} <br /> Enter the OTP to activate your account <br /> You can activate your account by clicking <a href='https://mls.sparcsystems.africa'>here</a>";
+            // var pinEmailResult = BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(user.Email, "Login Details", pinBody));
            
 
             return Ok(user);

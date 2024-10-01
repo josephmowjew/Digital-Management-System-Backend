@@ -810,9 +810,16 @@ namespace MLS_Digital_MGM_API.Controllers
         private async Task SendMissingFieldsEmailAsync(string email, List<string> missingFields)
         {
             var subject = "Please Update Your Member Profile";
-            var body = $"Dear Member,\n\nWelcome to our platform. We noticed that some optional information is missing from your profile. " +
-                       $"Please log in and update the following fields:\n\n{string.Join("\n", missingFields)}\n\n" +
-                       $"Updating this information will help us serve you better.\n\nThank you for your cooperation.";
+            var body = $@"Dear Member,
+
+            Welcome to Malawi Law Society. We noticed that some optional information is missing from your profile. 
+            Please log in and update the following fields:
+
+            {string.Join(Environment.NewLine, missingFields.Select(field => $"• {field}"))}
+
+            Updating this information will help us serve you better.
+
+            Thank you for your cooperation.";
 
             await _emailService.SendMailWithKeyVarReturn(email, subject, body);
         }
@@ -820,12 +827,30 @@ namespace MLS_Digital_MGM_API.Controllers
         private async Task SendWelcomeEmailAsync(ApplicationUser user, string password)
         {
             // Send login details email
-            string passwordBody = $"Your account has been created on Malawi Law Society. Your login details are as follows: <br /> Email: {user.Email} <br /> Password: {password} <br /> Login to Malawi Law Society. Your password is {password}";
-            BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(user.Email, "Login Details", passwordBody));
+            string passwordBody = $@"Dear Member,
 
-            // Send OTP email
-            string pinBody = $"An account has been created on Malawi Law Society. Your OTP is {user.Pin} <br /> Enter the OTP to activate your account <br /> You can activate your account by clicking <a href='https://mls.sparcsystems.africa'>here</a>";
-            BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(user.Email, "Account Activation", pinBody));
+            Welcome to Malawi Law Society!
+
+            Your account has been successfully created. Here are your login details:
+
+            Email: {user.Email}
+            Password: {password}
+
+            To access your account, please visit our member portal at:
+            https://members.malawilawsociety.net
+
+            For security reasons, we recommend changing your password after your first login.
+
+            If you have any questions or need assistance, please don't hesitate to contact our support team.
+
+            Best regards,
+            Malawi Law Society";
+
+            BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(user.Email, "Welcome to Malawi Law Society - Your Login Details", passwordBody));
+
+            // // Send OTP email
+            // string pinBody = $"An account has been created on Malawi Law Society. Your OTP is {user.Pin} <br /> Enter the OTP to activate your account <br /> You can activate your account by clicking <a href='https://members.malawilawsociety.net'>here</a>";
+            // BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(user.Email, "Account Activation", pinBody));
         }
 
         private bool IsRowEmpty(ExcelWorksheet worksheet, int row)
