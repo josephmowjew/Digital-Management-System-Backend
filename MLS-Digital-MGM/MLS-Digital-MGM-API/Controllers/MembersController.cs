@@ -525,6 +525,7 @@ namespace MLS_Digital_MGM_API.Controllers
                                 Status = Lambda.Active,
                                 CreatedDate = DateTime.Now,
                                 UpdatedDate = DateTime.Now,
+                                EmailConfirmed = true,
                             };
 
                             var password = GenerateRandomPassword();
