@@ -23,11 +23,11 @@ namespace DataStore.Core.Models
         public ApplicationUser User { get; set; }
         [Required, MaxLength(250)]
         public string PostalAddress { get; set; }
-        [Required, MaxLength(250)]
+        [MaxLength(250)]
         public string? PermanentAddress { get; set; }
-        [Required, MaxLength(250)]
+        [MaxLength(250)]
         public string? ResidentialAddress { get; set; }
-        [Required]
+        
         public DateTime? DateOfAdmissionToPractice { get; set; }
         public virtual List<QualificationType> QualificationTypes { get; set; }
         public ICollection<ProBono> ProBonos { get; set; }

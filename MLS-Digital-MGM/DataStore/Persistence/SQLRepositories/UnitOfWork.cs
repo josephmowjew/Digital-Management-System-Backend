@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 
 namespace DataStore.Persistence.SQLRepositories
 {
-    public class UnitOfWork : IUnitOfWork, IAsyncDisposable
+    public class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
     {
         private readonly ApplicationDbContext _context;
         private IDbContextTransaction _transaction;
@@ -21,11 +21,13 @@ namespace DataStore.Persistence.SQLRepositories
 
         public async Task<IDbContextTransaction> BeginTransactionAsync()
         {
-            if (!_isTransactionActive)
+            if (_isTransactionActive)
             {
-                _transaction = await _context.Database.BeginTransactionAsync();
-                _isTransactionActive = true;
+                throw new InvalidOperationException("A transaction is already in progress.");
             }
+            
+            _transaction = await _context.Database.BeginTransactionAsync();
+            _isTransactionActive = true;
             return _transaction;
         }
 
@@ -46,6 +48,11 @@ namespace DataStore.Persistence.SQLRepositories
                 int result = await _context.SaveChangesAsync();
                 await _transaction.CommitAsync();
                 return result;
+            }
+            catch
+            {
+                await RollbackAsync();
+                throw;
             }
             finally
             {
@@ -83,13 +90,18 @@ namespace DataStore.Persistence.SQLRepositories
         {
             if (!_disposed)
             {
-                if (_transaction != null)
+                if (_isTransactionActive)
                 {
-                    await DisposeTransactionAsync();
+                    await RollbackAsync();
                 }
                 await _context.DisposeAsync();
                 _disposed = true;
             }
+        }
+
+        public void Dispose()
+        {
+            DisposeAsync().AsTask().Wait();
         }
     }
 }
