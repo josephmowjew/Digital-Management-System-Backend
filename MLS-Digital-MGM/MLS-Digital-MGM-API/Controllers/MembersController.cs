@@ -812,7 +812,7 @@ namespace MLS_Digital_MGM_API.Controllers
             var subject = "Please Update Your Member Profile";
             var body = $@"Dear Member,
 
-            Welcome to Malawi Law Society. We noticed that some optional information is missing from your profile. 
+            Welcome to Malawi Law Society. We noticed that some information is missing from your profile. 
             Please log in and update the following fields:
 
             {string.Join(Environment.NewLine, missingFields.Select(field => $"• {field}"))}
