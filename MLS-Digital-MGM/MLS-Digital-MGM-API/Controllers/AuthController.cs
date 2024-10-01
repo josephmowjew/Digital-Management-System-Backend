@@ -43,27 +43,37 @@ namespace MLS_Digital_MGM_API.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginViewModel loginViewModel)
         {
-            // Find the user by email
-            var user = await _repositoryManager.UserRepository.FindByEmailAsync(loginViewModel.Email);
-
-            // Check if the user exists, is not deleted, and has confirmed their email
-            if (user == null || user.DeletedDate != null || !user.EmailConfirmed)
-                return BadRequest(GetErrorMessage(user));
-
-            // Check the password for the user or handle Google authentication
-            var isGoogleAuth = loginViewModel.AuthProvider?.Equals("Google", StringComparison.CurrentCultureIgnoreCase) == true;
-            if (isGoogleAuth || (await _signInManager.CheckPasswordSignInAsync(user, loginViewModel.Password, false)).Succeeded)
+            try
             {
-                await _signInManager.SignInAsync(user, isPersistent: true);
-                user.LastLogin = DateTime.UtcNow;
-                await _repositoryManager.UnitOfWork.CommitAsync();
+                // Find the user by email
+                var user = await _repositoryManager.UserRepository.FindByEmailAsync(loginViewModel.Email);
 
-                var token = await GenerateToken(user);
-                return Ok(new { TokenData = token });
+                // Check if the user exists, is not deleted, and has confirmed their email
+                if (user == null || user.DeletedDate != null || !user.EmailConfirmed)
+                    return BadRequest(GetErrorMessage(user));
+
+                // Check the password for the user or handle Google authentication
+                var isGoogleAuth = loginViewModel.AuthProvider?.Equals("Google", StringComparison.CurrentCultureIgnoreCase) == true;
+                if (isGoogleAuth || (await _signInManager.CheckPasswordSignInAsync(user, loginViewModel.Password, false)).Succeeded)
+                {
+                    await _signInManager.SignInAsync(user, isPersistent: true);
+                    user.LastLogin = DateTime.UtcNow;
+                    await _repositoryManager.UnitOfWork.CommitAsync();
+
+                    var token = await GenerateToken(user);
+                    return Ok(new { TokenData = token });
+                }
+
+                // Return an error message if the credentials are invalid
+                return BadRequest("Invalid login credentials");
             }
-
-            // Return an error message if the credentials are invalid
-            return BadRequest("Invalid login credentials");
+            catch (Exception ex)
+            {
+                // Log the exception
+                // TODO: Implement proper logging
+                Console.WriteLine($"An error occurred during login: {ex.Message}");
+                return StatusCode(500, "An unexpected error occurred. Please try again later.");
+            }
         }
 
         // A function that takes an ApplicationUser object as a parameter and returns an error message based on the user's status.
