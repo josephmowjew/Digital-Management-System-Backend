@@ -100,19 +100,19 @@ namespace DataStore.Migrations
                 oldClrType: typeof(DateTime),
                 oldType: "datetime(6)");
 
-            migrationBuilder.AddForeignKey(
-                name: "FK_Users_Countries_CountryId",
-                table: "Users",
-                column: "CountryId",
-                principalTable: "Countries",
-                principalColumn: "Id");
+            // migrationBuilder.AddForeignKey(
+            //     name: "FK_Users_Countries_CountryId",
+            //     table: "Users",
+            //     column: "CountryId",
+            //     principalTable: "Countries",
+            //     principalColumn: "Id");
 
-            migrationBuilder.AddForeignKey(
-                name: "FK_Users_IdentityTypes_IdentityTypeId",
-                table: "Users",
-                column: "IdentityTypeId",
-                principalTable: "IdentityTypes",
-                principalColumn: "Id");
+            // migrationBuilder.AddForeignKey(
+            //     name: "FK_Users_IdentityTypes_IdentityTypeId",
+            //     table: "Users",
+            //     column: "IdentityTypeId",
+            //     principalTable: "IdentityTypes",
+            //     principalColumn: "Id");
         }
 
         /// <inheritdoc />
