@@ -21,13 +21,10 @@ namespace DataStore.Persistence.SQLRepositories
 
         public async Task<IDbContextTransaction> BeginTransactionAsync()
         {
-            if (_isTransactionActive)
+            if (_transaction == null)
             {
-                throw new InvalidOperationException("A transaction is already in progress.");
+                _transaction = await _context.Database.BeginTransactionAsync();
             }
-            
-            _transaction = await _context.Database.BeginTransactionAsync();
-            _isTransactionActive = true;
             return _transaction;
         }
 
@@ -38,36 +35,40 @@ namespace DataStore.Persistence.SQLRepositories
 
         public async Task<int> CommitAsync()
         {
-            if (!_isTransactionActive)
-            {
-                return await _context.SaveChangesAsync();
-            }
-
             try
             {
                 int result = await _context.SaveChangesAsync();
-                await _transaction.CommitAsync();
+                if (_transaction != null)
+                {
+                    await _transaction.CommitAsync();
+                }
                 return result;
             }
             catch
             {
-                await RollbackAsync();
+                if (_transaction != null)
+                {
+                    await _transaction.RollbackAsync();
+                }
                 throw;
             }
             finally
             {
-                await DisposeTransactionAsync();
-                _isTransactionActive = false;
+                if (_transaction != null)
+                {
+                    await _transaction.DisposeAsync();
+                    _transaction = null;
+                }
             }
         }
 
         public async Task RollbackAsync()
         {
-            if (_isTransactionActive)
+            if (_transaction != null)
             {
                 await _transaction.RollbackAsync();
-                await DisposeTransactionAsync();
-                _isTransactionActive = false;
+                await _transaction.DisposeAsync();
+                _transaction = null;
             }
         }
 
@@ -105,3 +106,4 @@ namespace DataStore.Persistence.SQLRepositories
         }
     }
 }
+
