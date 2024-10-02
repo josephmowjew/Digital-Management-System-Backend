@@ -59,7 +59,6 @@ namespace DataStore.Core.Services
         {
             if (!_enableEmailSending)
             {
-                // Log that email sending is disabled
                 await _errorService.LogErrorAsync(new Exception($"Email sending is disabled. Would have sent email to {email} with subject: {subject}"));
                 return new KeyValuePair<bool, string>(true, "Email sending is disabled, but operation logged as successful");
             }
@@ -72,8 +71,10 @@ namespace DataStore.Core.Services
                 message.To.Add(MailboxAddress.Parse(email));
                 message.Subject = subject;
 
-                var bodyBuilder = new BodyBuilder { HtmlBody = htmlMessage };
-                message.Body = bodyBuilder.ToMessageBody();
+                message.Body = new TextPart("html")
+                {
+                    Text = htmlMessage
+                };
 
                 var context = new Context();
                 context["email"] = email;
@@ -81,13 +82,14 @@ namespace DataStore.Core.Services
                 await _retryPolicy.ExecuteAsync(async (ctx) =>
                 {
                     using var client = new SmtpClient();
+                    client.Timeout = 30000; // 30 seconds timeout
                     await client.ConnectAsync(
                         GetSetting("Server"),
                         int.Parse(GetSetting("Port")),
-                        SecureSocketOptions.StartTls
+                        SecureSocketOptions.SslOnConnect
                     );
                     await client.AuthenticateAsync(
-                        GetSetting(_useMailtrap ? "UserName" : "SenderEmail"),
+                        GetSetting("SenderEmail"),
                         GetSetting("Password")
                     );
                     await client.SendAsync(message);
@@ -111,12 +113,7 @@ namespace DataStore.Core.Services
             }
             catch (Exception ex)
             {
-                string errorMessage = "Message not sent";
-                if (ex is SslHandshakeException || (ex is SocketException socketEx && socketEx.SocketErrorCode == SocketError.HostNotFound))
-                {
-                    errorMessage = "Message not sent due to internet-related issues. Please try again later.";
-                }
-
+                string errorMessage = $"Message not sent. Error: {ex.Message}";
                 await _errorService.LogErrorAsync(ex);
                 return new KeyValuePair<bool, string>(false, errorMessage);
             }

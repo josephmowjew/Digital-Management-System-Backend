@@ -489,7 +489,7 @@ namespace MLS_Digital_MGM_API.Controllers
                         try
                         {
                             var memberData = ExtractMemberData(worksheet, row);
-                            if (memberData == null) return;
+                            if (memberData == null) continue;
 
                             if (!ValidateMemberData(memberData, out var validationErrors))
                             {
@@ -555,14 +555,14 @@ namespace MLS_Digital_MGM_API.Controllers
                             if (!createUserResult.Succeeded)
                             {
                                 errors.Add(new RegistrationError { Row = row, Errors = createUserResult.Errors.Select(e => e.Description).ToList() });
-                                return;
+                                continue;
                             }
 
                             var roleResult = await _repositoryManager.UserRepository.AddUserToRoleAsync(user, "Member");
                             if (!roleResult.Succeeded)
                             {
                                 errors.Add(new RegistrationError { Row = row, Errors = new List<string> { "Failed to assign Member role." } });
-                                return;
+                                continue;
                             }
 
                             var member = new Member
@@ -618,6 +618,9 @@ namespace MLS_Digital_MGM_API.Controllers
                 // Schedule the email processing job
                 BackgroundJob.Schedule(() => ProcessEmailQueue(), TimeSpan.FromMinutes(5));
 
+                // Update result with successful registrations count
+                result.SuccessfulRegistrations = successfulRegistrations.Count;
+
                 // Send completion emails
                 foreach (var user in secretariatUsers)
                 {
@@ -649,9 +652,28 @@ namespace MLS_Digital_MGM_API.Controllers
             if (string.IsNullOrWhiteSpace(email)) return;
 
             var subject = "Bulk Member Registration Completed";
-            var body = $"The bulk member registration process has completed.\n\n" +
-                       $"Successful Registrations: {result.SuccessfulRegistrations}\n\n" +
-                       $"Please check the system for more details.";
+            var body = $@"
+                <!DOCTYPE html>
+                <html lang='en'>
+                <head>
+                    <meta charset='UTF-8'>
+                    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+                    <title>Bulk Member Registration Completed</title>
+                </head>
+                <body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;'>
+                    <div style='background-color: #f8f8f8; border: 1px solid #ddd; border-radius: 5px; padding: 20px;'>
+                        <h2 style='color: #0066cc; margin-top: 0;'>Bulk Member Registration Completed</h2>
+                        <p>Dear Administrator,</p>
+                        <p>We are pleased to inform you that the bulk member registration process has been successfully completed.</p>
+                        <p style='background-color: #e6f3ff; border-left: 4px solid #0066cc; padding: 10px;'>
+                            <strong>Successful Registrations:</strong> {result.SuccessfulRegistrations}
+                        </p>
+                        <p>For a detailed overview of the registration process, including any potential issues or discrepancies, please log in to the system and review the complete report.</p>
+                        <p>If you have any questions or concerns, please don't hesitate to contact the IT support team.</p>
+                        <p>Best regards,<br>Malawi Law Society</p>
+                    </div>
+                </body>
+                </html>";
 
             await _emailService.SendMailWithKeyVarReturn(email, subject, body);
         }
@@ -893,42 +915,67 @@ namespace MLS_Digital_MGM_API.Controllers
         private string GenerateWelcomeEmailBody(ApplicationUser user, string password)
         {
             // Generate the welcome email body
-            return $@"Dear Member,
-
-            Welcome to Malawi Law Society!
-
-            Your account has been successfully created. Here are your login details:
-
-            Email: {user.Email}
-            Password: {password}
-
-            To access your account, please visit our member portal at:
-            https://members.malawilawsociety.net
-
-            For security reasons, we recommend changing your password after your first login.
-
-            If you have any questions or need assistance, please don't hesitate to contact our support team.
-
-            Best regards,
-            Malawi Law Society";
+            return $@"
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Welcome to Malawi Law Society</title>
+</head>
+<body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;'>
+    <div style='background-color: #f8f8f8; border: 1px solid #ddd; border-radius: 5px; padding: 20px;'>
+        <h2 style='color: #0066cc; margin-top: 0;'>Welcome to Malawi Law Society!</h2>
+        <p>Dear Member,</p>
+        <p>Your account has been successfully created. Here are your login details:</p>
+        <p style='background-color: #e6f3ff; border-left: 4px solid #0066cc; padding: 10px;'>
+            <strong>Email:</strong> {user.Email}<br>
+            <strong>Password:</strong> {password}
+        </p>
+        <p>To access your account, please visit our member portal at:<br>
+        <a href='https://members.malawilawsociety.net' style='color: #0066cc;'>https://members.malawilawsociety.net</a></p>
+        <p><strong>Important:</strong> For security reasons, we strongly recommend changing your password after your first login.</p>
+        <p>If you have any questions or need assistance, please don't hesitate to contact our support team.</p>
+        <p>Best regards,<br>Malawi Law Society</p>
+    </div>
+</body>
+</html>";
         }
 
         private string GenerateMissingFieldsEmailBody(List<string> missingFields)
         {
             // Generate the missing fields email body
-            return $@"Dear Member,
-
-            Welcome to Malawi Law Society. We noticed that some information is missing from your profile. 
-            Please log in and update the following fields:
-
-            {string.Join(Environment.NewLine, missingFields.Select(field => $"• {field}"))}
-
-            Updating this information will help us serve you better.
-
-            Thank you for your cooperation.
-
-            Best regards,
-            Malawi Law Society";
+            return $@"
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Profile Update Request - Malawi Law Society</title>
+</head>
+<body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;'>
+    <div style='background-color: #f8f8f8; border: 1px solid #ddd; border-radius: 5px; padding: 20px;'>
+        <h2 style='color: #0066cc; margin-top: 0;'>Welcome to Malawi Law Society</h2>
+        <p>Dear Member,</p>
+        <p>We hope this email finds you well. We've noticed that some information is missing from your profile. To ensure we can provide you with the best possible service, we kindly request that you log in and update the following fields:</p>
+        <ul style='background-color: #e6f3ff; border-left: 4px solid #0066cc; padding: 10px;'>
+            {string.Join("", missingFields.Select(field => $"<li>{field}</li>"))}
+        </ul>
+        <p>Updating this information will help us serve you more effectively and ensure you receive all relevant communications.</p>
+        <p>To update your profile, please follow these steps:</p>
+        <ol>
+            <li>Visit our member portal at <a href='https://members.malawilawsociety.net' style='color: #0066cc;'>https://members.malawilawsociety.net</a></li>
+            <li>Log in to your account</li>
+            <li>Navigate to your profile settings</li>
+            <li>Update the missing information</li>
+            <li>Save your changes</li>
+        </ol>
+        <p>If you encounter any issues or need assistance, please don't hesitate to contact our support team.</p>
+        <p>Thank you for your prompt attention to this matter. Your cooperation is greatly appreciated.</p>
+        <p>Best regards,<br>Malawi Law Society</p>
+    </div>
+</body>
+</html>";
         }
 
         [AutomaticRetry(Attempts = 3)]
