@@ -53,12 +53,11 @@ namespace MLS_Digital_MGM_API.Controllers
                     SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null
                 };
 
-                // Fetch paginated users using the UserRepository
-                var users = await _repositoryManager.UserRepository.GetPagedAsync(pagingParameters);
+                // Fetch paginated staff users using the UserRepository
+                var staffUsers = await _repositoryManager.UserRepository.GetPagedStaffUsersAsync(pagingParameters);
 
-            
-               // Check if users exist
-                if (users == null || !users.Any())
+                // Check if users exist
+                if (staffUsers == null || !staffUsers.Any())
                 {
                     if (dataTableParams.LoadFromRequest(_httpContextAccessor))
                     {
@@ -75,21 +74,18 @@ namespace MLS_Digital_MGM_API.Controllers
                 }
         
                 // Map User entities to ReadUserDTOs
-                var mappedUsers = _mapper.Map<IEnumerable<ReadUserDTO>>(users);
+                var mappedUsers = _mapper.Map<IEnumerable<ReadUserDTO>>(staffUsers);
 
-                //get the user role of the user
-                var usersWithRoles = new List<ReadUserDTO>();
-
-                mappedUsers.ToList().ForEach(user =>
+                var usersWithRoles = mappedUsers.Select(user =>
                 {
-                   var userRole =  this._repositoryManager.UserRepository.GetUserRoleByUserId(user.Id);
-                   string roleName = this._repositoryManager.UserRepository.GetRoleName(userRole.RoleId);
-                   user.RoleName = FormatRoleName(roleName);
-                   usersWithRoles.Add(user);
-                
-                });
+                    var userRole = _repositoryManager.UserRepository.GetUserRoleByUserId(user.Id);
+                    string roleName = userRole != null 
+                        ? _repositoryManager.UserRepository.GetRoleName(userRole.RoleId) 
+                        : string.Empty;
+                    user.RoleName = FormatRoleName(roleName);
+                    return user;
+                }).ToList();
 
-               
                 // Return datatable JSON if the request came from a datatable
                 if (dataTableParams.LoadFromRequest(_httpContextAccessor))
                 {
@@ -456,9 +452,12 @@ namespace MLS_Digital_MGM_API.Controllers
 
        private string FormatRoleName(string roleName)
         {
-            var firstChar = char.ToUpper(roleName[0]);
-            var restOfName = new string(roleName.Skip(1).SelectMany(c => char.IsUpper(c) ? new[] { ' ', c } : new[] { c }).ToArray());
-            return firstChar + restOfName;
+            if (string.IsNullOrEmpty(roleName))
+            {
+                return string.Empty;
+            }
+
+            return char.ToUpper(roleName[0]) + roleName.Substring(1).ToLower();
         }
 
         [HttpGet("getAll")]

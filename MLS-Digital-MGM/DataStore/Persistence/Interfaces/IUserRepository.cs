@@ -1,4 +1,5 @@
 ﻿using DataStore.Core.Models;
+using DataStore.Helpers;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
@@ -29,5 +30,7 @@ namespace DataStore.Persistence.Interfaces
         Task<List<ApplicationUser>> GetUsersByDepartmentIdsAsync(IEnumerable<int> departmentIds);
 
         Task<List<ApplicationUser>> GetAllConfirmedUsersAsync();
+
+        Task<IEnumerable<ApplicationUser>> GetPagedStaffUsersAsync(PagingParameters<ApplicationUser> pagingParameters);
     }
 }

@@ -4,12 +4,10 @@ using DataStore.Helpers;
 using DataStore.Persistence.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Linq.Dynamic.Core;
+using System.Linq.Expressions;
 
 namespace DataStore.Persistence.SQLRepositories
 {
@@ -123,6 +121,38 @@ namespace DataStore.Persistence.SQLRepositories
                 .ToListAsync();
         }
 
-        
+        public async Task<IEnumerable<ApplicationUser>> GetPagedStaffUsersAsync(PagingParameters<ApplicationUser> pagingParameters)
+        {
+            var query = _context.Users
+                .Where(pagingParameters.Predicate)
+                .Where(u => !_context.UserRoles.Any(ur => ur.UserId == u.Id && _context.Roles.Any(r => r.Id == ur.RoleId && r.Name.ToLower() == "member")));
+
+            // Apply search if provided
+            if (!string.IsNullOrEmpty(pagingParameters.SearchTerm))
+            {
+                query = query.Where(u => u.UserName.Contains(pagingParameters.SearchTerm) || u.Email.Contains(pagingParameters.SearchTerm));
+            }
+
+            // Apply sorting
+            if (!string.IsNullOrEmpty(pagingParameters.SortColumn))
+            {
+                var parameter = Expression.Parameter(typeof(ApplicationUser), "u");
+                var property = Expression.Property(parameter, pagingParameters.SortColumn);
+                var lambda = Expression.Lambda(property, parameter);
+
+                query = pagingParameters.SortDirection == "asc" 
+                    ? Queryable.OrderBy(query, (dynamic)lambda)
+                    : Queryable.OrderByDescending(query, (dynamic)lambda);
+            }
+            else
+            {
+                query = query.OrderBy(u => u.UserName);
+            }
+
+            return await query
+                .Skip((pagingParameters.PageNumber - 1) * pagingParameters.PageSize)
+                .Take(pagingParameters.PageSize)
+                .ToListAsync();
+        }
     }
 }
