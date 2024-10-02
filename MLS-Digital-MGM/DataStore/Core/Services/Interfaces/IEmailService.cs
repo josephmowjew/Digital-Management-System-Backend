@@ -14,5 +14,6 @@ namespace DataStore.Core.Services.Interfaces
         Task SendCPDInvoiceStatusEmailAsync(List<string> memberEmails, string emailBody, string subject);
         Task ProcessEmailQueueAsync();
         Task QueueEmailAsync(string email, string subject, string body, string emailType);
+        Task<KeyValuePair<bool, string>> SendMailWithKeyVarReturn(string email, string subject, string htmlMessage, bool isFromQueue = false);
     }
 }

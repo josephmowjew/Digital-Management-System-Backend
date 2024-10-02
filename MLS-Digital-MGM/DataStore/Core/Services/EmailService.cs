@@ -55,7 +55,7 @@ namespace DataStore.Core.Services
                     });
         }
         
-        public async Task<KeyValuePair<bool, string>> SendMailWithKeyVarReturn(string email, string subject, string htmlMessage)
+        public async Task<KeyValuePair<bool, string>> SendMailWithKeyVarReturn(string email, string subject, string htmlMessage, bool isFromQueue = false)
         {
             if (!_enableEmailSending)
             {
@@ -95,6 +95,19 @@ namespace DataStore.Core.Services
                 }, context);
 
                 return new KeyValuePair<bool, string>(true, "Message sent");
+            }
+            catch (SmtpCommandException ex) when (ex.StatusCode == SmtpStatusCode.MailboxUnavailable && ex.Message.Contains("Daily user sending limit exceeded"))
+            {
+                await _errorService.LogErrorAsync(ex);
+                if (!isFromQueue)
+                {
+                    await QueueEmailAsync(email, subject, htmlMessage, "DailyLimitExceeded");
+                    return new KeyValuePair<bool, string>(false, "Daily sending limit exceeded. Email queued for later sending.");
+                }
+                else
+                {
+                    return new KeyValuePair<bool, string>(false, "Daily sending limit exceeded. Email remains in queue.");
+                }
             }
             catch (Exception ex)
             {
@@ -176,12 +189,18 @@ namespace DataStore.Core.Services
 
             foreach (var email in emailsToSend)
             {
-                var result = await SendMailWithKeyVarReturn(email.RecipientEmail, email.Subject, email.Body);
+                var result = await SendMailWithKeyVarReturn(email.RecipientEmail, email.Subject, email.Body, isFromQueue: true);
                 if (result.Key)
                 {
                     email.IsSent = true;
                     email.SentDate = DateTime.Now;
                     await _repositoryManager.EmailQueueRepository.UpdateAsync(email);
+                }
+                else if (result.Value.Contains("Daily sending limit exceeded"))
+                {
+                    // If we hit the limit while processing the queue, stop processing for today
+                    await _errorService.LogErrorAsync(new Exception("Daily sending limit reached while processing email queue. Stopping processing for today."));
+                    break;
                 }
             }
 
