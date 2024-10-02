@@ -284,7 +284,7 @@ namespace MLS_Digital_MGM_API.Controllers
                     await _unitOfWork.CommitAsync();
 
                     var username = await _repositoryManager.UserRepository.GetSingleUser(subcommitteeMemberShip.MemberShipId);
-                    BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(username.Email, "Subcommittee Membership Status", $"Your subcommittee membership for {subcommitteeMemberShip.Subcommittee.SubcommitteeName} has been approved"));
+                    BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(username.Email, "Subcommittee Membership Status", $"Your subcommittee membership for {subcommitteeMemberShip.Subcommittee.SubcommitteeName} has been approved", false));
 
                     return Ok();
                 }
@@ -319,7 +319,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 await _repositoryManager.SubcommitteeMembershipRepository.UpdateAsync(subcommitteeMembership);
                 await _unitOfWork.CommitAsync();
 
-                BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(subcommitteeMembership.MemberShip.Email, "Subcommittee Membership Status", $"Your subcommittee membership for {subcommitteeMembership.Subcommittee.SubcommitteeName} has been rejected"));
+                BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(subcommitteeMembership.MemberShip.Email, "Subcommittee Membership Status", $"Your subcommittee membership for {subcommitteeMembership.Subcommittee.SubcommitteeName} has been rejected", false));
                 
                 return Ok();
             }
@@ -351,7 +351,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 await _repositoryManager.SubcommitteeMembershipRepository.UpdateAsync(membership);
                 await _unitOfWork.CommitAsync();
 
-                BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(membership.MemberShip.Email, "Subcommittee Membership Status", $"You have exited the subcommittee {membership.Subcommittee.SubcommitteeName}"));
+                BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(membership.MemberShip.Email, "Subcommittee Membership Status", $"You have exited the subcommittee {membership.Subcommittee.SubcommitteeName}", false));
                 return Ok();
             }
             catch (Exception ex)

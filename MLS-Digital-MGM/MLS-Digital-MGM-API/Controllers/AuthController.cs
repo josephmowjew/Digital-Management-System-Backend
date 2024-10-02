@@ -159,7 +159,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
             Best regards,
             Malawi Law Society";
-            var passwordEmailResult = BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(user.Email, "Login Details", passwordBody));
+            var passwordEmailResult = BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(user.Email, "Login Details", passwordBody, false));
           
             // // Send OTP email
             // string pinBody = $"An account has been created on Malawi Law Society. Your OTP is {pin} <br /> Enter the OTP to activate your account <br /> You can activate your account by clicking <a href='https://mls.sparcsystems.africa'>here</a>";
@@ -275,7 +275,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
             // sending an email
             string PinBody = "Your OTP for Malawi Law Society Account is " + pin + " <br /> Enter the OTP, email address and the new password to reset your account";
-            var pinEmailResult = BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(user.Email, "Account Reset Details", PinBody));
+            var pinEmailResult = BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(user.Email, "Account Reset Details", PinBody, false));
 
            
 
@@ -407,7 +407,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
             var body = $"Please reset your password by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.";
 
-            var pinEmailResult = BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(user.Email, "Reset Password", body));
+            var pinEmailResult = BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(user.Email, "Reset Password", body, false));
 
             //return  json with message
             return Json(new { isSuccess=true, message = "Password reset link was sent to your email successfully" });

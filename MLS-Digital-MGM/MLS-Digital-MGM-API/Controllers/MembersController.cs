@@ -878,7 +878,7 @@ namespace MLS_Digital_MGM_API.Controllers
             Best regards,
             Malawi Law Society";
 
-            BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(user.Email, "Welcome to Malawi Law Society - Your Login Details", passwordBody));
+            BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(user.Email, "Welcome to Malawi Law Society - Your Login Details", passwordBody, false));
 
             // // Send OTP email
             // string pinBody = $"An account has been created on Malawi Law Society. Your OTP is {user.Pin} <br /> Enter the OTP to activate your account <br /> You can activate your account by clicking <a href='https://members.malawilawsociety.net'>here</a>";

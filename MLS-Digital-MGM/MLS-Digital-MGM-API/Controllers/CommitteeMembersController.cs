@@ -299,7 +299,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
                     //send email to the user that he has been approved
                     var username = await _repositoryManager.UserRepository.GetSingleUser(committeeMemberShip.MemberShipId);
-                    BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(username.Email, "Committe Membership Status", $"Your committee membership for {committeeMemberShip.Committee.CommitteeName} has been approved"));
+                    BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(username.Email, "Committe Membership Status", $"Your committee membership for {committeeMemberShip.Committee.CommitteeName} has been approved", false));
 
                     return Ok();
                 }
@@ -334,7 +334,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 await _unitOfWork.CommitAsync();
 
                  
-                BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(committeeMembership.MemberShip.Email, "Committe Membership Status", $"Your committee membership for {committeeMembership.Committee.CommitteeName} has been rejected"));
+                BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(committeeMembership.MemberShip.Email, "Committe Membership Status", $"Your committee membership for {committeeMembership.Committee.CommitteeName} has been rejected", false));
                 
                 return Ok();
             }
@@ -367,7 +367,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 //send an email to the user that he has exited the committee
                 
-                BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(membership.MemberShip.Email, "Committe Membership Status", $"You have exited the committee {membership.Committee.CommitteeName}"));
+                BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(membership.MemberShip.Email, "Committe Membership Status", $"You have exited the committee {membership.Committee.CommitteeName}", false));
                 return Ok();
             }
             catch (Exception ex)

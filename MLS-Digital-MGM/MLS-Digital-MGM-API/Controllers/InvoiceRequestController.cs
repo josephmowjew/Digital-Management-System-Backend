@@ -629,7 +629,7 @@ namespace MLS_Digital_MGM_API.Controllers
                     await _repositoryManager.InvoiceRequestRepository.UpdateAsync(invoiceRequest);
                     await _unitOfWork.CommitAsync();
 
-                    BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(invoiceRequest.CreatedBy.Email, "Invoice Request Status", "Your invoice for a CPD has been generated"));
+                    BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(invoiceRequest.CreatedBy.Email, "Invoice Request Status", "Your invoice for a CPD has been generated", false));
 
                     return Json(new { message = "Invoice Request marked as generated" });
                 }
@@ -659,7 +659,7 @@ namespace MLS_Digital_MGM_API.Controllers
                     await _repositoryManager.InvoiceRequestRepository.UpdateAsync(invoiceRequest);
                     await _unitOfWork.CommitAsync();
 
-                    BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(invoiceRequest.CreatedBy.Email, "Invoice Request Status", "Your invoice for a CPD has been paid"));
+                    BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(invoiceRequest.CreatedBy.Email, "Invoice Request Status", "Your invoice for a CPD has been paid", false));
 
                     return Json(new { message = "Invoice Request marked as paid" });
                 }
