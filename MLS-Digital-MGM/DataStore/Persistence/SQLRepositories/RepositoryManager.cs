@@ -63,6 +63,7 @@ namespace DataStore.Persistence.SQLRepositories
         private ISubcommitteeMessageRepository _subcommitteeMessageRepository;
         private IStampRepository _stampRepository;
         private ISignatureRepository _signatureRepository;
+        private IEmailQueueRepository _emailQueueRepository;
 
 
         public RepositoryManager(
@@ -131,6 +132,7 @@ namespace DataStore.Persistence.SQLRepositories
         public ISubcommitteeMessageRepository SubcommitteeMessageRepository => _subcommitteeMessageRepository ??= new SubcommitteeMessageRepository(_context, _unitOfWork);
         public IStampRepository StampRepository => _stampRepository ??= new StampRepository(_context, _unitOfWork); 
         public ISignatureRepository SignatureRepository => _signatureRepository ??= new SignatureRepository(_context, _unitOfWork);
+        public IEmailQueueRepository EmailQueueRepository => _emailQueueRepository ??= new EmailQueueRepository(_context, _unitOfWork);
         
     }
 }

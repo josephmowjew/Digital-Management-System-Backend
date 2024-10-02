@@ -5,7 +5,6 @@ using DataStore.Data;
 using DataStore.Middleware;
 using DataStore.Persistence.Interfaces;
 using DataStore.Persistence.SQLRepositories;
-using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -106,6 +105,8 @@ builder.Services.AddHangfire(config =>
            .UseDefaultTypeSerializer()
            .UseMemoryStorage());
 
+builder.Services.AddHangfireServer();
+
 builder.Services.AddSignalR();
 
 
@@ -113,6 +114,15 @@ var app = builder.Build();
 // Use the CORS policy
 app.UseCors("AllowFrontend");
 // Serve static files from the "Uploads" directory
+
+
+// Schedule the daily email processing
+using (var scope = app.Services.CreateScope())
+{
+    var emailService = scope.ServiceProvider.GetRequiredService<IEmailService>();
+    ((EmailService)emailService).ScheduleDailyEmailProcessing();
+}
+
 
 app.UseStaticFiles(new StaticFileOptions
 {
