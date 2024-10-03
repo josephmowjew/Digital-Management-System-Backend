@@ -91,7 +91,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 {
                     var draw = dataTableParams.Draw;
                     var resultTotalFiltred = usersWithRoles.Count;
-                    var totalRecords = await _repositoryManager.UserRepository.CountAsync(pagingParameters);
+                    var totalRecords = await _repositoryManager.UserRepository.CountStaffUsersAsync(pagingParameters);
 
 
                     return Json(new 

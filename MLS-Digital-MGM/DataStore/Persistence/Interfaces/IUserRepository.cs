@@ -32,5 +32,6 @@ namespace DataStore.Persistence.Interfaces
         Task<List<ApplicationUser>> GetAllConfirmedUsersAsync();
 
         Task<IEnumerable<ApplicationUser>> GetPagedStaffUsersAsync(PagingParameters<ApplicationUser> pagingParameters);
+        Task<int> CountStaffUsersAsync(PagingParameters<ApplicationUser> pagingParameters);
     }
 }
