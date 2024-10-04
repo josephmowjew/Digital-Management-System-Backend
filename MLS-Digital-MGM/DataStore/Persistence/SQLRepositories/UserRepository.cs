@@ -154,5 +154,37 @@ namespace DataStore.Persistence.SQLRepositories
                 .Take(pagingParameters.PageSize)
                 .ToListAsync();
         }
+
+
+        public async Task<int> CountStaffUsersAsync(PagingParameters<ApplicationUser> pagingParameters)
+        {
+            var query = _context.Users
+            .Where(pagingParameters.Predicate)
+            .Where(u => !_context.UserRoles.Any(ur => ur.UserId == u.Id && _context.Roles.Any(r => r.Id == ur.RoleId && r.Name.ToLower() == "member")));
+
+            // Apply search if provided
+            if (!string.IsNullOrEmpty(pagingParameters.SearchTerm))
+            {
+                var searchTerm = pagingParameters.SearchTerm.ToLower();
+                query = query.Where(u => 
+                u.UserName.ToLower().Contains(searchTerm) || 
+                u.Email.ToLower().Contains(searchTerm) ||
+                u.FirstName.ToLower().Contains(searchTerm) ||
+                    u.LastName.ToLower().Contains(searchTerm)
+                );
+            }
+
+            // Apply additional filters if needed
+            if (pagingParameters.CreatedById != null)
+            {
+                query = query.Where(x => x.CreatedById == pagingParameters.CreatedById);
+            }
+
+            // Count the results
+            var result = await query.CountAsync();
+
+            return result;
+        }
     }
+
 }
