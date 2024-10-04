@@ -42,15 +42,29 @@ namespace DataStore.Persistence.SQLRepositories
         }
 
         
-                public async Task<IEnumerable<Member>> GetLicensedMembersAsync()
-                {
-                    return await _context.Members
-                        .Include(m => m.User)
-                        .Include(m => m.Customer)
-                        .Include(m => m.Firm)
-                        .Where(m => _context.Licenses.Any(l => l.MemberId == m.Id) && m.Status != Lambda.Deleted)
-                        .ToListAsync();
-                }
+        public async Task<int> GetLicensedMembersCountAsync()
+        {
+            return await _context.Members
+                .CountAsync(m => _context.Licenses.Any(l => l.MemberId == m.Id) && m.Status != Lambda.Deleted);
+        }
+
+        //get unlicensed members count
+        public async Task<int> GetUnlicensedMembersCountAsync()
+        {
+            return await _context.Members
+                .CountAsync(m => !_context.Licenses.Any(l => l.MemberId == m.Id) && m.Status != Lambda.Deleted);
+        }
+
+        
+        public async Task<IEnumerable<Member>> GetLicensedMembersAsync()
+        {
+            return await _context.Members
+                .Include(m => m.User)
+                .Include(m => m.Customer)
+                .Include(m => m.Firm)
+                .Where(m => _context.Licenses.Any(l => l.MemberId == m.Id) && m.Status != Lambda.Deleted)
+                .ToListAsync();
+        }
         
     }
 }

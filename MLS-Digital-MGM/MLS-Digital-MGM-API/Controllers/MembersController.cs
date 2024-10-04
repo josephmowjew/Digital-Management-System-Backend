@@ -285,7 +285,39 @@ namespace MLS_Digital_MGM_API.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+        
+        [HttpGet("countLicensed")]
+        public async Task<IActionResult> CountLicensed()
+        {
+            try
+            {
+                var count = await _repositoryManager.MemberRepository.GetLicensedMembersCountAsync();
+        
+                return Ok(count);
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
 
+        //get count of unlicensedMembers
+        [HttpGet("countUnlicensed")]
+        public async Task<IActionResult> CountUnlicensed()
+        {
+            try
+            {
+                var count = await _repositoryManager.MemberRepository.GetUnlicensedMembersCountAsync();
+
+                return Ok(count);
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
         
         [HttpGet("getLicensedMembers")]
         public async Task<IActionResult> GetLicensedMembers(int pageNumber = 1, int pageSize = 10)

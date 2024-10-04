@@ -157,16 +157,13 @@ namespace DataStore.Data
         public DbSet<Thread> Threads { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<InvoiceRequest> InvoiceRequests { get; set; }
-        
         public DbSet<QBInvoice> QBInvoices { get; set; }
         public DbSet<QBReceipt> QBReceipts { get; set; }
         public DbSet<QBCustomer> QBCustomers { get; set; }
         public DbSet<QBPayment> QBPayments { get; set; }
-
         public DbSet<LevyDeclaration> LevyDeclarations { get; set; }
         public DbSet<LevyPercent> LevyPercents { get; set; }
         public DbSet<CommunicationMessage> CommunicationMessages { get; set; }
-
         public DbSet<Subcommittee> Subcommittees { get; set; }
         public DbSet<SubcommitteeMembership> SubcommitteeMemberships { get; set; }
         public DbSet<SubcommitteeThread> SubcommitteeThreads { get; set; }
@@ -174,5 +171,6 @@ namespace DataStore.Data
         public DbSet<Stamp> Stamps { get; set; }
         public DbSet<Signature> Signatures { get; set; }
         public DbSet<EmailQueue> EmailQueues { get; set; }
+        public DbSet<NotaryPublic> NotariesPublic { get; set; }
     }
 }

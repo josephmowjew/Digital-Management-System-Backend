@@ -23,6 +23,7 @@ namespace DataStore.Core.Models
             LevyDeclarations = new List<LevyDeclaration>();
             Stamps = new List<Stamp>();
             Signatures = new List<Signature>();
+            NotariesPublic = new List<NotaryPublic>();
         }
         
         [Required]
@@ -51,6 +52,7 @@ namespace DataStore.Core.Models
         public ICollection<LevyDeclaration> LevyDeclarations { get; set; }
         public ICollection<Stamp> Stamps { get; set; }
         public ICollection<Signature> Signatures { get; set; }
+        public ICollection<NotaryPublic> NotariesPublic { get; set; }
 
     }
 }

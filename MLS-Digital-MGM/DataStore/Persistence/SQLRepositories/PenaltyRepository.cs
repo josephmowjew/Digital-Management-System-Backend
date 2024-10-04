@@ -31,8 +31,6 @@ namespace DataStore.Persistence.SQLRepositories
             .FirstOrDefaultAsync(t => t.Id == id);
         }
 
-        
-
         public async Task<List<Penalty>> GetByMemberId(int memberId) { 
             return await _context.Penalties.Where(penalty => penalty.MemberId ==  memberId && penalty.Status != Lambda.Deleted).ToListAsync();
         }

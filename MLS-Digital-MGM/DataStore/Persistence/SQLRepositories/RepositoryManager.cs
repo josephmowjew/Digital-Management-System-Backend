@@ -64,6 +64,7 @@ namespace DataStore.Persistence.SQLRepositories
         private IStampRepository _stampRepository;
         private ISignatureRepository _signatureRepository;
         private IEmailQueueRepository _emailQueueRepository;
+        private INotaryPublicRepository _notaryPublicRepository;
 
 
         public RepositoryManager(
@@ -133,6 +134,6 @@ namespace DataStore.Persistence.SQLRepositories
         public IStampRepository StampRepository => _stampRepository ??= new StampRepository(_context, _unitOfWork); 
         public ISignatureRepository SignatureRepository => _signatureRepository ??= new SignatureRepository(_context, _unitOfWork);
         public IEmailQueueRepository EmailQueueRepository => _emailQueueRepository ??= new EmailQueueRepository(_context, _unitOfWork);
-        
+        public INotaryPublicRepository NotaryPublicRepository => _notaryPublicRepository ??= new NotaryPublicRepository(_context, _unitOfWork);
     }
 }
