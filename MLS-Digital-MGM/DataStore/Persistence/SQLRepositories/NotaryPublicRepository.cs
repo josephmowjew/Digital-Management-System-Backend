@@ -63,7 +63,7 @@ namespace DataStore.Persistence.SQLRepositories
         public async Task<int> GetNotaryPublicCountAsync()
         {
             return await _context.NotariesPublic
-                .Where(np => np.Status == Lambda.Active)
+                .Where(np => np.Status == Lambda.Active && np.ApplicationStatus == Lambda.Approved)
                 .CountAsync();
         }
 
