@@ -60,10 +60,9 @@ namespace MLS_Digital_MGM_API.Controllers
                 
                 var pagingParameters = new PagingParameters<ProBonoApplication>();
 
-                // Check if the user is secretariat and approve the application if so
                 pagingParameters = new PagingParameters<ProBonoApplication>
                 {
-                    Predicate = u => u.Status != Lambda.Deleted && (string.Equals(currentRole, "secretariat", StringComparison.OrdinalIgnoreCase) || string.Equals(currentRole, "ceo", StringComparison.OrdinalIgnoreCase) || u.CreatedById == user.Id) && u.ApplicationStatus != Lambda.Approved,
+                    Predicate = u => u.Status != Lambda.Deleted && (string.Equals(currentRole, "secretariat", StringComparison.OrdinalIgnoreCase) || string.Equals(currentRole, "ceo", StringComparison.OrdinalIgnoreCase) || string.Equals(currentRole, "president", StringComparison.OrdinalIgnoreCase) || u.CreatedById == user.Id) && u.ApplicationStatus != Lambda.Approved,
                     PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
                     PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
                     SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
