@@ -17,8 +17,8 @@ namespace DataStore.Core.Models
 
         }
 
-        [StringLength(maximumLength:100)]
-        [Required]
+        [StringLength(maximumLength:250)]
+        [Required]  
         public string Title { get; set; }
         [StringLength(maximumLength:250)]
         public string Description { get; set; }
