@@ -6,6 +6,9 @@ namespace MLS_Digital_Management_System_Front_End.Core.DTOs.Communication
 {
     public class ReadCommunicationMessageDTO
     {
+        public ReadCommunicationMessageDTO(){
+            Attachments = new List<DataStore.Core.DTOs.Attachment.ReadAttachmentDTO>();
+        }
         public int Id { get; set; }
         public string Subject { get; set; }
         public string Body { get; set; }
@@ -18,8 +21,7 @@ namespace MLS_Digital_Management_System_Front_End.Core.DTOs.Communication
         public List<string> TargetedDepartments { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime? UpdatedDate { get; set; }
-
-
+        public List<DataStore.Core.DTOs.Attachment.ReadAttachmentDTO> Attachments { get; set; }
         
     }
 

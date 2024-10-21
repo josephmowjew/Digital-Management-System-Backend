@@ -243,5 +243,115 @@ namespace DataStore.Core.Services
                 _errorService.LogErrorAsync(new Exception($"Email sending is disabled. Email enqueued but will not be sent: To: {email}, Subject: {subject}"));
             }
         }
+
+        //communication message with or without attachments
+        public async Task<KeyValuePair<bool, string>> SendMailFromCommunicationMessage(string email, CommunicationMessage message, bool isFromQueue = false)
+        {
+            if (!_enableEmailSending)
+            {
+                await _errorService.LogErrorAsync(new Exception($"Email sending is disabled. Would have sent email to {email} with subject: {message.Subject} and {message.Attachments?.Count ?? 0} attachment(s)"));
+                return new KeyValuePair<bool, string>(true, "Email sending is disabled, but operation logged as successful");
+            }
+
+            await _semaphore.WaitAsync();
+            try
+            {
+                var mimeMessage = new MimeMessage();
+                mimeMessage.From.Add(new MailboxAddress(GetSetting("SenderName"), GetSetting("SenderEmail")));
+                mimeMessage.To.Add(MailboxAddress.Parse(email));
+                mimeMessage.Subject = message.Subject;
+
+                var bodyBuilder = new BodyBuilder();
+                bodyBuilder.HtmlBody = message.Body;
+
+                if (message.Attachments != null && message.Attachments.Any())
+                {
+                    foreach (var attachment in message.Attachments)
+                    {
+                        if (File.Exists(attachment.FilePath))
+                        {
+                            using (var stream = File.OpenRead(attachment.FilePath))
+                            {
+                                var contentType = MimeTypes.GetMimeType(attachment.FileName);
+                                bodyBuilder.Attachments.Add(attachment.FileName, stream, ContentType.Parse(contentType));
+                            }
+                        }
+                        else
+                        {
+                            await _errorService.LogErrorAsync(new Exception($"Attachment file not found: {attachment.FilePath}"));
+                        }
+                    }
+                }
+
+                mimeMessage.Body = bodyBuilder.ToMessageBody();
+
+                var context = new Context();
+                context["email"] = email;
+
+                await _retryPolicy.ExecuteAsync(async (ctx) =>
+                {
+                    using var client = new SmtpClient();
+                    client.Timeout = 30000; // 30 seconds timeout
+                    await client.ConnectAsync(
+                        GetSetting("Server"),
+                        int.Parse(GetSetting("Port")),
+                        SecureSocketOptions.SslOnConnect
+                    );
+                    await client.AuthenticateAsync(
+                        GetSetting("SenderEmail"),
+                        GetSetting("Password")
+                    );
+                    await client.SendAsync(mimeMessage);
+                    await client.DisconnectAsync(true);
+                }, context);
+
+                return new KeyValuePair<bool, string>(true, "Message sent successfully");
+            }
+            catch (SmtpCommandException ex) when (ex.StatusCode == SmtpStatusCode.MailboxUnavailable && ex.Message.Contains("Daily user sending limit exceeded"))
+            {
+                await _errorService.LogErrorAsync(ex);
+                if (!isFromQueue)
+                {
+                    await QueueEmailFromCommunicationMessageAsync(email, message, "DailyLimitExceeded");
+                    return new KeyValuePair<bool, string>(false, "Daily sending limit exceeded. Email queued for later sending.");
+                }
+                else
+                {
+                    return new KeyValuePair<bool, string>(false, "Daily sending limit exceeded. Email remains in queue.");
+                }
+            }
+            catch (Exception ex)
+            {
+                string errorMessage = $"Message not sent. Error: {ex.Message}";
+                await _errorService.LogErrorAsync(ex);
+                return new KeyValuePair<bool, string>(false, errorMessage);
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
+        }
+
+        public async Task QueueEmailFromCommunicationMessageAsync(string email, CommunicationMessage message, string emailType)
+        {
+            var emailQueue = new EmailQueue
+            {
+                RecipientEmail = email,
+                Subject = message.Subject,
+                Body = message.Body,
+                ScheduledDate = await GetNextAvailableSendDate(),
+                IsSent = false,
+                EmailType = emailType,
+                Attachments = message.Attachments
+            };
+
+            await _repositoryManager.EmailQueueRepository.AddAsync(emailQueue);
+            await _repositoryManager.UnitOfWork.SaveChangesAsync();
+
+            if (!_enableEmailSending)
+            {
+                await _errorService.LogErrorAsync(new Exception($"Email sending is disabled. Email queued but will not be sent: To: {email}, Subject: {message.Subject}"));
+            }
+        }
     }
 }

@@ -6,6 +6,10 @@ namespace DataStore.Core.Models
 {
     public class CommunicationMessage : Meta
     {
+        public CommunicationMessage(){
+            this.Attachments = new List<Attachment>();
+        }
+
         public int Id { get; set; }
         public string Subject { get; set; }
         public string Body { get; set; }
@@ -19,6 +23,7 @@ namespace DataStore.Core.Models
         public DateTime CreatedDate { get; set; }
         public DateTime? UpdatedDate { get; set; }
         public DateTime? DeletedDate { get; set; }
+        public List<Attachment>? Attachments { get; set; }
 
         public List<string> GetTargetedRoles()
         {

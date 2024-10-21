@@ -24,6 +24,7 @@ namespace DataStore.Core.Models
             Stamps = new List<Stamp>();
             Signatures = new List<Signature>();
             NotariesPublic = new List<NotaryPublic>();
+            CommunicationMessages = new List<CommunicationMessage>();
         }
         
         [Required]
@@ -53,6 +54,7 @@ namespace DataStore.Core.Models
         public ICollection<Stamp> Stamps { get; set; }
         public ICollection<Signature> Signatures { get; set; }
         public ICollection<NotaryPublic> NotariesPublic { get; set; }
+        public ICollection<CommunicationMessage> CommunicationMessages { get; set; }
 
     }
 }

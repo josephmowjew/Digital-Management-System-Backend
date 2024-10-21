@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DataStore.Core.Models;
 
 namespace DataStore.Core.Services.Interfaces
 {
@@ -15,5 +16,6 @@ namespace DataStore.Core.Services.Interfaces
         Task ProcessEmailQueueAsync();
         Task QueueEmailAsync(string email, string subject, string body, string emailType);
         Task<KeyValuePair<bool, string>> SendMailWithKeyVarReturn(string email, string subject, string htmlMessage, bool isFromQueue = false);
+        Task<KeyValuePair<bool, string>> SendMailFromCommunicationMessage(string email, CommunicationMessage message, bool isFromQueue = false);
     }
 }

@@ -349,10 +349,10 @@ namespace MLS_Digital_MGM_API.Controllers
                 }
                        
 
-                if(string.IsNullOrEmpty(cpdTrainingDTO.AccreditingInstitution))
+                /*if(string.IsNullOrEmpty(cpdTrainingDTO.AccreditingInstitution))
                 {
                     cpdTrainingDTO.AccreditingInstitution = "MLS";
-                }
+                }*/
 
 
 
@@ -391,7 +391,7 @@ namespace MLS_Digital_MGM_API.Controllers
         }
 
         private async Task<List<Attachment>> SaveAttachmentsAsync(IEnumerable<IFormFile> attachments, int attachmentTypeId)
-     {
+        {
             var attachmentsList = new List<Attachment>();
             var hostEnvironment = HttpContext.RequestServices.GetRequiredService<IWebHostEnvironment>();
             var webRootPath = hostEnvironment.WebRootPath;
