@@ -52,8 +52,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 var pagingParameters = new PagingParameters<NotaryPublic>
                 {
                     Predicate = u => ((memberId > 0 ? u.MemberId == memberId : true) 
-                      && u.Status != Lambda.Deleted 
-                      && u.ApplicationStatus == Lambda.Approved),
+                      && u.Status != Lambda.Deleted),
                     PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
                     PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
                     SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,

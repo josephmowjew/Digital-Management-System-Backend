@@ -23,11 +23,13 @@ using System.Text;
 using Hangfire;
 using Microsoft.AspNetCore.Hosting;
 using System.Collections.Concurrent;
+using Microsoft.AspNetCore.Cors;
 
 namespace MLS_Digital_MGM_API.Controllers 
 {
     [Route("api/[controller]")]
-    //[Authorize(AuthenticationSchemes = "Bearer")]
+    [EnableCors("AllowFrontend")]  // Add this attribute
+    [Authorize(AuthenticationSchemes = "Bearer")]
     public class MembersController : Controller
     {
         private readonly IRepositoryManager _repositoryManager;
