@@ -342,7 +342,7 @@ namespace DataStore.Core.Services
                 ScheduledDate = await GetNextAvailableSendDate(),
                 IsSent = false,
                 EmailType = emailType,
-                Attachments = message.Attachments
+                //Attachments = message.Attachments
             };
 
             await _repositoryManager.EmailQueueRepository.AddAsync(emailQueue);
