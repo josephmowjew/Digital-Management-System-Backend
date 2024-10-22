@@ -120,6 +120,29 @@ namespace MLS_Digital_MGM_API.Controllers
             }
         }
 
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetCommunicationMessage(int id)
+        {
+            try
+            {
+                var communicationMessage = await _repositoryManager.CommunicationMessageRepository.GetByIdWithRecipientsAsync(id);
+
+                if (communicationMessage == null)
+                {
+                    return NotFound();
+                }
+
+                var communicationDTO = _mapper.Map<ReadCommunicationMessageDTO>(communicationMessage);
+
+                return Ok(communicationDTO);
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
 
         [HttpPost("send")]
         public async Task<IActionResult> SendMessage([FromForm] SendMessageDTO messageDto)
