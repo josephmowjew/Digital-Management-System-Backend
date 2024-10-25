@@ -51,8 +51,84 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 var pagingParameters = new PagingParameters<NotaryPublic>
                 {
-                    Predicate = u => ((memberId > 0 ? u.MemberId == memberId : true) 
-                      && u.Status != Lambda.Deleted && u.ApplicationStatus == Lambda.Approved),
+                    Predicate = u => (memberId > 0
+                        ? (u.MemberId == memberId && u.Status != Lambda.Deleted)
+                        : (u.Status != Lambda.Deleted && u.ApplicationStatus == Lambda.Approved)),
+                                        PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
+                                        PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
+                                        SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
+                                        SortColumn = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumn : null,
+                                        SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null,
+                                        Includes = new Expression<Func<NotaryPublic, object>>[] {
+                        p => p.Member,
+                        p => p.YearOfOperation,
+                        p => p.Attachments,
+                    }
+                };
+
+                var notaryPublicsPaged = await _repositoryManager.NotaryPublicRepository.GetPagedAsync(pagingParameters);
+
+                if (notaryPublicsPaged == null || !notaryPublicsPaged.Any())
+                {
+                    if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                    {
+                        var draw = dataTableParams.Draw;
+                        return Json(new
+                        {
+                            draw,
+                            recordsFiltered = 0,
+                            recordsTotal = 0,
+                            data = Enumerable.Empty<ReadNotaryPublicDTO>()
+                        });
+                    }
+                    return Ok(Enumerable.Empty<ReadNotaryPublicDTO>());
+                }
+
+                var notaryPublicDTOs = _mapper.Map<List<ReadNotaryPublicDTO>>(notaryPublicsPaged);
+
+                foreach (var notaryPublic in notaryPublicDTOs)
+                {
+                    foreach (var attachment in notaryPublic.Attachments)
+                    {
+                        string newfilePath = Path.Combine("Uploads/NotaryPublicAttachments/", attachment.FileName);
+                        attachment.FilePath = newfilePath;
+                    }
+                }
+
+                if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                {
+                    var draw = dataTableParams.Draw;
+                    var resultTotalFiltered = notaryPublicDTOs.Count;
+                    var totalRecords = await _repositoryManager.NotaryPublicRepository.CountAsync(pagingParameters);
+
+                    return Json(new
+                    {
+                        draw,
+                        recordsFiltered = totalRecords,
+                        recordsTotal = totalRecords,
+                        data = notaryPublicDTOs.ToList()
+                    });
+                }
+
+                return Ok(notaryPublicDTOs);
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpGet("registered")]
+        public async Task<IActionResult> GetRegisteredNotaryPublics(int pageNumber = 1, int pageSize = 10)
+        {
+            try
+            {
+                var dataTableParams = new DataTablesParameters();
+
+                var pagingParameters = new PagingParameters<NotaryPublic>
+                {
+                    Predicate = u => u.ApplicationStatus == Lambda.Approved && u.Status != Lambda.Deleted,
                     PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
                     PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
                     SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
@@ -118,6 +194,7 @@ namespace MLS_Digital_MGM_API.Controllers
             }
         }
 
+
         [HttpGet("pending")]
         public async Task<IActionResult> GetPendingNotaryPublics(int pageNumber = 1, int pageSize = 10)
         {
@@ -127,7 +204,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 var pagingParameters = new PagingParameters<NotaryPublic>
                 {
-                    Predicate = u => u.ApplicationStatus == Lambda.Pending && u.Status == Lambda.Active,
+                    Predicate = u => (u.ApplicationStatus == Lambda.Pending || u.ApplicationStatus == Lambda.UnderReview) && u.Status == Lambda.Active,
                     PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
                     PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
                     SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
@@ -304,6 +381,16 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 var notaryPublic = _mapper.Map<NotaryPublic>(notaryPublicDTO);
                 notaryPublic.Status = "Active";
+
+                string username = _httpContextAccessor.HttpContext.User.Identity.Name;
+                var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
+                string currentRole = Lambda.GetCurrentUserRole(_repositoryManager, user.Id);
+
+                if (currentRole.Equals("secretariat", StringComparison.OrdinalIgnoreCase))
+                {
+                    notaryPublic.ApplicationStatus = Lambda.UnderReview;
+                }
+
 
                 var attachmentType = await _repositoryManager.AttachmentTypeRepository.GetAsync(d => d.Name == "NotaryPublic")
                                     ?? new AttachmentType { Name = "NotaryPublic" };
@@ -529,16 +616,18 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 var validNotariesPublic = notariesPublic.YearOfOperationId == yearOfOperation.Id;
 
-                if(notariesPublic.YearOfOperationId == yearOfOperation.Id){
+                if (notariesPublic.YearOfOperationId == yearOfOperation.Id)
+                {
                     var notaryPublicDTO = _mapper.Map<ReadNotaryPublicDTO>(notariesPublic);
 
                     return Ok(notaryPublicDTO);
 
                 }
-                else{
+                else
+                {
                     return NotFound($"No active Notaries Public found for member with ID {memberId} for the current year");
                 }
-                
+
             }
             catch (Exception ex)
             {
@@ -564,6 +653,17 @@ namespace MLS_Digital_MGM_API.Controllers
                 {
                     if (currentRole.Equals("secretariat", StringComparison.OrdinalIgnoreCase))
                     {
+                        notaryPublic.ApplicationStatus = Lambda.UnderReview;
+                        notaryPublic.ApprovedDate = DateTime.UtcNow;
+                        await _repositoryManager.NotaryPublicRepository.UpdateAsync(notaryPublic);
+                        await _unitOfWork.CommitAsync();
+
+                        string emailBody = $"Your Notaries Public submission has been approved.";
+
+                        BackgroundJob.Enqueue(() => _emailService.SendCPDStatusEmailsAsync(new List<string> { user.Email }, emailBody, "Notary Public Application Status"));
+                    }
+                    else if (currentRole.Equals("ceo", StringComparison.OrdinalIgnoreCase))
+                    {
                         notaryPublic.ApplicationStatus = Lambda.Approved;
                         notaryPublic.ApprovedDate = DateTime.UtcNow;
                         await _repositoryManager.NotaryPublicRepository.UpdateAsync(notaryPublic);
@@ -573,6 +673,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
                         BackgroundJob.Enqueue(() => _emailService.SendCPDStatusEmailsAsync(new List<string> { user.Email }, emailBody, "Notary Public Application Status"));
                     }
+
 
                     return Ok();
                 }
