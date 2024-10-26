@@ -49,7 +49,7 @@ public class FirmsController : Controller
 
             var pagingParameters = new PagingParameters<Firm>
             {
-                Predicate = u => u.Status != Lambda.Deleted && (string.Equals(currentRole, "administrator", StringComparison.OrdinalIgnoreCase) || string.Equals(currentRole, "CEO", StringComparison.OrdinalIgnoreCase) || string.Equals(currentRole, "Finance Officer", StringComparison.OrdinalIgnoreCase) || u.CreatedById == user.Id),
+                Predicate = u => u.Status != Lambda.Deleted && (string.Equals(currentRole, "administrator", StringComparison.OrdinalIgnoreCase) || string.Equals(currentRole, "CEO", StringComparison.OrdinalIgnoreCase) || string.Equals(currentRole, "Finance Officer", StringComparison.OrdinalIgnoreCase) || u.CreatedById == user.Id || string.Equals(currentRole, "Secretariat", StringComparison.OrdinalIgnoreCase)),
                 PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
                 PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
                 SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
@@ -166,8 +166,11 @@ public class FirmsController : Controller
              string currentRole  = Lambda.GetCurrentUserRole(_repositoryManager,user.Id);
 
 
-            // Check if the user is secretariat and approve the application if so
-            if (!string.Equals(currentRole, "administrator", StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(currentRole, "administrator", StringComparison.OrdinalIgnoreCase) || string.Equals(currentRole, "Secretariat", StringComparison.OrdinalIgnoreCase))
+            {
+                firm.Status = Lambda.Active;
+            }
+            else
             {
                 firm.Status = Lambda.Pending;
             }

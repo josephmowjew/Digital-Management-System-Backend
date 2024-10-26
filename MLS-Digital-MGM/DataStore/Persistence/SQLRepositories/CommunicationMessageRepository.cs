@@ -20,6 +20,7 @@ namespace DataStore.Persistence.SQLRepositories
         {
             return await _context.CommunicationMessages
                 .Include(cm => cm.SentByUser)
+                .Include(cm => cm.Attachments)
                 .FirstOrDefaultAsync(cm => cm.Id == id);
         }
     }
