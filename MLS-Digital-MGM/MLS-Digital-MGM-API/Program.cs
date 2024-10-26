@@ -83,6 +83,7 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IEntityResolverService,EntityResolverService>();
 builder.Services.AddScoped<IErrorLogRepository, ErrorLogRepository>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+builder.Services.AddScoped<ILicenseGenerationService, LicenseGenerationService>();
 builder.Services.AddDistributedRedisCache(r => { r.Configuration = builder.Configuration["redis:connectionString"]; });
 var provider = builder.Configuration["ServerSettings:ServerName"];
 string mySqlConnectionStr = builder.Configuration.GetConnectionString("MySqlConnection");

@@ -16,7 +16,7 @@ namespace DataStore.Core.Models
         public DateTime ExpiryDate { get; set; }
         public int YearOfOperationId { get; set; }
         public YearOfOperation YearOfOperation { get; set; }
-        public int LicenseApplicationId { get; set; }
+        public int? LicenseApplicationId { get; set; }
         public LicenseApplication LicenseApplication { get; set; }
     }
 }

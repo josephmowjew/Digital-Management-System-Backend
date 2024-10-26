@@ -22,5 +22,6 @@ namespace DataStore.Persistence.Interfaces;
      Task<int> GetLicensedMembersCountAsync();
      Task<int> GetUnlicensedMembersCountAsync();
      Task<IEnumerable<Member>> GetLicensedMembersAsync();
+     Task<IEnumerable<Member>> GetUnlicensedMembersAsync();
   
   }

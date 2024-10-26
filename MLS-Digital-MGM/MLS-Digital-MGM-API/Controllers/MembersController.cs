@@ -493,7 +493,7 @@ namespace MLS_Digital_MGM_API.Controllers
         }
 
         [AutomaticRetry(Attempts = 3)]
-        public async Task ProcessBulkRegistration(string filePath, List<ApplicationUser> secretariatUsers)
+        private async Task ProcessBulkRegistration(string filePath, List<ApplicationUser> secretariatUsers)
         {
             var result = new BulkRegistrationResult();
             var successfulRegistrations = new List<(ApplicationUser User, string Password)>();
@@ -1013,7 +1013,7 @@ namespace MLS_Digital_MGM_API.Controllers
         }
 
         [AutomaticRetry(Attempts = 3)]
-        public async Task ProcessEmailQueue()
+        private async Task ProcessEmailQueue()
         {
             await _emailService.ProcessEmailQueueAsync();
         }
