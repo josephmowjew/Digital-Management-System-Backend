@@ -22,7 +22,7 @@ using DataStore.Core.DTOs.License;
 namespace MLS_Digital_MGM_API.Controllers
 {
     [Route("api/[controller]")]
-    ///[Authorize(AuthenticationSchemes = "Bearer")]
+    [Authorize(AuthenticationSchemes = "Bearer")]
     public class LicenseApplicationsController : Controller
     {
         private readonly IRepositoryManager _repositoryManager;
