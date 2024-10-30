@@ -17,6 +17,8 @@ namespace DataStore.Core.Models
 
         public int MemberId { get; set; }
         public Member Member { get; set; }
+        public string UserId { get; set; }
+        public ApplicationUser User { get; set; }
         public string ApplicationStatus { get; set; } = Lambda.Pending;
         public DateTime? ApprovedDate { get; set; }
         [StringLength(200)]
