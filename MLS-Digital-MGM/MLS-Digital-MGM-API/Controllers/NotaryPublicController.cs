@@ -646,8 +646,9 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 string username = _httpContextAccessor.HttpContext.User.Identity.Name;
 
-                var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
-                string currentRole = Lambda.GetCurrentUserRole(_repositoryManager, user.Id);
+                var approvingUser = await _repositoryManager.UserRepository.FindByEmailAsync(username);
+                var applyingUser = await _repositoryManager.UserRepository.GetSingleUser(notaryPublic.UserId);
+                string currentRole = Lambda.GetCurrentUserRole(_repositoryManager, approvingUser.Id);
 
                 if (notaryPublic != null)
                 {
@@ -658,9 +659,9 @@ namespace MLS_Digital_MGM_API.Controllers
                         await _repositoryManager.NotaryPublicRepository.UpdateAsync(notaryPublic);
                         await _unitOfWork.CommitAsync();
 
-                        string emailBody = $"Your Notaries Public submission has been approved.";
+                        string emailBody = $"Your Notaries Public submission is currently under review.";
 
-                        BackgroundJob.Enqueue(() => _emailService.SendCPDStatusEmailsAsync(new List<string> { user.Email }, emailBody, "Notary Public Application Status"));
+                        BackgroundJob.Enqueue(() => _emailService.SendCPDStatusEmailsAsync(new List<string> { applyingUser.Email }, emailBody, "Notary Public Application Status"));
                     }
                     else if (currentRole.Equals("ceo", StringComparison.OrdinalIgnoreCase))
                     {
@@ -671,7 +672,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
                         string emailBody = $"Your Notaries Public submission has been approved.";
 
-                        BackgroundJob.Enqueue(() => _emailService.SendCPDStatusEmailsAsync(new List<string> { user.Email }, emailBody, "Notary Public Application Status"));
+                        BackgroundJob.Enqueue(() => _emailService.SendCPDStatusEmailsAsync(new List<string> { applyingUser.Email }, emailBody, "Notary Public Application Status"));
                     }
 
 
