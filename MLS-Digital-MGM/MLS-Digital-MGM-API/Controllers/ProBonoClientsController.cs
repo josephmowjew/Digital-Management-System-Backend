@@ -41,13 +41,17 @@ namespace MLS_Digital_MGM_API.Controllers // Update with your actual namespace
         {
             try
             {
-
                 // Create a new DataTablesParameters object
                 var dataTableParams = new DataTablesParameters();
+
+                string username = _httpContextAccessor.HttpContext.User.Identity.Name;
+                var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
+
+                string currentRole  = Lambda.GetCurrentUserRole(_repositoryManager,user.Id);
             
                 var pagingParameters = new PagingParameters<ProbonoClient>
                 {
-                    Predicate = u => u.Status != Lambda.Deleted,
+                    Predicate = u => u.Status != Lambda.Deleted && (string.Equals(currentRole, "secretariat", StringComparison.OrdinalIgnoreCase) || string.Equals(currentRole, "ceo", StringComparison.OrdinalIgnoreCase) || string.Equals(currentRole, "president", StringComparison.OrdinalIgnoreCase) || u.CreatedById == user.Id),
                     PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
                     PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
                     SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
