@@ -121,39 +121,48 @@ namespace DataStore.Persistence.SQLRepositories
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<ApplicationUser>> GetPagedStaffUsersAsync(PagingParameters<ApplicationUser> pagingParameters)
-        {
-            var query = _context.Users
-                .Where(pagingParameters.Predicate)
-                .Where(u => !_context.UserRoles.Any(ur => ur.UserId == u.Id && _context.Roles.Any(r => r.Id == ur.RoleId && r.Name.ToLower() == "member")));
+public async Task<IEnumerable<ApplicationUser>> GetPagedStaffUsersAsync(PagingParameters<ApplicationUser> pagingParameters)
+{
+    // Build the query first
+    var query = _context.Users.AsNoTracking() // Add AsNoTracking() for better performance
+        .Where(pagingParameters.Predicate)
+        .Where(u => !_context.UserRoles.Any(ur => 
+            ur.UserId == u.Id && 
+            _context.Roles.Any(r => r.Id == ur.RoleId && r.Name.ToLower() == "member")));
 
-            // Apply search if provided
-            if (!string.IsNullOrEmpty(pagingParameters.SearchTerm))
-            {
-                query = query.Where(u => u.UserName.Contains(pagingParameters.SearchTerm) || u.Email.Contains(pagingParameters.SearchTerm));
-            }
+    // Apply search if provided
+    if (!string.IsNullOrEmpty(pagingParameters.SearchTerm))
+    {
+        query = query.Where(u => 
+            u.UserName.Contains(pagingParameters.SearchTerm) || 
+            u.Email.Contains(pagingParameters.SearchTerm));
+    }
 
-            // Apply sorting
-            if (!string.IsNullOrEmpty(pagingParameters.SortColumn))
-            {
-                var parameter = Expression.Parameter(typeof(ApplicationUser), "u");
-                var property = Expression.Property(parameter, pagingParameters.SortColumn);
-                var lambda = Expression.Lambda(property, parameter);
+    // Apply sorting
+    if (!string.IsNullOrEmpty(pagingParameters.SortColumn))
+    {
+        var parameter = Expression.Parameter(typeof(ApplicationUser), "u");
+        var property = Expression.Property(parameter, pagingParameters.SortColumn);
+        var lambda = Expression.Lambda<Func<ApplicationUser, object>>(
+            Expression.Convert(property, typeof(object)), 
+            parameter);
 
-                query = pagingParameters.SortDirection == "asc" 
-                    ? Queryable.OrderBy(query, (dynamic)lambda)
-                    : Queryable.OrderByDescending(query, (dynamic)lambda);
-            }
-            else
-            {
-                query = query.OrderBy(u => u.UserName);
-            }
+        query = pagingParameters.SortDirection == "asc"
+            ? query.OrderBy(lambda)
+            : query.OrderByDescending(lambda);
+    }
+    else
+    {
+        query = query.OrderBy(u => u.UserName);
+    }
 
-            return await query
-                .Skip((pagingParameters.PageNumber - 1) * pagingParameters.PageSize)
-                .Take(pagingParameters.PageSize)
-                .ToListAsync();
-        }
+    // Execute the query in a single operation
+    return await query
+        .Skip((pagingParameters.PageNumber - 1) * pagingParameters.PageSize)
+        .Take(pagingParameters.PageSize)
+        .ToListAsync()
+        .ConfigureAwait(false);
+}
 
 
         public async Task<int> CountStaffUsersAsync(PagingParameters<ApplicationUser> pagingParameters)

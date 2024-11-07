@@ -13,6 +13,8 @@ using System.Threading.Tasks;
 using DataStore.Core.Models;
 using DataStore.Persistence.Interfaces;
 using Hangfire;
+using System.Text.Json;
+using DataStore.Core.DTOs.User;
 
 namespace DataStore.Core.Services
 {
@@ -34,7 +36,8 @@ namespace DataStore.Core.Services
             IErrorLogService errorService, 
             IRepositoryManager repositoryManager,
             IBackgroundJobClient backgroundJobClient,
-            IRecurringJobManager recurringJobManager)
+            IRecurringJobManager recurringJobManager
+           )
         {
             _configuration = configuration;
             _errorService = errorService;
@@ -43,6 +46,7 @@ namespace DataStore.Core.Services
             _recurringJobManager = recurringJobManager;
             _useMailtrap = _configuration.GetValue<bool>("MailSettings:UseMailtrap");
             _enableEmailSending = _configuration.GetValue<bool>("MailSettings:EnableEmailSending");
+       
 
             _retryPolicy = Policy
                 .Handle<SmtpCommandException>()
@@ -245,7 +249,7 @@ namespace DataStore.Core.Services
         }
 
         //communication message with or without attachments
-        public async Task<KeyValuePair<bool, string>> SendMailFromCommunicationMessage(string email, CommunicationMessage message, bool isFromQueue = false)
+        public async Task<KeyValuePair<bool, string>> SendMailFromCommunicationMessage(string email, CommunicationMessage message, string senderUserId = null, bool isFromQueue = false)
         {
             if (!_enableEmailSending)
             {
@@ -262,7 +266,20 @@ namespace DataStore.Core.Services
                 mimeMessage.Subject = message.Subject;
 
                 var bodyBuilder = new BodyBuilder();
-                bodyBuilder.HtmlBody = message.Body;
+                
+                // Add signature if sender is specified
+                string emailBody = message.Body;
+                if (!string.IsNullOrEmpty(senderUserId))
+                {
+                    var sender = await _repositoryManager.UserRepository.GetSingleUser(senderUserId);
+                   if (!string.IsNullOrEmpty(sender?.SignatureData))
+                    {
+                        var signatureData = JsonSerializer.Deserialize<SignatureDTO>(sender.SignatureData);
+                        emailBody += $"<br/><br/>{SignatureService.GenerateSignatureHtml(signatureData)}";
+                    }
+                }
+                
+                bodyBuilder.HtmlBody = emailBody;
 
                 if (message.Attachments != null && message.Attachments.Any())
                 {

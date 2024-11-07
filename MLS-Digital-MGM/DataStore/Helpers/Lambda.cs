@@ -7,6 +7,7 @@ using DataStore.Core.Services.Interfaces;
 using DataStore.Persistence.Interfaces;
 using Microsoft.AspNetCore.Http;
 using System.Text.RegularExpressions;
+using DataStore.Core.Models;
 
 namespace DataStore.Helpers
 {
@@ -81,6 +82,15 @@ namespace DataStore.Helpers
         {
             // generating a random number
             return _random.Next(100000, 1000000);
+        }
+
+        //get current user 
+        public static async Task<ApplicationUser> GetCurrentUser(IRepositoryManager repositoryManager, HttpContext httpContext)
+        {
+             //return the current user object
+             string username = httpContext.User.Identity?.Name;
+             var user = await repositoryManager.UserRepository.FindByEmailAsync(username);
+             return user;
         }
 
         public static string GetCurrentUserRole(IRepositoryManager repositoryManager, string userId)
