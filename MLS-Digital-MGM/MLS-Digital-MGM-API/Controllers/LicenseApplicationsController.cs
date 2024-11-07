@@ -812,5 +812,58 @@ namespace MLS_Digital_MGM_API.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+
+        [HttpPost("generate-licenses/{year}")]
+        public async Task<IActionResult> GenerateLicensesForYear(string? year = null)
+        {
+            try
+            {
+                var licenseGenerationService = HttpContext.RequestServices
+                    .GetRequiredService<ILicenseGenerationService>();
+
+                // Remove the query parameter and just use the route value
+                year = year?.TrimEnd('?');
+                
+                if (string.IsNullOrEmpty(year))
+                {
+                    var result = await licenseGenerationService.GenerateLicensesForYear();
+                    return Ok(new { 
+                        message = $"License generation complete. Success: {result.success}, Failed: {result.failed}",
+                        successCount = result.success,
+                        failedCount = result.failed
+                    });
+                }
+
+                // Clean up the year format
+                year = year.Replace("year=", "").Trim();
+                
+                var yearParts = year.Split('-');
+                if (yearParts.Length != 2 || !int.TryParse(yearParts[0], out int startYear) || !int.TryParse(yearParts[1], out int endYear))
+                {
+                    return BadRequest("Invalid year format. Please use 'YYYY-YYYY' format.");
+                }
+
+                var yearOfOperation = await _repositoryManager.YearOfOperationRepository.GetAsync(
+                    y => y.StartDate.Year == startYear && y.EndDate.Year == endYear);
+
+                if (yearOfOperation == null)
+                {
+                    return NotFound("Year of operation not found.");
+                }
+                
+                var (success, failed) = await licenseGenerationService.GenerateLicensesForYear(yearOfOperation.Id);
+                
+                return Ok(new { 
+                    message = $"License generation complete. Success: {success}, Failed: {failed}",
+                    successCount = success,
+                    failedCount = failed
+                });
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
     }
 }

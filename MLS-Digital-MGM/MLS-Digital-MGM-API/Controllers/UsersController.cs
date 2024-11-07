@@ -12,6 +12,8 @@ using DataStore.Helpers;
 using System.Linq.Expressions;
 using MLS_Digital_MGM.DataStore.Helpers;
 using Microsoft.AspNetCore.Authorization;
+using System.Text.Json;
+using DataStore.Core.Services;
 
 namespace MLS_Digital_MGM_API.Controllers
 {
@@ -24,16 +26,17 @@ namespace MLS_Digital_MGM_API.Controllers
         private readonly IErrorLogService _errorLogService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-
+        private readonly SignatureService _signatureService;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public UsersController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor)
+        public UsersController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor, SignatureService signatureService)
         {
             _repositoryManager = repositoryManager;
             _errorLogService = errorLogService;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _httpContextAccessor = httpContextAccessor;
+            _signatureService = signatureService;
         }
 
         [HttpGet("paged")]
@@ -506,6 +509,91 @@ namespace MLS_Digital_MGM_API.Controllers
                 // Log the error and return an error response
                 await _errorLogService.LogErrorAsync(ex);
                 return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpPut("signature")]
+        public async Task<IActionResult> UpdateEmailSignature([FromBody] SignatureDTO signature)
+        {
+            try
+            {
+                var user = await Lambda.GetCurrentUser(_repositoryManager, _httpContextAccessor.HttpContext);
+                
+                // Store only the JSON data
+                user.SignatureData = JsonSerializer.Serialize(signature);
+                
+                await _repositoryManager.UserRepository.UpdateAsync(user);
+                await _repositoryManager.UnitOfWork.CommitAsync();
+                
+                return Ok("Email signature updated successfully");
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "An error occurred while updating the signature.");
+            }
+        }
+
+        [HttpGet("signature")]
+        public async Task<IActionResult> GetSignature()
+        {
+            try
+            {
+                var user = await Lambda.GetCurrentUser(_repositoryManager, _httpContextAccessor.HttpContext);
+                if (string.IsNullOrEmpty(user.SignatureData))
+                    return Ok(new SignatureDTO());
+                    
+                return Ok(JsonSerializer.Deserialize<SignatureDTO>(user.SignatureData));
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "An error occurred while fetching the signature.");
+            }
+        }
+
+        [HttpGet("signature/html")]
+        public async Task<IActionResult> GetFormattedSignature()
+        {
+            try
+            {
+                var user = await Lambda.GetCurrentUser(_repositoryManager, _httpContextAccessor.HttpContext);
+                if (string.IsNullOrEmpty(user.SignatureData))
+                    return Ok(string.Empty);
+                    
+                var signatureData = JsonSerializer.Deserialize<SignatureDTO>(user.SignatureData);
+                var htmlSignature = SignatureService.GenerateSignatureHtml(signatureData);
+                
+                return Ok(new { html = htmlSignature });
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "An error occurred while generating the signature HTML.");
+            }
+        }
+
+        [HttpGet("signature/html/{userId}")]
+        public async Task<IActionResult> GetUserFormattedSignature(string userId)
+        {
+            try
+            {
+                var user = await _repositoryManager.UserRepository.GetSingleUser(userId);
+                if (user == null)
+                    return NotFound("User not found");
+                    
+                if (string.IsNullOrEmpty(user.SignatureData))
+                    return Ok(string.Empty);
+                    
+                var signatureData = JsonSerializer.Deserialize<SignatureDTO>(user.SignatureData);
+                var htmlSignature = SignatureService.GenerateSignatureHtml(signatureData);
+                
+                return Ok(new { html = htmlSignature });
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "An error occurred while generating the signature HTML.");
             }
         }
 

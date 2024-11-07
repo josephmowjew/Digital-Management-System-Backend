@@ -55,6 +55,15 @@ namespace DataStore.Persistence.SQLRepositories
                 .CountAsync(m => !_context.Licenses.Any(l => l.MemberId == m.Id) && m.Status != Lambda.Deleted);
         }
 
+        public async Task<IEnumerable<Member>> GetUnlicensedMembersAsync()
+        {
+            return await _context.Members
+                .Include(m => m.User)
+                .Include(m => m.Customer)
+                .Where(m => !_context.Licenses.Any(l => l.MemberId == m.Id) && m.Status != Lambda.Deleted)
+                .ToListAsync();
+        }
+
         
         public async Task<IEnumerable<Member>> GetLicensedMembersAsync()
         {

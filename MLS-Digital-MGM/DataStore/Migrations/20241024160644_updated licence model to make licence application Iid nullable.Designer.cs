@@ -3,6 +3,7 @@ using System;
 using DataStore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241024160644_updated licence model to make licence application Iid nullable")]
+    partial class updatedlicencemodeltomakelicenceapplicationIidnullable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -347,10 +350,6 @@ namespace DataStore.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("SecurityStamp")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("SignatureData")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("Status")
@@ -1727,18 +1726,12 @@ namespace DataStore.Migrations
                     b.Property<DateTime>("UpdatedDate")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("varchar(200)");
-
                     b.Property<int>("YearOfOperationId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("MemberId");
-
-                    b.HasIndex("UserId");
 
                     b.HasIndex("YearOfOperationId");
 
@@ -3761,12 +3754,6 @@ namespace DataStore.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DataStore.Core.Models.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("DataStore.Core.Models.YearOfOperation", "YearOfOperation")
                         .WithMany()
                         .HasForeignKey("YearOfOperationId")
@@ -3774,8 +3761,6 @@ namespace DataStore.Migrations
                         .IsRequired();
 
                     b.Navigation("Member");
-
-                    b.Navigation("User");
 
                     b.Navigation("YearOfOperation");
                 });

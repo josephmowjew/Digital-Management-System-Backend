@@ -202,9 +202,18 @@ namespace MLS_Digital_MGM_API.Controllers
                 await _repositoryManager.CommunicationMessageRepository.AddAsync(communicationMessage);
                 await _repositoryManager.UnitOfWork.CommitAsync();
 
-                var emailTasks = recipients.Select(recipient =>
-                    _emailService.SendMailFromCommunicationMessage(recipient.Email, communicationMessage));
-                await Task.WhenAll(emailTasks);
+                var emailTasks = recipients.Select(async recipient =>
+                {
+                    using var scope = HttpContext.RequestServices.CreateScope();
+                    var emailService = scope.ServiceProvider.GetRequiredService<IEmailService>();
+                    return await emailService.SendMailFromCommunicationMessage(
+                        recipient.Email,
+                        communicationMessage,
+                        currentUser.Id,
+                        messageDto.IncludeSignature
+                    );
+                });
+                var results = await Task.WhenAll(emailTasks);
 
                 return Json(new { message = $"Message sent successfully to {recipients.Count} recipients and saved with ID {communicationMessage.Id}." });
             }

@@ -66,6 +66,8 @@ namespace DataStore.Core.Models
 
         public List<Committee> Committees { get; set; }
 
+        public string SignatureData { get; set; }   // Stores JSON data
+
        
         // [NotMapped]
         // public string FullName => $"{FirstName} {LastName}";
