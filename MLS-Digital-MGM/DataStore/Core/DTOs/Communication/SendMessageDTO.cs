@@ -19,5 +19,7 @@ namespace DataStore.Core.DTOs.Communication
         public bool SendToAllUsers { get; set; }
         
         public List<IFormFile>? Attachments { get; set; }
+
+        public bool IncludeSignature { get; set; } = true;
     }
 }

@@ -249,7 +249,12 @@ namespace DataStore.Core.Services
         }
 
         //communication message with or without attachments
-        public async Task<KeyValuePair<bool, string>> SendMailFromCommunicationMessage(string email, CommunicationMessage message, string senderUserId = null, bool isFromQueue = false)
+        public async Task<KeyValuePair<bool, string>> SendMailFromCommunicationMessage(
+            string email, 
+            CommunicationMessage message, 
+            string senderUserId = null, 
+            bool includeSignature = true,
+            bool isFromQueue = false)
         {
             if (!_enableEmailSending)
             {
@@ -267,12 +272,12 @@ namespace DataStore.Core.Services
 
                 var bodyBuilder = new BodyBuilder();
                 
-                // Add signature if sender is specified
+                // Add signature if sender is specified AND includeSignature is true
                 string emailBody = message.Body;
-                if (!string.IsNullOrEmpty(senderUserId))
+                if (!string.IsNullOrEmpty(senderUserId) && includeSignature)
                 {
                     var sender = await _repositoryManager.UserRepository.GetSingleUser(senderUserId);
-                   if (!string.IsNullOrEmpty(sender?.SignatureData))
+                    if (!string.IsNullOrEmpty(sender?.SignatureData))
                     {
                         var signatureData = JsonSerializer.Deserialize<SignatureDTO>(sender.SignatureData);
                         emailBody += $"<br/><br/>{SignatureService.GenerateSignatureHtml(signatureData)}";

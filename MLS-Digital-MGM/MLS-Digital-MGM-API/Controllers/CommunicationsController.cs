@@ -202,7 +202,6 @@ namespace MLS_Digital_MGM_API.Controllers
                 await _repositoryManager.CommunicationMessageRepository.AddAsync(communicationMessage);
                 await _repositoryManager.UnitOfWork.CommitAsync();
 
-               // ... in SendMessage method ...
                 var emailTasks = recipients.Select(async recipient =>
                 {
                     using var scope = HttpContext.RequestServices.CreateScope();
@@ -210,7 +209,8 @@ namespace MLS_Digital_MGM_API.Controllers
                     return await emailService.SendMailFromCommunicationMessage(
                         recipient.Email,
                         communicationMessage,
-                        currentUser.Id
+                        currentUser.Id,
+                        messageDto.IncludeSignature
                     );
                 });
                 var results = await Task.WhenAll(emailTasks);
