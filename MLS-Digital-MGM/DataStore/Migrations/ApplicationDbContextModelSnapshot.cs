@@ -1723,12 +1723,18 @@ namespace DataStore.Migrations
                     b.Property<DateTime>("UpdatedDate")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("varchar(200)");
+
                     b.Property<int>("YearOfOperationId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("MemberId");
+
+                    b.HasIndex("UserId");
 
                     b.HasIndex("YearOfOperationId");
 
@@ -3753,6 +3759,12 @@ namespace DataStore.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("DataStore.Core.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("DataStore.Core.Models.YearOfOperation", "YearOfOperation")
                         .WithMany()
                         .HasForeignKey("YearOfOperationId")
@@ -3760,6 +3772,8 @@ namespace DataStore.Migrations
                         .IsRequired();
 
                     b.Navigation("Member");
+
+                    b.Navigation("User");
 
                     b.Navigation("YearOfOperation");
                 });

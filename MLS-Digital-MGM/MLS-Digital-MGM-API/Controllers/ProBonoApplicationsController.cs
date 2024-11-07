@@ -197,10 +197,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
                 proBonoApplication.CreatedById = user.Id;
 
-
                 await _repositoryManager.ProBonoApplicationRepository.AddAsync(proBonoApplication);
-
-               
 
                 // Check if a ProBonoApplication with the same nature of dispute already exists
                 var existingProBonoApplication = await _repositoryManager.ProBonoApplicationRepository.GetAsync(
@@ -248,21 +245,17 @@ namespace MLS_Digital_MGM_API.Controllers
 
                     //added a record of an actual pro bono itself as well once the application has been saved
 
-                    var probono = this._mapper.Map<ProBono>(proBonoApplication);
+                    //var probono = this._mapper.Map<ProBono>(proBonoApplication);
 
                     //generate a unique file number
-                    string fileNumber = await GenerateUniqueFileNumber();
+                   /* string fileNumber = await GenerateUniqueFileNumber();
                     probono.ProBonoApplicationId = proBonoApplication.Id;
                     probono.FileNumber = fileNumber;
                     
-                
-
-                    await _repositoryManager.ProBonoRepository.AddAsync(probono);
-
-                
+                    await _repositoryManager.ProBonoRepository.AddAsync(probono);*/
                     
                     // Send status details email
-                    string emailBody = $"Your application for the pro bono application has been accepted.";
+                    string emailBody = $"Your application for the pro bono application is currently under review.";
                    
 
                     BackgroundJob.Enqueue(() => this._emailService.SendCPDStatusEmailsAsync(new List<string>{user.Email},emailBody,"Pro Bono Application Status"));
@@ -471,7 +464,6 @@ namespace MLS_Digital_MGM_API.Controllers
                         await _unitOfWork.CommitAsync();
 
                         //added a record of an actual pro bono itself as well once the application has been saved
-
                         var probono = this._mapper.Map<ProBono>(application);
 
                         //generate a unique file number
@@ -479,19 +471,27 @@ namespace MLS_Digital_MGM_API.Controllers
                         probono.ProBonoApplicationId = application.Id;
                         probono.FileNumber = fileNumber;
 
+                        //assign the probono to member
+                        var member = await _repositoryManager.MemberRepository.GetMemberByUserId(application.CreatedById);
+
+                        //check if the probono application was made by a member
+                        if(member !=null)
+                        {
+                            probono.Members.Add(member);   
+                        }
+
                         await _repositoryManager.ProBonoRepository.AddAsync(probono);
 
                         await _unitOfWork.CommitAsync();
 
                         //send email to the user who created the probono application
-                        
+
                         // Send status details email
                         string emailBody = $"Your application for the pro bono application has been accepted. The file number is {fileNumber}";
-                    
 
                         BackgroundJob.Enqueue(() => this._emailService.SendCPDStatusEmailsAsync(new List<string>{user.Email},emailBody,"Pro Bono Application Status"));
                     }
-                    
+
                     return Ok();
                 }
                 return BadRequest("user not found");

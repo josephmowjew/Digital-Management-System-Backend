@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DataStore.Core.DTOs.Member;
 using DataStore.Core.DTOs.ProBonoClient;
 using DataStore.Core.DTOs.ProBonoReport;
 
@@ -31,7 +32,7 @@ namespace DataStore.Core.DTOs.ProBono
         public int ProbonoClientId { get; set; }
 
         public ReadProBonoClientDTO ProbonoClient { get; set; }
-
+        public ICollection<ReadMemberDTO> Members { get; set; }
         public int ProBonoApplicationId { get; set; }
         public DataStore.Core.Models.ProBonoApplication ProBonoApplication { get; set; }
         public int YearOfOperationId { get; set; }

@@ -17,7 +17,6 @@ namespace DataStore.Core.Models
            this.CPDTrainingRegistrations = new List<CPDTrainingRegistration>();
            this.Licenses = new List<License>();
            this.Penalties = new List<Penalty>();
-           
        }
         public string UserId { get; set; }
         public ApplicationUser User { get; set; }

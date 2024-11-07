@@ -14,7 +14,7 @@ using System.Reflection;
 
 namespace DataStore.Persistence.SQLRepositories
 {
-    public class Repository<T>: IRepository<T> where T : class, IEntity
+    public class Repository<T> : IRepository<T> where T : class, IEntity
     {
         private readonly ApplicationDbContext _context;
         private readonly IUnitOfWork _unitOfWork;
@@ -29,7 +29,7 @@ namespace DataStore.Persistence.SQLRepositories
         {
             var type = typeof(T);
             var property = type.GetProperty("Id");
-            
+
             if (property == null)
             {
                 throw new ArgumentException($"The entity of type {typeof(T).Name} does not have an Id property.");
@@ -183,7 +183,7 @@ namespace DataStore.Persistence.SQLRepositories
                 }
             }
 
-            var result = await query.CountAsync();  
+            var result = await query.CountAsync();
 
             return result;
         }
@@ -199,20 +199,43 @@ namespace DataStore.Persistence.SQLRepositories
                 var searchTermValue = Expression.Constant(pagingParameters.SearchTerm.ToLower(), typeof(string));
 
                 var searchExpressions = entityProperties
-                    .Where(p => p.PropertyType == typeof(string))
-                    .Select(p =>
+                    .SelectMany(p =>
                     {
-                        var propertyAccess = Expression.Property(parameter, p);
-                        var toLowerExpression = Expression.Call(propertyAccess, typeof(string).GetMethod("ToLower", Type.EmptyTypes));
-                        var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) });
-                        var containsExpression = Expression.Call(toLowerExpression, containsMethod, searchTermValue);
-                        return containsExpression;
-                    });
+                        // Check if property is a string and add it directly
+                        if (p.PropertyType == typeof(string))
+                        {
+                            var propertyAccess = Expression.Property(parameter, p);
+                            var toLowerExpression = Expression.Call(propertyAccess, typeof(string).GetMethod("ToLower", Type.EmptyTypes));
+                            var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) });
+                            var containsExpression = Expression.Call(toLowerExpression, containsMethod, searchTermValue);
+                            return new[] { containsExpression };
+                        }
 
-                var orExpression = searchExpressions.Aggregate<Expression>(Expression.OrElse);
-                var lambda = Expression.Lambda<Func<T, bool>>(orExpression, parameter);
+                        // If the property is a class or association, get its properties
+                        if (p.PropertyType.IsClass && p.PropertyType != typeof(string))
+                        {
+                            var nestedProperties = p.PropertyType.GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                                .Where(nestedProp => nestedProp.PropertyType == typeof(string));
 
-                query = query.Where(lambda);
+                            return nestedProperties.Select(nestedProp =>
+                            {
+                                var nestedAccess = Expression.Property(Expression.Property(parameter, p), nestedProp);
+                                var nestedToLowerExpression = Expression.Call(nestedAccess, typeof(string).GetMethod("ToLower", Type.EmptyTypes));
+                                var nestedContainsExpression = Expression.Call(nestedToLowerExpression, typeof(string).GetMethod("Contains", new[] { typeof(string) }), searchTermValue);
+                                return (Expression)nestedContainsExpression;
+                            });
+                        }
+
+                        return Enumerable.Empty<Expression>();
+                    })
+                    .ToList();
+
+                if (searchExpressions.Any())
+                {
+                    var orExpression = searchExpressions.Aggregate<Expression>(Expression.OrElse);
+                    var lambda = Expression.Lambda<Func<T, bool>>(orExpression, parameter);
+                    query = query.Where(lambda);
+                }
             }
 
             foreach (var include in pagingParameters.Includes)
@@ -231,6 +254,10 @@ namespace DataStore.Persistence.SQLRepositories
                 if (includeString == "Member")
                 {
                     query = query.Include("Member.User");
+                }
+                 if (includeString == "Members")
+                {
+                    query = query.Include("Members.User");
                 }
             }
 
@@ -282,7 +309,7 @@ namespace DataStore.Persistence.SQLRepositories
         public async Task AddRange(List<T> entities)
         {
             await _context.Set<T>().AddRangeAsync(entities);
-           
+
         }
 
         public async Task AddAsync(T entity)
@@ -298,7 +325,7 @@ namespace DataStore.Persistence.SQLRepositories
 
         public async Task DeleteAsync(T entity)
         {
-           
+
             if (entity != null)
             {
                 entity.DeletedDate = DateTime.Now;
