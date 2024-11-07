@@ -552,6 +552,51 @@ namespace MLS_Digital_MGM_API.Controllers
             }
         }
 
+        [HttpGet("signature/html")]
+        public async Task<IActionResult> GetFormattedSignature()
+        {
+            try
+            {
+                var user = await Lambda.GetCurrentUser(_repositoryManager, _httpContextAccessor.HttpContext);
+                if (string.IsNullOrEmpty(user.SignatureData))
+                    return Ok(string.Empty);
+                    
+                var signatureData = JsonSerializer.Deserialize<SignatureDTO>(user.SignatureData);
+                var htmlSignature = SignatureService.GenerateSignatureHtml(signatureData);
+                
+                return Ok(new { html = htmlSignature });
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "An error occurred while generating the signature HTML.");
+            }
+        }
+
+        [HttpGet("signature/html/{userId}")]
+        public async Task<IActionResult> GetUserFormattedSignature(string userId)
+        {
+            try
+            {
+                var user = await _repositoryManager.UserRepository.GetSingleUser(userId);
+                if (user == null)
+                    return NotFound("User not found");
+                    
+                if (string.IsNullOrEmpty(user.SignatureData))
+                    return Ok(string.Empty);
+                    
+                var signatureData = JsonSerializer.Deserialize<SignatureDTO>(user.SignatureData);
+                var htmlSignature = SignatureService.GenerateSignatureHtml(signatureData);
+                
+                return Ok(new { html = htmlSignature });
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "An error occurred while generating the signature HTML.");
+            }
+        }
+
     }
 
     
