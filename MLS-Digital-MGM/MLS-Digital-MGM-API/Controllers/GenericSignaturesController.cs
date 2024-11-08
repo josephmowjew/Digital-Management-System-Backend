@@ -105,7 +105,7 @@ public class GenericSignaturesController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateGenericSignature([FromBody] SignatureDTO signatureDTO)
+    public async Task<IActionResult> CreateGenericSignature([FromForm] SignatureDTO signatureDTO)
     {
         try
         {
@@ -114,6 +114,26 @@ public class GenericSignaturesController : Controller
 
             var signature = _mapper.Map<GenericSignature>(signatureDTO);
             
+            // Get or create attachment type
+            var attachmentType = await _repositoryManager.AttachmentTypeRepository.GetAsync(d => d.Name == "Signature") 
+                                ?? new AttachmentType { Name = "Signature" };
+
+            if (attachmentType.Id == 0)
+            {
+                await _repositoryManager.AttachmentTypeRepository.AddAsync(attachmentType);
+                await _unitOfWork.CommitAsync();
+            }
+
+            // Handle attachments
+            if (signatureDTO.Attachments?.Any() == true)
+            {
+                var attachmentsToUpdate = signatureDTO.Attachments.Where(a => a.Length > 0).ToList();
+                if (attachmentsToUpdate.Any())
+                {
+                    signature.Attachments = await SaveAttachmentsAsync(attachmentsToUpdate, attachmentType.Id);
+                }
+            }
+
             // Deactivate current active signature if exists
             var currentActive = await _repositoryManager.GenericSignatureRepository.GetSingleAsync(s => s.IsActive);
             if (currentActive != null)
@@ -136,7 +156,7 @@ public class GenericSignaturesController : Controller
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateGenericSignature(int id, [FromBody] SignatureDTO signatureDTO)
+    public async Task<IActionResult> UpdateGenericSignature(int id, [FromForm] SignatureDTO signatureDTO)
     {
         try
         {
@@ -147,9 +167,28 @@ public class GenericSignaturesController : Controller
             if (signature == null)
                 return NotFound();
 
+            // Get or create attachment type
+            var attachmentType = await _repositoryManager.AttachmentTypeRepository.GetAsync(d => d.Name == "Signature") 
+                                ?? new AttachmentType { Name = "Signature" };
+
+            if (attachmentType.Id == 0)
+            {
+                await _repositoryManager.AttachmentTypeRepository.AddAsync(attachmentType);
+                await _unitOfWork.CommitAsync();
+            }
+
+            // Handle attachments
+            if (signatureDTO.Attachments?.Any() == true)
+            {
+                var attachmentsToUpdate = signatureDTO.Attachments.Where(a => a.Length > 0).ToList();
+                if (attachmentsToUpdate.Any())
+                {
+                    signature.Attachments = await SaveAttachmentsAsync(attachmentsToUpdate, attachmentType.Id);
+                }
+            }
+
             _mapper.Map(signatureDTO, signature);
             signature.UpdatedDate = DateTime.UtcNow;
-
             await _repositoryManager.GenericSignatureRepository.UpdateAsync(signature);
             await _unitOfWork.CommitAsync();
 
@@ -217,5 +256,55 @@ public class GenericSignaturesController : Controller
             await _errorLogService.LogErrorAsync(ex);
             return StatusCode(500, "Internal server error");
         }
+    }
+
+    private async Task<List<Attachment>> SaveAttachmentsAsync(IEnumerable<IFormFile> attachments, int attachmentTypeId)
+    {
+        var attachmentsList = new List<Attachment>();
+        var hostEnvironment = HttpContext.RequestServices.GetRequiredService<IWebHostEnvironment>();
+        var webRootPath = hostEnvironment.WebRootPath;
+
+        if (string.IsNullOrWhiteSpace(webRootPath))
+        {
+            throw new ArgumentNullException(nameof(webRootPath), "Web root path cannot be null or empty");
+        }
+
+        var attachmentsPath = Path.Combine(webRootPath, "Uploads/SignatureAttachments");
+
+        if (!Directory.Exists(attachmentsPath))
+        {
+            Directory.CreateDirectory(attachmentsPath);
+        }
+
+        foreach (var attachment in attachments)
+        {
+            if (attachment == null || string.IsNullOrWhiteSpace(attachment.FileName))
+                continue;
+
+            var uniqueFileName = FileNameGenerator.GenerateUniqueFileName(attachment.FileName);
+            var filePath = Path.Combine(attachmentsPath, uniqueFileName);
+
+            try
+            {
+                using (var stream = System.IO.File.Create(filePath))
+                {
+                    await attachment.CopyToAsync(stream);
+                }
+
+                attachmentsList.Add(new Attachment
+                {
+                    FileName = uniqueFileName,
+                    FilePath = filePath,
+                    AttachmentTypeId = attachmentTypeId,
+                    PropertyName = "Banner"
+                });
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        return attachmentsList;
     }
 }

@@ -1,16 +1,21 @@
 using DataStore.Core.DTOs.User;
 using DataStore.Core.Models;
 using DataStore.Persistence.Interfaces;
+using Microsoft.Extensions.Configuration;
 
 namespace DataStore.Core.Services;
 
 public class SignatureService
 {
     private readonly IRepositoryManager _repositoryManager;
+    private readonly IConfiguration _configuration;
+    private readonly string _appUrl;
 
-    public SignatureService(IRepositoryManager repositoryManager)
+    public SignatureService(IRepositoryManager repositoryManager, IConfiguration configuration)
     {
         _repositoryManager = repositoryManager;
+        _configuration = configuration;
+        _appUrl = _configuration.GetValue<string>("AppSettings:APP_URL")?.TrimEnd('/') ?? "";
     }
 
     public async Task<SignatureDTO> GetGenericSignature()
@@ -21,6 +26,9 @@ public class SignatureService
         if (genericSignature == null)
             return null;
 
+        var bannerAttachment = genericSignature.Attachments
+            .FirstOrDefault(a => a.PropertyName == "Banner");
+
         return new SignatureDTO
         {
             Name = genericSignature.Name,
@@ -29,14 +37,31 @@ public class SignatureService
             Address = genericSignature.Address,
             Tel = genericSignature.Tel,
             Mobile = genericSignature.Mobile,
-            Website = genericSignature.Website
+            Website = genericSignature.Website,
+            BannerImageUrl = bannerAttachment != null 
+                ? $"{_appUrl}/{bannerAttachment.FilePath.Replace("\\", "/")}"
+                : null
         };
     }
 
-    public static string GenerateSignatureHtml(SignatureDTO data)
+    public string GenerateSignatureHtml(SignatureDTO data)
     {
+        var bannerHtml = "";
+        
+        if (!string.IsNullOrEmpty(data.BannerImageUrl))
+        {
+            var imageUrl = data.BannerImageUrl.StartsWith("http") 
+                ? data.BannerImageUrl 
+                : $"{_appUrl}/{data.BannerImageUrl.TrimStart('/')}";
+                
+            bannerHtml = $@"<div style='margin-bottom: 10px;'>
+                <img src='{imageUrl}' alt='Company Banner' style='max-width: 600px; width: 100%; height: auto;'/>
+            </div>";
+        }
+
         return $@"
             <div style='font-family: Arial, sans-serif; line-height: 1.5;'>
+                {bannerHtml}
                 <p>Regards,</p>
                 <div>
                     <span style='color: #1a237e; font-weight: bold;'>{data.Name}</span>

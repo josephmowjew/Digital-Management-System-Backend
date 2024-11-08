@@ -87,10 +87,14 @@ namespace DataStore.Helpers
         //get current user 
         public static async Task<ApplicationUser> GetCurrentUser(IRepositoryManager repositoryManager, HttpContext httpContext)
         {
-             //return the current user object
-             string username = httpContext.User.Identity?.Name;
-             var user = await repositoryManager.UserRepository.FindByEmailAsync(username);
-             return user;
+            if (httpContext?.User?.Identity?.Name == null)
+            {
+                return null;
+            }
+
+            string username = httpContext.User.Identity.Name;
+            // Use await to properly wait for the async operation
+            return await repositoryManager.UserRepository.FindByEmailAsync(username).ConfigureAwait(false);
         }
 
         public static string GetCurrentUserRole(IRepositoryManager repositoryManager, string userId)

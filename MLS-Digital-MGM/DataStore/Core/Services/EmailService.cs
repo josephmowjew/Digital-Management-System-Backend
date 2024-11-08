@@ -30,13 +30,15 @@ namespace DataStore.Core.Services
         private readonly IRecurringJobManager _recurringJobManager;
         private readonly bool _useMailtrap;
         private readonly bool _enableEmailSending;
+        private readonly SignatureService _signatureService;
 
         public EmailService(
             IConfiguration configuration, 
             IErrorLogService errorService, 
             IRepositoryManager repositoryManager,
             IBackgroundJobClient backgroundJobClient,
-            IRecurringJobManager recurringJobManager
+            IRecurringJobManager recurringJobManager,
+            SignatureService signatureService
            )
         {
             _configuration = configuration;
@@ -46,7 +48,7 @@ namespace DataStore.Core.Services
             _recurringJobManager = recurringJobManager;
             _useMailtrap = _configuration.GetValue<bool>("MailSettings:UseMailtrap");
             _enableEmailSending = _configuration.GetValue<bool>("MailSettings:EnableEmailSending");
-       
+            _signatureService = signatureService;
 
             _retryPolicy = Policy
                 .Handle<SmtpCommandException>()
@@ -280,7 +282,7 @@ namespace DataStore.Core.Services
                     if (!string.IsNullOrEmpty(sender?.SignatureData))
                     {
                         var signatureData = JsonSerializer.Deserialize<SignatureDTO>(sender.SignatureData);
-                        emailBody += $"<br/><br/>{SignatureService.GenerateSignatureHtml(signatureData)}";
+                        emailBody += $"<br/><br/>{_signatureService.GenerateSignatureHtml(signatureData)}";
                     }
                 }
                 

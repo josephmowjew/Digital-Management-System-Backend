@@ -13,7 +13,7 @@ namespace DataStore.Persistence.Interfaces
     {
         // Additional methods specific to the User entity, if needed
 
-        Task<ApplicationUser> FindByEmailAsync(string email);
+        Task<ApplicationUser?> FindByEmailAsync(string email);
         Task<ApplicationUser> ConfirmAccount(string id, int pin);
         Task<ApplicationUser?> GetSingleUser(string id);
     
