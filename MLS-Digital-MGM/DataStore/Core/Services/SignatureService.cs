@@ -1,9 +1,38 @@
 using DataStore.Core.DTOs.User;
+using DataStore.Core.Models;
+using DataStore.Persistence.Interfaces;
 
 namespace DataStore.Core.Services;
 
 public class SignatureService
 {
+    private readonly IRepositoryManager _repositoryManager;
+
+    public SignatureService(IRepositoryManager repositoryManager)
+    {
+        _repositoryManager = repositoryManager;
+    }
+
+    public async Task<SignatureDTO> GetGenericSignature()
+    {
+        var genericSignature = await _repositoryManager.GenericSignatureRepository
+            .GetSingleAsync(g => g.IsActive);
+
+        if (genericSignature == null)
+            return null;
+
+        return new SignatureDTO
+        {
+            Name = genericSignature.Name,
+            Title = genericSignature.Title,
+            CompanyName = genericSignature.CompanyName,
+            Address = genericSignature.Address,
+            Tel = genericSignature.Tel,
+            Mobile = genericSignature.Mobile,
+            Website = genericSignature.Website
+        };
+    }
+
     public static string GenerateSignatureHtml(SignatureDTO data)
     {
         return $@"

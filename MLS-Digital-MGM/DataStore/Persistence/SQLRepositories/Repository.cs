@@ -268,6 +268,11 @@ namespace DataStore.Persistence.SQLRepositories
             }
         }
 
+        public async Task<T?> GetSingleAsync(Expression<Func<T, bool>> predicate)
+        {
+            return await _context.Set<T>().Where(q => q.Status != Lambda.Deleted).Where(predicate).FirstOrDefaultAsync();
+        }
+
         private string GetFullPropertyPath(MemberExpression memberExpression)
         {
             var path = new List<string>();

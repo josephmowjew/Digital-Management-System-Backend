@@ -172,5 +172,6 @@ namespace DataStore.Data
         public DbSet<Signature> Signatures { get; set; }
         public DbSet<EmailQueue> EmailQueues { get; set; }
         public DbSet<NotaryPublic> NotariesPublic { get; set; }
+        public DbSet<GenericSignature> GenericSignatures { get; set; }
     }
 }
