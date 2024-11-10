@@ -195,8 +195,11 @@ public class GenericSignaturesController : Controller
                 }
             }
 
+            var currentIsActive = signature.IsActive;  // Store current IsActive state
             _mapper.Map(signatureDTO, signature);
+            signature.IsActive = currentIsActive;      // Restore IsActive state
             signature.UpdatedDate = DateTime.UtcNow;
+
             await _repositoryManager.GenericSignatureRepository.UpdateAsync(signature);
             await _unitOfWork.CommitAsync();
 
