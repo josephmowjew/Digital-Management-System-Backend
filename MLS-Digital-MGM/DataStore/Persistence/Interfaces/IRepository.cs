@@ -23,7 +23,7 @@ namespace DataStore.Persistence.Interfaces
         Task AddRange (List<T> entities);
         Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>> predicate,Func<IQueryable<T>, IOrderedQueryable<T>> orderBy,string orderByDirection,int count,int skip,Expression<Func<T, object>>[] includes = null);
         Task<int> CountAsync(PagingParameters<T> pagingParameters);
-        Task<T?> GetSingleAsync(Expression<Func<T, bool>> predicate);
+       Task<T?> GetSingleAsync(Expression<Func<T, bool>> predicate, Expression<Func<T, object>>[] includes = null);
 
         // New method to project entities to DTOs
         //Task<IEnumerable<TDto>> ProjectToAsync<TDto>(Expression<Func<T, bool>> predicate);

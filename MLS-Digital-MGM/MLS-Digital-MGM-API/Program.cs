@@ -127,7 +127,7 @@ options => _ = provider switch
 {
     "MySQL" => options.UseMySQL(mySqlConnectionStr),
     _ => throw new Exception($"Unsupported provider: {provider}")
-},ServiceLifetime.Scoped);
+});
 
 builder.Services.AddIdentity<ApplicationUser, Role>()
                    .AddEntityFrameworkStores<ApplicationDbContext>()

@@ -54,14 +54,13 @@ public class SignatureService
                 ? data.BannerImageUrl 
                 : $"{_appUrl}/{data.BannerImageUrl.TrimStart('/')}";
                 
-            bannerHtml = $@"<div style='margin-bottom: 10px;'>
+            bannerHtml = $@"<div style='margin-top: 10px;'>
                 <img src='{imageUrl}' alt='Company Banner' style='max-width: 600px; width: 100%; height: auto;'/>
             </div>";
         }
 
         return $@"
             <div style='font-family: Arial, sans-serif; line-height: 1.5;'>
-                {bannerHtml}
                 <p>Regards,</p>
                 <div>
                     <span style='color: #1a237e; font-weight: bold;'>{data.Name}</span>
@@ -76,6 +75,7 @@ public class SignatureService
                         <span style='color: #03a9f4;'>Web:</span> <a href='{data.Website}' style='color: #2196f3; text-decoration: none;'>{data.Website}</a>
                     </div>
                 </div>
+                {bannerHtml}
             </div>";
     }
 }

@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using AutoMapper;
 using DataStore.Core.DTOs.User;
 using DataStore.Core.Models;
@@ -163,11 +164,13 @@ public class GenericSignaturesController : Controller
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var signature = await _repositoryManager.GenericSignatureRepository.GetByIdAsync(id);
+            var signature = await _repositoryManager.GenericSignatureRepository.GetSingleAsync(
+                s => s.Id == id,
+                new Expression<Func<GenericSignature, object>>[] { s => s.Attachments }
+            );
             if (signature == null)
                 return NotFound();
 
-            // Get or create attachment type
             var attachmentType = await _repositoryManager.AttachmentTypeRepository.GetAsync(d => d.Name == "Signature") 
                                 ?? new AttachmentType { Name = "Signature" };
 
@@ -177,13 +180,18 @@ public class GenericSignaturesController : Controller
                 await _unitOfWork.CommitAsync();
             }
 
-            // Handle attachments
             if (signatureDTO.Attachments?.Any() == true)
             {
                 var attachmentsToUpdate = signatureDTO.Attachments.Where(a => a.Length > 0).ToList();
                 if (attachmentsToUpdate.Any())
                 {
-                    signature.Attachments = await SaveAttachmentsAsync(attachmentsToUpdate, attachmentType.Id);
+                    var attachmentsList = await SaveAttachmentsAsync(attachmentsToUpdate, attachmentType.Id);
+                    
+                    // Remove old attachments with same property name
+                    signature.Attachments.RemoveAll(a => attachmentsList.Any(b => b.PropertyName == a.PropertyName));
+                    
+                    // Add new attachments
+                    signature.Attachments.AddRange(attachmentsList);
                 }
             }
 
@@ -250,6 +258,34 @@ public class GenericSignaturesController : Controller
             await _unitOfWork.CommitAsync();
 
             return NoContent();
+        }
+        catch (Exception ex)
+        {
+            await _errorLogService.LogErrorAsync(ex);
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetGenericSignature(int id)
+    {
+        try
+        {
+            var signature = await _repositoryManager.GenericSignatureRepository.GetSingleAsync(s => s.Id == id, new Expression<Func<GenericSignature, object>>[] { s => s.Attachments });
+            if (signature == null)
+                return NotFound();
+
+            var signatureDto = _mapper.Map<SignatureDTO>(signature);
+            
+            // Set banner image URL if attachment exists
+            var bannerAttachment = signature.Attachments?.FirstOrDefault(a => a.PropertyName == "Banner");
+            if (bannerAttachment != null)
+            {
+                var baseUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}";
+                signatureDto.BannerImageUrl = $"{baseUrl}/Uploads/SignatureAttachments/{bannerAttachment.FileName}";
+            }
+
+            return Ok(signatureDto);
         }
         catch (Exception ex)
         {

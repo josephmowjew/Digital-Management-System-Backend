@@ -268,9 +268,34 @@ namespace DataStore.Persistence.SQLRepositories
             }
         }
 
-        public async Task<T?> GetSingleAsync(Expression<Func<T, bool>> predicate)
+        public async Task<T?> GetSingleAsync(Expression<Func<T, bool>> predicate, Expression<Func<T, object>>[] includes = null)
         {
-            return await _context.Set<T>().Where(q => q.Status != Lambda.Deleted).Where(predicate).FirstOrDefaultAsync();
+            IQueryable<T> query = _context.Set<T>().Where(q => q.Status != Lambda.Deleted).Where(predicate);
+
+            if (includes != null)
+            {
+                foreach (var include in includes)
+                {
+                    var includeString = GetIncludePath(include);
+                    query = query.Include(includeString);
+
+                    // Handle nested includes
+                    if (includeString == "Attachments")
+                    {
+                        query = query.Include("Attachments.AttachmentType");
+                    }
+                    if (includeString == "CurrentApprovalLevel")
+                    {
+                        query = query.Include("CurrentApprovalLevel.Department");
+                    }
+                    if (includeString == "Member")
+                    {
+                        query = query.Include("Member.User");
+                    }
+                }
+            }
+
+            return await query.FirstOrDefaultAsync();
         }
 
         private string GetFullPropertyPath(MemberExpression memberExpression)

@@ -28,5 +28,5 @@ public class GenericSignature : Meta
     public bool IsActive { get; set; } = true;
     
     // Collection navigation property
-    public ICollection<Attachment> Attachments { get; set; }
+    public List<Attachment> Attachments { get; set; }
 }

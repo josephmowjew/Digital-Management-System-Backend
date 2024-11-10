@@ -11,6 +11,7 @@ public class SignatureDTO
     {
         Attachments = new List<IFormFile>();
     }
+    public int Id { get; set; }
 
     [Required]
     public string Name { get; set; }
@@ -26,6 +27,8 @@ public class SignatureDTO
     public string Mobile { get; set; }
     [Required]
     public string Website { get; set; }
+
+    public bool IsActive { get; set; }
 
     [JsonIgnore]
     [AllowedFileTypes(new[] { ".png", ".jpg", ".jpeg" })]

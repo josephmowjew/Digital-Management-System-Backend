@@ -28,8 +28,9 @@ namespace MLS_Digital_MGM_API.Controllers
         private readonly IMapper _mapper;
         private readonly SignatureService _signatureService;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IConfiguration _configuration;
 
-        public UsersController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor, SignatureService signatureService)
+        public UsersController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor, SignatureService signatureService, IConfiguration configuration)
         {
             _repositoryManager = repositoryManager;
             _errorLogService = errorLogService;
@@ -37,6 +38,7 @@ namespace MLS_Digital_MGM_API.Controllers
             _mapper = mapper;
             _httpContextAccessor = httpContextAccessor;
             _signatureService = signatureService;
+            _configuration = configuration;
         }
 
         [HttpGet("paged")]
@@ -537,7 +539,7 @@ namespace MLS_Digital_MGM_API.Controllers
                     if (attachmentsToUpdate.Any())
                     {
                         var attachmentsList = await SaveAttachmentsAsync(attachmentsToUpdate, attachmentType.Id);
-                        signatureDTO.BannerImageUrl = attachmentsList.FirstOrDefault()?.FilePath;
+                        signatureDTO.BannerImageUrl = "Uploads/SignatureAttachments/"+attachmentsList.FirstOrDefault()?.FileName;
                     }
                 }
 
@@ -566,7 +568,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 throw new ArgumentNullException(nameof(webRootPath), "Web root path cannot be null or empty");
             }
 
-            var attachmentsPath = Path.Combine("", "Uploads/SignatureAttachments");
+            var attachmentsPath = Path.Combine(webRootPath, "Uploads/SignatureAttachments");
 
             if (!Directory.Exists(attachmentsPath))
             {
@@ -614,7 +616,15 @@ namespace MLS_Digital_MGM_API.Controllers
                 if (string.IsNullOrEmpty(user.SignatureData))
                     return Ok(new SignatureDTO());
                     
-                return Ok(JsonSerializer.Deserialize<SignatureDTO>(user.SignatureData));
+                var signatureData = JsonSerializer.Deserialize<SignatureDTO>(user.SignatureData);
+                if (!string.IsNullOrEmpty(signatureData.BannerImageUrl))
+                {
+                    signatureData.BannerImageUrl = signatureData.BannerImageUrl.StartsWith("http") 
+                        ? signatureData.BannerImageUrl 
+                        : $"{_configuration.GetValue<string>("AppSettings:APP_URL")?.TrimEnd('/')}/{signatureData.BannerImageUrl.TrimStart('/')}";
+                }
+                
+                return Ok(signatureData);
             }
             catch (Exception ex)
             {
