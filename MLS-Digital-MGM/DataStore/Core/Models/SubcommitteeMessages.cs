@@ -5,6 +5,10 @@ namespace DataStore.Core.Models
 {
     public class SubcommitteeMessage : Meta
     {
+        public SubcommitteeMessage()
+        {
+            Attachments = new List<Attachment>();
+        }
         public int SubcommitteeID { get; set; }
         public Subcommittee Subcommittee { get; set; }
         public string CreatedById { get; set; }
@@ -14,5 +18,7 @@ namespace DataStore.Core.Models
         public List<Attachment> Attachments { get; set; }
         public int? SubcommitteeThreadId { get; set; }
         public SubcommitteeThread SubcommitteeThread { get; set; }
+        
+
     }
 }

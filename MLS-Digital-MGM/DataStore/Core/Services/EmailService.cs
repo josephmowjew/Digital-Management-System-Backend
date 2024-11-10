@@ -15,6 +15,10 @@ using DataStore.Persistence.Interfaces;
 using Hangfire;
 using System.Text.Json;
 using DataStore.Core.DTOs.User;
+using DataStore.Helpers;
+using AutoMapper;
+using System.Linq.Expressions;
+using Microsoft.AspNetCore.Http;
 
 namespace DataStore.Core.Services
 {
@@ -30,13 +34,20 @@ namespace DataStore.Core.Services
         private readonly IRecurringJobManager _recurringJobManager;
         private readonly bool _useMailtrap;
         private readonly bool _enableEmailSending;
+        private readonly SignatureService _signatureService;
+        // Add to class fields
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IMapper _mapper;
 
         public EmailService(
             IConfiguration configuration, 
             IErrorLogService errorService, 
             IRepositoryManager repositoryManager,
             IBackgroundJobClient backgroundJobClient,
-            IRecurringJobManager recurringJobManager
+            IRecurringJobManager recurringJobManager,
+            SignatureService signatureService,
+            IMapper mapper,
+            IHttpContextAccessor httpContextAccessor
            )
         {
             _configuration = configuration;
@@ -46,8 +57,9 @@ namespace DataStore.Core.Services
             _recurringJobManager = recurringJobManager;
             _useMailtrap = _configuration.GetValue<bool>("MailSettings:UseMailtrap");
             _enableEmailSending = _configuration.GetValue<bool>("MailSettings:EnableEmailSending");
-       
-
+            _signatureService = signatureService;
+            _mapper = mapper;
+            _httpContextAccessor = httpContextAccessor;
             _retryPolicy = Policy
                 .Handle<SmtpCommandException>()
                 .Or<SmtpProtocolException>()
@@ -272,18 +284,43 @@ namespace DataStore.Core.Services
 
                 var bodyBuilder = new BodyBuilder();
                 
-                // Add signature if sender is specified AND includeSignature is true
+                // Add signature logic
                 string emailBody = message.Body;
-                if (!string.IsNullOrEmpty(senderUserId) && includeSignature)
+                if (includeSignature)
                 {
-                    var sender = await _repositoryManager.UserRepository.GetSingleUser(senderUserId);
-                    if (!string.IsNullOrEmpty(sender?.SignatureData))
+                    if (!string.IsNullOrEmpty(senderUserId))
                     {
-                        var signatureData = JsonSerializer.Deserialize<SignatureDTO>(sender.SignatureData);
-                        emailBody += $"<br/><br/>{SignatureService.GenerateSignatureHtml(signatureData)}";
+                        var sender = await _repositoryManager.UserRepository.GetSingleUser(senderUserId);
+                        if (!string.IsNullOrEmpty(sender?.SignatureData))
+                        {
+                            var signatureData = JsonSerializer.Deserialize<SignatureDTO>(sender.SignatureData);
+                            emailBody += $"<br/><br/>{_signatureService.GenerateSignatureHtml(signatureData)}";
+                        }
                     }
                 }
-                
+                else
+                {
+                    // Check for active generic signature when personal signature is not included
+                    var activeGenericSignature = await _repositoryManager.GenericSignatureRepository.GetSingleAsync(
+                        s => s.IsActive == true && s.Status != Lambda.Deleted, 
+                        new Expression<Func<GenericSignature, object>>[] { s => s.Attachments }
+                    );
+                    
+                    if (activeGenericSignature != null)
+                    {
+                        var signatureData = _mapper.Map<SignatureDTO>(activeGenericSignature);
+                         // Set banner image URL if attachment exists
+                        var bannerAttachment = activeGenericSignature.Attachments?.FirstOrDefault(a => a.PropertyName == "Banner");
+                        if (bannerAttachment != null)
+                        {
+                            var baseUrl = $"{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host}";
+                            signatureData.BannerImageUrl = $"{baseUrl}/Uploads/SignatureAttachments/{bannerAttachment.FileName}";
+                        }
+
+                        emailBody += $"<br/><br/>{_signatureService.GenerateSignatureHtml(signatureData)}";
+                    }
+                }
+
                 bodyBuilder.HtmlBody = emailBody;
 
                 if (message.Attachments != null && message.Attachments.Any())

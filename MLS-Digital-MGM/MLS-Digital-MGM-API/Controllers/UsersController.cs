@@ -28,8 +28,9 @@ namespace MLS_Digital_MGM_API.Controllers
         private readonly IMapper _mapper;
         private readonly SignatureService _signatureService;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IConfiguration _configuration;
 
-        public UsersController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor, SignatureService signatureService)
+        public UsersController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor, SignatureService signatureService, IConfiguration configuration)
         {
             _repositoryManager = repositoryManager;
             _errorLogService = errorLogService;
@@ -37,6 +38,7 @@ namespace MLS_Digital_MGM_API.Controllers
             _mapper = mapper;
             _httpContextAccessor = httpContextAccessor;
             _signatureService = signatureService;
+            _configuration = configuration;
         }
 
         [HttpGet("paged")]
@@ -513,17 +515,38 @@ namespace MLS_Digital_MGM_API.Controllers
         }
 
         [HttpPut("signature")]
-        public async Task<IActionResult> UpdateEmailSignature([FromBody] SignatureDTO signature)
+        public async Task<IActionResult> UpdateEmailSignature([FromForm] SignatureDTO signatureDTO)
         {
             try
             {
                 var user = await Lambda.GetCurrentUser(_repositoryManager, _httpContextAccessor.HttpContext);
                 
-                // Store only the JSON data
-                user.SignatureData = JsonSerializer.Serialize(signature);
-                
+                // Get or create attachment type
+                var attachmentType = await _repositoryManager.AttachmentTypeRepository.GetAsync(d => d.Name == "Signature") 
+                                    ?? new AttachmentType { Name = "Signature" };
+
+                // Add attachment type if it doesn't exist
+                if (attachmentType.Id == 0)
+                {
+                    await _repositoryManager.AttachmentTypeRepository.AddAsync(attachmentType);
+                    await _unitOfWork.CommitAsync();
+                }
+
+                // Handle attachments
+                if (signatureDTO.Attachments?.Any() == true)
+                {
+                    var attachmentsToUpdate = signatureDTO.Attachments.Where(a => a.Length > 0).ToList();
+                    if (attachmentsToUpdate.Any())
+                    {
+                        var attachmentsList = await SaveAttachmentsAsync(attachmentsToUpdate, attachmentType.Id);
+                        signatureDTO.BannerImageUrl = "Uploads/SignatureAttachments/"+attachmentsList.FirstOrDefault()?.FileName;
+                    }
+                }
+
+                // Store signature data
+                user.SignatureData = JsonSerializer.Serialize(signatureDTO);
                 await _repositoryManager.UserRepository.UpdateAsync(user);
-                await _repositoryManager.UnitOfWork.CommitAsync();
+                await _unitOfWork.CommitAsync();
                 
                 return Ok("Email signature updated successfully");
             }
@@ -532,6 +555,56 @@ namespace MLS_Digital_MGM_API.Controllers
                 await _errorLogService.LogErrorAsync(ex);
                 return StatusCode(500, "An error occurred while updating the signature.");
             }
+        }
+
+        private async Task<List<Attachment>> SaveAttachmentsAsync(IEnumerable<IFormFile> attachments, int attachmentTypeId)
+        {
+            var attachmentsList = new List<Attachment>();
+            var hostEnvironment = HttpContext.RequestServices.GetRequiredService<IWebHostEnvironment>();
+            var webRootPath = hostEnvironment.WebRootPath;
+
+            if (string.IsNullOrWhiteSpace(webRootPath))
+            {
+                throw new ArgumentNullException(nameof(webRootPath), "Web root path cannot be null or empty");
+            }
+
+            var attachmentsPath = Path.Combine(webRootPath, "Uploads/SignatureAttachments");
+
+            if (!Directory.Exists(attachmentsPath))
+            {
+                Directory.CreateDirectory(attachmentsPath);
+            }
+
+            foreach (var attachment in attachments)
+            {
+                if (attachment == null || string.IsNullOrWhiteSpace(attachment.FileName))
+                    continue;
+
+                var uniqueFileName = FileNameGenerator.GenerateUniqueFileName(attachment.FileName);
+                var filePath = Path.Combine(attachmentsPath, uniqueFileName);
+
+                try
+                {
+                    using (var stream = System.IO.File.Create(filePath))
+                    {
+                        await attachment.CopyToAsync(stream);
+                    }
+
+                    attachmentsList.Add(new Attachment
+                    {
+                        FileName = uniqueFileName,
+                        FilePath = filePath,
+                        AttachmentTypeId = attachmentTypeId,
+                        PropertyName = "Banner"
+                    });
+                }
+                catch
+                {
+                    throw;
+                }
+            }
+
+            return attachmentsList;
         }
 
         [HttpGet("signature")]
@@ -543,7 +616,15 @@ namespace MLS_Digital_MGM_API.Controllers
                 if (string.IsNullOrEmpty(user.SignatureData))
                     return Ok(new SignatureDTO());
                     
-                return Ok(JsonSerializer.Deserialize<SignatureDTO>(user.SignatureData));
+                var signatureData = JsonSerializer.Deserialize<SignatureDTO>(user.SignatureData);
+                if (!string.IsNullOrEmpty(signatureData.BannerImageUrl))
+                {
+                    signatureData.BannerImageUrl = signatureData.BannerImageUrl.StartsWith("http") 
+                        ? signatureData.BannerImageUrl 
+                        : $"{_configuration.GetValue<string>("AppSettings:APP_URL")?.TrimEnd('/')}/{signatureData.BannerImageUrl.TrimStart('/')}";
+                }
+                
+                return Ok(signatureData);
             }
             catch (Exception ex)
             {
@@ -557,12 +638,16 @@ namespace MLS_Digital_MGM_API.Controllers
         {
             try
             {
-                var user = await Lambda.GetCurrentUser(_repositoryManager, _httpContextAccessor.HttpContext);
-                if (string.IsNullOrEmpty(user.SignatureData))
+                // Get user first and complete that operation
+                var user =  _repositoryManager.UserRepository.FindByEmailAsync(_httpContextAccessor.HttpContext.User.Identity.Name).Result;
+                if (user == null || string.IsNullOrEmpty(user.SignatureData))
+                {
                     return Ok(string.Empty);
-                    
+                }
+                
+                // Then process the signature data
                 var signatureData = JsonSerializer.Deserialize<SignatureDTO>(user.SignatureData);
-                var htmlSignature = SignatureService.GenerateSignatureHtml(signatureData);
+                var htmlSignature = await Task.Run(() => _signatureService.GenerateSignatureHtml(signatureData));
                 
                 return Ok(new { html = htmlSignature });
             }
@@ -586,7 +671,7 @@ namespace MLS_Digital_MGM_API.Controllers
                     return Ok(string.Empty);
                     
                 var signatureData = JsonSerializer.Deserialize<SignatureDTO>(user.SignatureData);
-                var htmlSignature = SignatureService.GenerateSignatureHtml(signatureData);
+                var htmlSignature = _signatureService.GenerateSignatureHtml(signatureData);
                 
                 return Ok(new { html = htmlSignature });
             }

@@ -3,6 +3,7 @@ using System;
 using DataStore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241108061942_added generic signature table")]
+    partial class addedgenericsignaturetable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -62,21 +65,6 @@ namespace DataStore.Migrations
                     b.HasIndex("CommunicationMessagesId");
 
                     b.ToTable("AttachmentCommunicationMessage");
-                });
-
-            modelBuilder.Entity("AttachmentGenericSignature", b =>
-                {
-                    b.Property<int>("AttachmentsId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("GenericSignaturesId")
-                        .HasColumnType("int");
-
-                    b.HasKey("AttachmentsId", "GenericSignaturesId");
-
-                    b.HasIndex("GenericSignaturesId");
-
-                    b.ToTable("AttachmentGenericSignature");
                 });
 
             modelBuilder.Entity("AttachmentLevyDeclaration", b =>
@@ -1797,18 +1785,12 @@ namespace DataStore.Migrations
                     b.Property<DateTime>("UpdatedDate")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("varchar(200)");
-
                     b.Property<int>("YearOfOperationId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("MemberId");
-
-                    b.HasIndex("UserId");
 
                     b.HasIndex("YearOfOperationId");
 
@@ -3167,21 +3149,6 @@ namespace DataStore.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("AttachmentGenericSignature", b =>
-                {
-                    b.HasOne("DataStore.Core.Models.Attachment", null)
-                        .WithMany()
-                        .HasForeignKey("AttachmentsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DataStore.Core.Models.GenericSignature", null)
-                        .WithMany()
-                        .HasForeignKey("GenericSignaturesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("AttachmentLevyDeclaration", b =>
                 {
                     b.HasOne("DataStore.Core.Models.Attachment", null)
@@ -3846,12 +3813,6 @@ namespace DataStore.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DataStore.Core.Models.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("DataStore.Core.Models.YearOfOperation", "YearOfOperation")
                         .WithMany()
                         .HasForeignKey("YearOfOperationId")
@@ -3859,8 +3820,6 @@ namespace DataStore.Migrations
                         .IsRequired();
 
                     b.Navigation("Member");
-
-                    b.Navigation("User");
 
                     b.Navigation("YearOfOperation");
                 });
