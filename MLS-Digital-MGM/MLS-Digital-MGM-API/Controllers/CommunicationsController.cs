@@ -234,25 +234,26 @@ namespace MLS_Digital_MGM_API.Controllers
             }
             else
             {
-                var tasks = new List<Task<IEnumerable<ApplicationUser>>>();
+                var results = new List<IEnumerable<ApplicationUser>>();
 
                 if (messageDto.DepartmentIds.Any())
                 {
-                    tasks.Add(_repositoryManager.UserRepository.GetAllAsync(u => messageDto.DepartmentIds.Contains(u.DepartmentId)));
+                    var deptUsers = await _repositoryManager.UserRepository.GetAllAsync(
+                        u => messageDto.DepartmentIds.Contains(u.DepartmentId) && u.EmailConfirmed
+                    );
+                    results.Add(deptUsers);
                 }
 
                 if (messageDto.RoleNames.Any())
                 {
-                    var roleTasks = messageDto.RoleNames.Select(async roleName => (await _repositoryManager.UserManager.GetUsersInRoleAsync(roleName)).AsEnumerable());
-                    tasks.AddRange(roleTasks);
+                    foreach (var roleName in messageDto.RoleNames)
+                    {
+                        var roleUsers = await _repositoryManager.UserManager.GetUsersInRoleAsync(roleName);
+                        results.Add(roleUsers.Where(u => u.EmailConfirmed));
+                    }
                 }
 
-                var results = await Task.WhenAll(tasks);
-
-                foreach (var result in results)
-                {
-                    recipients.AddRange(result.Where(u => u.EmailConfirmed));
-                }
+                recipients = results.SelectMany(x => x).Distinct().ToList();
             }
 
             return recipients;
