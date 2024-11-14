@@ -14,6 +14,7 @@ using MLS_Digital_MGM.DataStore.Helpers;
 using System.Linq.Expressions;
 using AutoMapper;
 using MLS_Digital_Management_System_Front_End.Core.DTOs.Communication;
+using System.Text.Json;
 
 namespace MLS_Digital_MGM_API.Controllers
 {
@@ -178,12 +179,7 @@ namespace MLS_Digital_MGM_API.Controllers
                     await _repositoryManager.UnitOfWork.CommitAsync();
                 }
 
-                var attachments = new List<Attachment>();
-                if (messageDto.Attachments?.Any() == true)
-                {
-                    attachments = await SaveAttachmentsAsync(messageDto.Attachments, attachmentType.Id);
-                }
-
+                // First create communication message without attachments
                 var communicationMessage = new CommunicationMessage
                 {
                     Subject = messageDto.Subject,
@@ -193,14 +189,31 @@ namespace MLS_Digital_MGM_API.Controllers
                     Status = "Sent",
                     SentToAllUsers = messageDto.SendToAllUsers,
                     CreatedDate = DateTime.Now,
-                    Attachments = attachments // Handle case when attachments are null
+                    TargetedDepartmentsJson = messageDto.DepartmentIds.Any() 
+                        ? JsonSerializer.Serialize(messageDto.DepartmentIds)
+                        : "[]",
+                    TargetedRolesJson = messageDto.RoleNames.Any()
+                        ? JsonSerializer.Serialize(messageDto.RoleNames)
+                        : "[]"
                 };
-
-                communicationMessage.SetTargetedRoles(messageDto.RoleNames);
-                communicationMessage.SetTargetedDepartments(targetedDepartments);
 
                 await _repositoryManager.CommunicationMessageRepository.AddAsync(communicationMessage);
                 await _repositoryManager.UnitOfWork.CommitAsync();
+
+                // Then handle attachments if any
+                if (messageDto.Attachments?.Any() == true)
+                {
+                    var attachments = await SaveAttachmentsAsync(messageDto.Attachments, attachmentType.Id);
+                    foreach (var attachment in attachments)
+                    {
+                        await _repositoryManager.AttachmentRepository.AddAsync(attachment);
+                    }
+                    await _repositoryManager.UnitOfWork.CommitAsync();
+
+                    // Now link attachments to the message
+                    communicationMessage.Attachments = attachments;
+                    await _repositoryManager.UnitOfWork.CommitAsync();
+                }
 
                 var emailTasks = recipients.Select(async recipient =>
                 {

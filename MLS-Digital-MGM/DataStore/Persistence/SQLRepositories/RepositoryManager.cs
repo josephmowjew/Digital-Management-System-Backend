@@ -66,6 +66,7 @@ namespace DataStore.Persistence.SQLRepositories
         private IEmailQueueRepository _emailQueueRepository;
         private INotaryPublicRepository _notaryPublicRepository;
         private IGenericSignatureRepository _genericSignatureRepository;
+        private IAttachmentRepository _attachmentRepository;
 
 
         public RepositoryManager(
@@ -137,5 +138,7 @@ namespace DataStore.Persistence.SQLRepositories
         public IEmailQueueRepository EmailQueueRepository => _emailQueueRepository ??= new EmailQueueRepository(_context, _unitOfWork);
         public INotaryPublicRepository NotaryPublicRepository => _notaryPublicRepository ??= new NotaryPublicRepository(_context, _unitOfWork);
         public IGenericSignatureRepository GenericSignatureRepository => _genericSignatureRepository ??= new GenericSignatureRepository(_context, _unitOfWork);
+        
+        public IAttachmentRepository AttachmentRepository => _attachmentRepository ??= new AttachmentRepository(_context, _unitOfWork);
     }
 }

@@ -86,5 +86,6 @@ namespace DataStore.Persistence.Interfaces
         IEmailQueueRepository EmailQueueRepository { get; }
         INotaryPublicRepository NotaryPublicRepository { get; }
         IGenericSignatureRepository GenericSignatureRepository { get; }
+        IAttachmentRepository AttachmentRepository { get; }
     }
 }

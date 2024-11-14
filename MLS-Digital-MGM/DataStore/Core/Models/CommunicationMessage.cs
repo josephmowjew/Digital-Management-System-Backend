@@ -23,7 +23,7 @@ namespace DataStore.Core.Models
         public DateTime CreatedDate { get; set; }
         public DateTime? UpdatedDate { get; set; }
         public DateTime? DeletedDate { get; set; }
-        public List<Attachment>? Attachments { get; set; }
+        public List<Attachment> Attachments { get; set; }
 
         public List<string> GetTargetedRoles()
         {
