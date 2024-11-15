@@ -682,6 +682,44 @@ namespace MLS_Digital_MGM_API.Controllers
             }
         }
 
+        [HttpDelete("signature/banner")]
+        public async Task<IActionResult> RemoveSignatureBanner()
+        {
+            try
+            {
+                var user = await Lambda.GetCurrentUser(_repositoryManager, _httpContextAccessor.HttpContext);
+                if (string.IsNullOrEmpty(user.SignatureData))
+                    return NotFound("No signature found");
+
+                var signatureData = JsonSerializer.Deserialize<SignatureDTO>(user.SignatureData);
+                
+                // Remove banner image file if it exists
+                if (!string.IsNullOrEmpty(signatureData.BannerImageUrl))
+                {
+                    var hostEnvironment = HttpContext.RequestServices.GetRequiredService<IWebHostEnvironment>();
+                    var filePath = Path.Combine(hostEnvironment.WebRootPath, signatureData.BannerImageUrl.TrimStart('/'));
+                    if (System.IO.File.Exists(filePath))
+                    {
+                        System.IO.File.Delete(filePath);
+                    }
+                }
+
+                // Clear banner URL from signature data
+                signatureData.BannerImageUrl = null;
+                user.SignatureData = JsonSerializer.Serialize(signatureData);
+                
+                await _repositoryManager.UserRepository.UpdateAsync(user);
+                await _unitOfWork.CommitAsync();
+
+                return Ok("Banner removed successfully");
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "An error occurred while removing the signature banner.");
+            }
+        }
+
     }
 
     
