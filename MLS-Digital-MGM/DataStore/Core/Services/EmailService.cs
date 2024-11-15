@@ -19,6 +19,7 @@ using DataStore.Helpers;
 using AutoMapper;
 using System.Linq.Expressions;
 using Microsoft.AspNetCore.Http;
+using System.IO;
 
 namespace DataStore.Core.Services
 {
@@ -294,6 +295,26 @@ namespace DataStore.Core.Services
                         if (!string.IsNullOrEmpty(sender?.SignatureData))
                         {
                             var signatureData = JsonSerializer.Deserialize<SignatureDTO>(sender.SignatureData);
+                            
+                            // Handle personal signature banner from SignatureData
+                            if (!string.IsNullOrEmpty(signatureData.BannerImageUrl))
+                            {
+                                var filePath = signatureData.BannerImageUrl.TrimStart('/');
+                                var fullPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", filePath);
+                                
+                                if (File.Exists(fullPath))
+                                {
+                                    var contentId = $"personal_banner_{Guid.NewGuid().ToString("N")}";
+                                    var image = bodyBuilder.LinkedResources.Add(fullPath);
+                                    image.ContentId = contentId;
+                                    signatureData.BannerImageUrl = $"cid:{contentId}";
+                                }
+                                else
+                                {
+                                    await _errorService.LogErrorAsync(new Exception($"Banner image not found at path: {fullPath}"));
+                                }
+                            }
+                            
                             emailBody += $"<br/><br/>{_signatureService.GenerateSignatureHtml(signatureData)}";
                         }
                     }
@@ -309,12 +330,15 @@ namespace DataStore.Core.Services
                     if (activeGenericSignature != null)
                     {
                         var signatureData = _mapper.Map<SignatureDTO>(activeGenericSignature);
-                         // Set banner image URL if attachment exists
-                        var bannerAttachment = activeGenericSignature.Attachments?.FirstOrDefault(a => a.PropertyName == "Banner");
-                        if (bannerAttachment != null)
+                        var bannerAttachment = activeGenericSignature.Attachments?
+                            .FirstOrDefault(a => a.PropertyName == "Banner" && a.Status != Lambda.Deleted);
+                        
+                        if (bannerAttachment != null && File.Exists(bannerAttachment.FilePath))
                         {
-                            var baseUrl = $"{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host}";
-                            signatureData.BannerImageUrl = $"{baseUrl}/Uploads/SignatureAttachments/{bannerAttachment.FileName}";
+                            var contentId = $"banner_{Guid.NewGuid().ToString("N")}";
+                            var image = bodyBuilder.LinkedResources.Add(bannerAttachment.FilePath);
+                            image.ContentId = contentId;
+                            signatureData.BannerImageUrl = $"cid:{contentId}";
                         }
 
                         emailBody += $"<br/><br/>{_signatureService.GenerateSignatureHtml(signatureData)}";

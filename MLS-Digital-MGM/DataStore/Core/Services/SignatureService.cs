@@ -50,7 +50,7 @@ public class SignatureService
         
         if (!string.IsNullOrEmpty(data.BannerImageUrl))
         {
-            var imageUrl = data.BannerImageUrl.StartsWith("http") 
+            var imageUrl = data.BannerImageUrl.StartsWith("cid:") 
                 ? data.BannerImageUrl 
                 : $"{_appUrl}/{data.BannerImageUrl.TrimStart('/')}";
                 
