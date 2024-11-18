@@ -1,4 +1,4 @@
-﻿using DataStore.Core.DTOs;
+using DataStore.Core.DTOs;
 using DataStore.Core.DTOs.Authentication;
 using DataStore.Core.Models;
 using DataStore.Core.Services.Interfaces;
@@ -108,7 +108,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 DepartmentId = model.DepartmentId,
                 IdentityTypeId = model.IdentityTypeId,
                 TitleId = model.TitleId,
-                CountryId = model.CountryId,
+                CountryId = model.CountryId ?? 0, // Default to 0 if no country is selected
                 Pin = pin
             };
 
@@ -447,4 +447,3 @@ namespace MLS_Digital_MGM_API.Controllers
 
     }
 }
-

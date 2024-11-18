@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
@@ -47,7 +47,8 @@ namespace DataStore.Core.DTOs.Authentication
         [Display(Name = "Title")]
         public int TitleId { get; set; }
         [Display(Name = "Country")]
-        public int CountryId { get; set; }
+        [Required(ErrorMessage = "Please select a country")]
+        public int? CountryId { get; set; }
 
         [Display(Name = "Role")]
         [Required]
