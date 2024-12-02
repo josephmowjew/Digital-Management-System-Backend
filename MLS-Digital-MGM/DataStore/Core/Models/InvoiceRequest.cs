@@ -17,7 +17,7 @@ namespace DataStore.Core.Models
         public virtual ApplicationUser CreatedBy { get; set; }
         [Required]
         public double? Amount { get; set; }
-        public string CustomerId { get; set; }
+        public string? CustomerId { get; set; }
 
         public QBCustomer Customer { get; set; }
 

@@ -100,9 +100,7 @@ namespace MLS_Digital_MGM_API.Controllers
                     return Ok(Enumerable.Empty<ReadInvoiceRequestDTO>());
                 }
 
-                var invoiceRequestDTOs = _mapper.Map<List<ReadInvoiceRequestDTO>>(invoiceRequestsPaged);
-
-              
+                var invoiceRequestDTOs = _mapper.Map<List<ReadInvoiceRequestDTO>>(invoiceRequestsPaged.OrderByDescending(x => x.CreatedDate).ToList());
 
                 if (dataTableParams.LoadFromRequest(_httpContextAccessor))
                 {
@@ -440,7 +438,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 {
                     //set the member account id
                   
-                    invoiceRequest.CustomerId = memberAccount.CustomerId;
+                    invoiceRequest.CustomerId = memberAccount.CustomerId ?? null;
                 }
 
 
