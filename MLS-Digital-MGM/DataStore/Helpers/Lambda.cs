@@ -52,6 +52,9 @@ namespace DataStore.Helpers
         public static string Attended = "Attended";
         public static string Finance = "Finance Officer";
 
+        //License Application section
+        public static string Expired = "Expired";
+
         //Penalty sections
         public static string Issued = "Issued";
         public static string Paid = "Paid";

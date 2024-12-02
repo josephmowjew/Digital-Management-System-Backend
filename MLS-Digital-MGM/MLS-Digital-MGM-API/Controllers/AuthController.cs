@@ -48,6 +48,13 @@ namespace MLS_Digital_MGM_API.Controllers
                 // Find the user by email
                 var user = await _repositoryManager.UserRepository.FindByEmailAsync(loginViewModel.Email);
 
+                //get the profile picture if the user is not null
+                /*if (user != null)
+                {
+                    var profilePicture = await _repositoryManager.UserRepository.GetProfilePictures(user);
+                    //bla bla bla
+                }*/
+
                 // Check if the user exists, is not deleted, and has confirmed their email
                 if (user == null || user.DeletedDate != null || !user.EmailConfirmed)
                     return BadRequest(GetErrorMessage(user));
@@ -186,7 +193,6 @@ namespace MLS_Digital_MGM_API.Controllers
             var token = tokenHandler.CreateToken(tokenDescriptor);
             var tokenString = tokenHandler.WriteToken(token);
 
-
             var role = _repositoryManager.UserRepository.GetUserRoleByUserId( user.Id);
             var roleData = await _repositoryManager.RoleRepository.GetRoleByIdAsync(role.RoleId);
 
@@ -202,6 +208,8 @@ namespace MLS_Digital_MGM_API.Controllers
                 TokenType = "bearer",
                 DateOfBirth = user.DateOfBirth,
                 TokenExpiryMinutes = (DateTime)tokenDescriptor.Expires,
+                ProfilePicture = user.ProfilePictures?.FirstOrDefault()?.FileName == null ? null : 
+                    $"{Lambda.http}://{HttpContext.Request.Host}{Configuration["APISettings:API_Prefix"]}/Uploads/UserProfilePictures/{user.ProfilePictures.FirstOrDefault()?.FileName}",
 
             };
             return userData;

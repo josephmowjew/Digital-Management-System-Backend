@@ -22,6 +22,7 @@ namespace DataStore.Core.DTOs
 
         [Column(TypeName = "Date")]
         public DateTime? DateOfBirth { get; set; }
+        public string ProfilePicture {get; set; }
 
     }
 }

@@ -17,6 +17,7 @@ namespace DataStore.Core.Models
         {
             Penalties = new List<Penalty>();
             Committees = new List<Committee>();
+            this.ProfilePictures = new List<Attachment>();
         }
 
         [Required]
@@ -67,12 +68,6 @@ namespace DataStore.Core.Models
         public List<Committee> Committees { get; set; }
 
         public string? SignatureData { get; set; }   // Stores JSON data
-
-       
-        // [NotMapped]
-        // public string FullName => $"{FirstName} {LastName}";
-
-
-
+        public virtual List<Attachment> ProfilePictures { get; set; }
     }
 }

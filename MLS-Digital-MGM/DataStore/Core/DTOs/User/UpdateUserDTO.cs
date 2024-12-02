@@ -1,5 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using DataStore.Core.DTOs.Attachment;
+using Microsoft.AspNetCore.Http;
 
 namespace DataStore.Core.DTOs.User
 {
@@ -46,7 +48,7 @@ namespace DataStore.Core.DTOs.User
 
         [Display(Name = "Role")]
         public string? RoleName { get; set; }
-
+        public ICollection<IFormFile>? ProfilePictures { get; set; }
 
         [Required]
         [EmailAddress]

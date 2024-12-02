@@ -27,6 +27,7 @@ namespace DataStore.Core.Models
             CommunicationMessages = new List<CommunicationMessage>();
             GenericSignatures = new List<GenericSignature>();
             SubcommitteeMessages = new List<SubcommitteeMessage>();
+            ApplicationUsers = new List<ApplicationUser>();
         }
         
         [Required]
@@ -58,6 +59,7 @@ namespace DataStore.Core.Models
         public ICollection<NotaryPublic> NotariesPublic { get; set; }
         public ICollection<CommunicationMessage> CommunicationMessages { get; set; }
         public ICollection<GenericSignature> GenericSignatures { get; set; }
+        public virtual ICollection<ApplicationUser> ApplicationUsers { get; set; }
 
         public ICollection<SubcommitteeMessage> SubcommitteeMessages { get; set; }
 

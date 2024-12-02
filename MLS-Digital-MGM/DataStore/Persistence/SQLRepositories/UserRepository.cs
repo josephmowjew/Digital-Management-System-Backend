@@ -1,4 +1,5 @@
-﻿using DataStore.Core.Models;
+using AutoMapper;
+using DataStore.Core.Models;
 using DataStore.Data;
 using DataStore.Helpers;
 using DataStore.Persistence.Interfaces;
@@ -48,7 +49,42 @@ namespace DataStore.Persistence.SQLRepositories
         }
         public async Task<ApplicationUser?> FindByEmailAsync(string email)
         {
-           return await _context.Users.Where(x => x.Email == email && x.Status != Lambda.Deleted).FirstOrDefaultAsync();
+            // First, let's check if there are any attachments for this user
+            var userWithPictures = await _context.Users
+                .AsNoTracking()
+                .Include(u => u.ProfilePictures.Where(p => p.Status != Lambda.Deleted))  // Add status check if applicable
+                .ThenInclude(p => p.AttachmentType)
+                .Where(x => x.Email == email && x.Status != Lambda.Deleted)
+                .FirstOrDefaultAsync();  // Remove AsNoTracking() temporarily for debugging
+
+            // For debugging - check direct relationship
+            if (userWithPictures != null)
+            {
+                var picturesCount = await _context.Attachments
+                    .CountAsync(a => a.ApplicationUsers.Any(u => u.Id == userWithPictures.Id));
+
+                var pictures = await _context.Attachments
+                    .Where(a => a.ApplicationUsers.Any(u => u.Id == userWithPictures.Id) && a.Status != Lambda.Deleted)
+                    .ToListAsync();
+                
+
+                //add the pictures to the user
+                userWithPictures.ProfilePictures = pictures;
+
+                // Log or check the count
+                System.Diagnostics.Debug.WriteLine($"Found {picturesCount} pictures for user {email}");
+            }
+
+            return userWithPictures;
+        }
+
+        public async Task<List<Attachment>> GetProfilePictures(ApplicationUser user)
+        {
+            return await _context.Attachments
+                .Include(t => t.AttachmentType)
+                .Include(t => t.ApplicationUsers)
+                .Where(a => a.ApplicationUsers.Any(u => u.Id == user.Id))
+                .ToListAsync();
         }
 
          public async Task<ApplicationUser?> GetSingleUserNoFilter(string id)
@@ -61,7 +97,33 @@ namespace DataStore.Persistence.SQLRepositories
         public async Task<ApplicationUser?> GetSingleUser(string id)
         {
 
-            return await this._context.Users.FirstOrDefaultAsync(u => u.Id == id && u.Status != Lambda.Deleted);
+            // First, let's check if there are any attachments for this user
+            var userWithPictures = await _context.Users
+                .AsNoTracking()
+                .Include(u => u.ProfilePictures.Where(p => p.Status != Lambda.Deleted))  // Add status check if applicable
+                .ThenInclude(p => p.AttachmentType)
+                .Where(x => x.Id == id && x.Status != Lambda.Deleted)
+                .FirstOrDefaultAsync();  // Remove AsNoTracking() temporarily for debugging
+
+            // For debugging - check direct relationship
+            if (userWithPictures != null)
+            {
+                var picturesCount = await _context.Attachments
+                    .CountAsync(a => a.ApplicationUsers.Any(u => u.Id == userWithPictures.Id));
+
+                var pictures = await _context.Attachments
+                    .Where(a => a.ApplicationUsers.Any(u => u.Id == userWithPictures.Id) && a.Status != Lambda.Deleted)
+                    .ToListAsync();
+                
+
+                //add the pictures to the user
+                userWithPictures.ProfilePictures = pictures;
+
+                // Log or check the count
+                System.Diagnostics.Debug.WriteLine($"Found {picturesCount} pictures for user {userWithPictures.Email}");
+            }
+
+            return userWithPictures;
 
         }
 
@@ -74,7 +136,8 @@ namespace DataStore.Persistence.SQLRepositories
 
         public IdentityUserRole<string> GetUserRoleByUserId(string userId)
         {
-            return _context.UserRoles.FirstOrDefault(u => u.UserId == userId);
+            return _context.UserRoles
+            .FirstOrDefault(u => u.UserId == userId);
         }
 
         public void ActivateAccount(ApplicationUser user)

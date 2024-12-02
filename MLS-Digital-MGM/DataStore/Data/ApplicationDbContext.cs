@@ -117,6 +117,11 @@ namespace DataStore.Data
             .WithMany()
             .HasForeignKey(c => c.ChairpersonID);
 
+            builder.Entity<ApplicationUser>()
+            .HasMany(a => a.ProfilePictures)
+            .WithMany(a => a.ApplicationUsers)
+            .UsingEntity(j => j.ToTable("ApplicationUserAttachment"));
+
 
             //builder.Entity<ApplicationUser>().Property(u => u.FullName).HasComputedColumnSql("[FirstName] + ' ' + [LastName]");
 

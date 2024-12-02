@@ -278,7 +278,7 @@ namespace MLS_Digital_MGM_API.Controllers
             {
                 // Log the exception using ErrorLogService
                 await _errorLogService.LogErrorAsync(ex);
-        
+
                 // Return 500 Internal Server Error
                 return StatusCode(500, "Internal server error");
             }
@@ -320,7 +320,7 @@ namespace MLS_Digital_MGM_API.Controllers
             {
                 // Log the exception using ErrorLogService
                 await _errorLogService.LogErrorAsync(ex);
-        
+
                 // Return 500 Internal Server Error
                 return StatusCode(500, "Internal server error");
             }
@@ -361,7 +361,7 @@ namespace MLS_Digital_MGM_API.Controllers
         }
       
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(string id, [FromBody]UpdateUserDTO userDTO)
+        public async Task<IActionResult> UpdateUser(string id, [FromForm]UpdateUserDTO userDTO)
         {
             try
             {
@@ -382,20 +382,39 @@ namespace MLS_Digital_MGM_API.Controllers
                     userDTO.DepartmentId = user.DepartmentId;
                 }
                 _mapper.Map(userDTO, user);
+
+                var attachmentType = await _repositoryManager.AttachmentTypeRepository.GetAsync(d => d.Name == "UserProfilePicture")
+                                ?? new AttachmentType { Name = "UserProfilePicture" };
+
+                if (userDTO.ProfilePictures?.Any() == true)
+                {
+                    // Clear existing profile pictures from the linking table
+                    if (user.ProfilePictures?.Any() == true)
+                    {
+                        foreach (var picture in user.ProfilePictures.ToList())
+                        {
+                            await _repositoryManager.AttachmentRepository.DeleteAsync(picture);
+                        }
+                        user.ProfilePictures.Clear();
+                    }
+
+                    // Save and add new profile picture
+                    var attachmentsList = await SaveProfilePicturesAsync(userDTO.ProfilePictures, attachmentType.Id);
+                    user.ProfilePictures = new List<Attachment>(attachmentsList);
+                }
+
                 await _repositoryManager.UserRepository.UpdateAsync(user);
 
                 if(userDTO.RoleName != null)
                 {
                     var roleResult = await _repositoryManager.UserRepository.AddUserToRoleAsync(user, userDTO.RoleName);
 
-                      if (!roleResult.Succeeded)
+                    if (!roleResult.Succeeded)
                     {
                         ModelState.AddModelError("Role", "Failed to associate the user with the specified role.");
                         return BadRequest(ModelState);
-                    }
-                    
+                    }                    
                 }
-
 
                 await _unitOfWork.CommitAsync();
 
@@ -599,6 +618,62 @@ namespace MLS_Digital_MGM_API.Controllers
                     });
                 }
                 catch
+                {
+                    throw;
+                }
+            }
+
+            return attachmentsList;
+        }
+
+        private async Task<List<Attachment>> SaveProfilePicturesAsync(IEnumerable<IFormFile> attachments, int attachmentTypeId)
+        {
+            var attachmentsList = new List<Attachment>();
+            var hostEnvironment = HttpContext.RequestServices.GetRequiredService<IWebHostEnvironment>();
+            var webRootPath = hostEnvironment.WebRootPath;
+
+            // Check if webRootPath is null or empty
+            if (string.IsNullOrWhiteSpace(webRootPath))
+            {
+                throw new ArgumentNullException(nameof(webRootPath), "Web root path cannot be null or empty");
+            }
+
+            var AttachmentsPath = Path.Combine(webRootPath, "Uploads/UserProfilePictures");
+            
+            // Ensure the directory exists
+            if (!Directory.Exists(AttachmentsPath))
+            {
+                Directory.CreateDirectory(AttachmentsPath);
+
+            }
+
+            foreach (var attachment in attachments)
+            {
+                if (attachment == null || string.IsNullOrWhiteSpace(attachment.FileName))
+                {
+
+                    continue;
+                }
+
+                var uniqueFileName = FileNameGenerator.GenerateUniqueFileName(attachment.FileName);
+                var filePath = Path.Combine(AttachmentsPath, uniqueFileName);
+
+                try
+                {
+                    using (var stream = System.IO.File.Create(filePath))
+                    {
+                        await attachment.CopyToAsync(stream);
+                    }
+
+                    attachmentsList.Add(new Attachment
+                    {
+                        FileName = uniqueFileName,
+                        FilePath = filePath,
+                        AttachmentTypeId = attachmentTypeId,
+                        PropertyName = attachment.Name
+                    });
+                }
+                catch (Exception ex)
                 {
                     throw;
                 }
