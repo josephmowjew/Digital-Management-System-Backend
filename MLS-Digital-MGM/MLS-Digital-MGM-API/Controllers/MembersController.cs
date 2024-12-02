@@ -40,8 +40,9 @@ namespace MLS_Digital_MGM_API.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IEmailService _emailService;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IConfiguration _configuration;
         
-        public MembersController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor, ApplicationDbContext context, IEmailService emailService, IWebHostEnvironment webHostEnvironment )
+        public MembersController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor, ApplicationDbContext context, IEmailService emailService, IWebHostEnvironment webHostEnvironment, IConfiguration configuration)
         {
             _repositoryManager = repositoryManager;
             _errorLogService = errorLogService;
@@ -51,6 +52,7 @@ namespace MLS_Digital_MGM_API.Controllers
             _context = context;
             _emailService = emailService;
             _webHostEnvironment = webHostEnvironment;
+            _configuration = configuration;
         }
 
        [HttpGet("paged")]
@@ -242,6 +244,16 @@ namespace MLS_Digital_MGM_API.Controllers
                     return NotFound();
                 }
 
+                foreach (var attachment in member.User.ProfilePictures)
+                {
+                    //string attachmentTypeName = attachment.AttachmentType.Name;
+
+                    string newFilePath = $"{Lambda.http}://{HttpContext.Request.Host}{_configuration["APISettings:API_Prefix"]}/Uploads/ProfilePictures/{attachment.FileName}";
+
+                    attachment.FilePath = newFilePath;
+
+                }
+
                 var mappedMember = _mapper.Map<ReadMemberDTO>(member);
                 return Ok(mappedMember);
             }
@@ -339,6 +351,7 @@ namespace MLS_Digital_MGM_API.Controllers
                     Includes = new Expression<Func<Member, object>>[] {
                         p => p.Customer,
                         p => p.User,
+                        p => p.Licenses,
                         p => p.Firm,
                     }
                 };

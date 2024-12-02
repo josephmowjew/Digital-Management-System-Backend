@@ -27,6 +27,7 @@ namespace DataStore.Core.DTOs.License
         public int LicenseApplicationId { get; set; }
         public ReadLicenseApplicationDTO LicenseApplication { get; set; }
         public DateTime CreatedDate { get; set; }
+        public string Status {get; set; }
          public List<ReadAttachmentDTO> Attachments { get; set; }
 
     }

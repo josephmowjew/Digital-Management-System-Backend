@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using AutoMapper;
-using DataStore.Core.DTOs; 
+using DataStore.Core.DTOs;
 using DataStore.Core.Services;
 using DataStore.Persistence.Interfaces;
 using DataStore.Core.Services.Interfaces;
@@ -17,18 +17,18 @@ using Microsoft.AspNetCore.Authorization;
 using System.Linq.Expressions;
 using System.Composition;
 
-namespace MLS_Digital_MGM_API.Controllers 
+namespace MLS_Digital_MGM_API.Controllers
 {
     [Route("api/[controller]")]
     [Authorize(AuthenticationSchemes = "Bearer")]
     public class MemberQualificationsController : Controller
     {
         private readonly IRepositoryManager _repositoryManager;
-        private readonly IErrorLogService _errorLogService; 
+        private readonly IErrorLogService _errorLogService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        
+
         public MemberQualificationsController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor)
         {
             _repositoryManager = repositoryManager;
@@ -39,15 +39,15 @@ namespace MLS_Digital_MGM_API.Controllers
         }
 
         [HttpGet("paged")]
-        public async Task<IActionResult> GetMemberQualifications(int pageNumber = 1, int pageSize = 10,int memberId = 0)
+        public async Task<IActionResult> GetMemberQualifications(int pageNumber = 1, int pageSize = 10, int memberId = 0)
         {
             try
             {
 
-                 var dataTableParams = new DataTablesParameters();
-                 var pagingParameters = new PagingParameters<MemberQualification>();
+                var dataTableParams = new DataTablesParameters();
+                var pagingParameters = new PagingParameters<MemberQualification>();
 
-                 if (memberId != 0)
+                if (memberId != 0)
                 {
                     pagingParameters.Predicate = u => u.Status != Lambda.Deleted && u.MemberId == memberId;
                 }
@@ -56,30 +56,30 @@ namespace MLS_Digital_MGM_API.Controllers
                     if (dataTableParams.LoadFromRequest(_httpContextAccessor))
                     {
                         var draw = dataTableParams.Draw;
-                        return Json(new 
-                        { 
-                            draw, 
-                            recordsFiltered = 0, 
-                            recordsTotal = 0, 
+                        return Json(new
+                        {
+                            draw,
+                            recordsFiltered = 0,
+                            recordsTotal = 0,
                             data = Enumerable.Empty<ReadMemberQualificationDTO>()
                         });
                     }
                     return Ok(Enumerable.Empty<ReadMemberQualificationDTO>());
                 }
 
-               
-                    
-                    pagingParameters.PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber;
-                    pagingParameters.PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize;
-                    pagingParameters.SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null;
-                    pagingParameters.SortColumn = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumn : null;
-                    pagingParameters.SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null;
-                    pagingParameters.Includes = new Expression<Func<MemberQualification, object>>[]{
+
+
+                pagingParameters.PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber;
+                pagingParameters.PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize;
+                pagingParameters.SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null;
+                pagingParameters.SortColumn = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumn : null;
+                pagingParameters.SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null;
+                pagingParameters.Includes = new Expression<Func<MemberQualification, object>>[]{
                         q => q.Member,
                         q=> q.QualificationType,
                         q => q.Attachments
-                       
-                        
+
+
                     };
 
                 var memberQualifications = await _repositoryManager.MemberQualificationRepository.GetPagedAsync(pagingParameters);
@@ -89,11 +89,11 @@ namespace MLS_Digital_MGM_API.Controllers
                     if (dataTableParams.LoadFromRequest(_httpContextAccessor))
                     {
                         var draw = dataTableParams.Draw;
-                        return Json(new 
-                        { 
-                            draw, 
-                            recordsFiltered = 0, 
-                            recordsTotal = 0, 
+                        return Json(new
+                        {
+                            draw,
+                            recordsFiltered = 0,
+                            recordsTotal = 0,
                             data = Enumerable.Empty<ReadMemberQualificationDTO>()
                         });
                     }
@@ -102,7 +102,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 var mappedMemberQualifications = _mapper.Map<List<ReadMemberQualificationDTO>>(memberQualifications);
 
-                 foreach (var report in mappedMemberQualifications)
+                foreach (var report in mappedMemberQualifications)
                 {
                     foreach (var attachment in report.Attachments)
                     {
@@ -121,12 +121,12 @@ namespace MLS_Digital_MGM_API.Controllers
                     var resultTotalFiltred = mappedMemberQualifications.Count;
                     var totalRecords = await _repositoryManager.MemberQualificationRepository.CountAsync(pagingParameters);
 
-                    return Json(new 
-                    { 
-                        draw, 
-                        recordsFiltered = totalRecords, 
-                        recordsTotal = totalRecords, 
-                        data = mappedMemberQualifications.ToList() 
+                    return Json(new
+                    {
+                        draw,
+                        recordsFiltered = totalRecords,
+                        recordsTotal = totalRecords,
+                        data = mappedMemberQualifications.ToList()
                     });
                 }
 
@@ -160,10 +160,10 @@ namespace MLS_Digital_MGM_API.Controllers
                     return BadRequest(ModelState);
                 }
 
-                            // Get or create attachment type
-                var attachmentType = await _repositoryManager.AttachmentTypeRepository.GetAsync(d => d.Name == "MemberQualification") 
+                // Get or create attachment type
+                var attachmentType = await _repositoryManager.AttachmentTypeRepository.GetAsync(d => d.Name == "MemberQualification")
                                 ?? new AttachmentType { Name = "MemberQualification" };
-                 // Add attachment type if it doesn't exist
+                // Add attachment type if it doesn't exist
                 if (attachmentType.Id == 0)
                 {
                     await _repositoryManager.AttachmentTypeRepository.AddAsync(attachmentType);
@@ -206,9 +206,9 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 var user = await _repositoryManager.UserRepository.FindByEmailAsync(_httpContextAccessor.HttpContext.User.Identity.Name);
 
-                var attachmentType = await _repositoryManager.AttachmentTypeRepository.GetAsync(d => d.Name == "MemberQualification") 
+                var attachmentType = await _repositoryManager.AttachmentTypeRepository.GetAsync(d => d.Name == "MemberQualification")
                                 ?? new AttachmentType { Name = "MemberQualification" };
-    
+
                 if (memberQualificationDTO.Attachments?.Any() == true)
                 {
                     memberQualification.Attachments = await SaveAttachmentsAsync(memberQualificationDTO.Attachments, attachmentType.Id);
@@ -283,12 +283,10 @@ namespace MLS_Digital_MGM_API.Controllers
         }
 
         private async Task<List<Attachment>> SaveAttachmentsAsync(IEnumerable<IFormFile> attachments, int attachmentTypeId)
-    {
+        {
             var attachmentsList = new List<Attachment>();
             var hostEnvironment = HttpContext.RequestServices.GetRequiredService<IWebHostEnvironment>();
             var webRootPath = hostEnvironment.WebRootPath;
-
-          
 
             // Check if webRootPath is null or empty
             if (string.IsNullOrWhiteSpace(webRootPath))
@@ -296,28 +294,26 @@ namespace MLS_Digital_MGM_API.Controllers
                 throw new ArgumentNullException(nameof(webRootPath), "Web root path cannot be null or empty");
             }
 
-            var AttachmentsPath = Path.Combine(webRootPath, "Uploads/QualificationAttachments" );
+            var AttachmentsPath = Path.Combine(webRootPath, "Uploads/QualificationAttachments");
 
-           
+
             // Ensure the directory exists
             if (!Directory.Exists(AttachmentsPath))
             {
                 Directory.CreateDirectory(AttachmentsPath);
-              
+
             }
 
             foreach (var attachment in attachments)
             {
                 if (attachment == null || string.IsNullOrWhiteSpace(attachment.FileName))
                 {
-                 
+
                     continue;
                 }
 
                 var uniqueFileName = FileNameGenerator.GenerateUniqueFileName(attachment.FileName);
                 var filePath = Path.Combine(AttachmentsPath, uniqueFileName);
-
-               
 
                 try
                 {
@@ -336,7 +332,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 }
                 catch (Exception ex)
                 {
-                   
+
                     throw;
                 }
             }
@@ -344,5 +340,5 @@ namespace MLS_Digital_MGM_API.Controllers
             return attachmentsList;
         }
 
-       }
+    }
 }

@@ -1,3 +1,4 @@
+using DataStore.Core.DTOs.Attachment;
 using DataStore.Core.DTOs.Department;
 using System;
 using System.Collections.Generic;  
@@ -7,6 +8,9 @@ namespace DataStore.Core.DTOs.User {
 
   public class ReadUserDTO {
 
+    public ReadUserDTO(){
+      ProfilePictures = new List<ReadAttachmentDTO>();
+    }
     
     public string Id { get; set; }
 
@@ -26,10 +30,8 @@ namespace DataStore.Core.DTOs.User {
         public string Email { get; set; }
         public DateOnly LastLogin { get; set; }
         public DateOnly CreatedDate { get; set; }
-
         public string FullName { get => this.FirstName + " " + this.LastName; }
-
-
+        public List<ReadAttachmentDTO> ProfilePictures { get; set; }
   }
 
 }

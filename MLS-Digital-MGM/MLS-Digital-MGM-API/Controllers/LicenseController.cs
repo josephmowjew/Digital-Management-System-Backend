@@ -45,7 +45,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
         // GET api/license/paged
         [HttpGet("paged")]
-        public async Task<IActionResult> GetLicenses(int pageNumber = 1, int pageSize = 10)
+        public async Task<IActionResult> GetLicenses(int pageNumber = 1, int pageSize = 10, int memberId = 0)
         {
             try
             {
@@ -56,7 +56,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 var pagingParameters = new PagingParameters<License>
                 {
-                    Predicate = l => l.Status != Lambda.Deleted,
+                    Predicate = l => l.Status != Lambda.Deleted && (memberId > 0 ? l.MemberId == memberId : true),
                     PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
                     PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
                     SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
