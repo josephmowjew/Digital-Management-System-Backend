@@ -19,6 +19,8 @@ using System.Linq.Expressions;
 using Hangfire;
 using Newtonsoft.Json;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
+using System.IO;
+using Microsoft.AspNetCore.Hosting;
 
 namespace MLS_Digital_MGM_API.Controllers
 {
@@ -33,6 +35,7 @@ namespace MLS_Digital_MGM_API.Controllers
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<InvoiceRequestController> _logger;
         private readonly IEmailService _emailService;
+        private readonly IWebHostEnvironment _hostEnvironment;
 
         public InvoiceRequestController(
             IRepositoryManager repositoryManager,
@@ -41,7 +44,8 @@ namespace MLS_Digital_MGM_API.Controllers
             IMapper mapper,
             IHttpContextAccessor httpContextAccessor,
             ILogger<InvoiceRequestController> logger,
-            IEmailService emailService)
+            IEmailService emailService,
+            IWebHostEnvironment hostEnvironment)
         {
             _repositoryManager = repositoryManager;
             _errorLogService = errorLogService;
@@ -50,6 +54,7 @@ namespace MLS_Digital_MGM_API.Controllers
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
             _emailService = emailService;
+            _hostEnvironment = hostEnvironment;
         }
 
         [HttpGet("paged")]
@@ -612,7 +617,7 @@ namespace MLS_Digital_MGM_API.Controllers
         }
 
         [HttpPost("MarkAsGenerated/{id}")]
-        public async Task<IActionResult> MarkGenerated(int id, UpdateInvoiceRequestDTO invoiceRequestDTO)
+        public async Task<IActionResult> MarkGenerated(int id, [FromForm] UpdateInvoiceRequestDTO invoiceRequestDTO)
         {
             try
             {
@@ -622,26 +627,73 @@ namespace MLS_Digital_MGM_API.Controllers
                 {
                     return NotFound();
                 }
-                else
+
+                if (invoiceRequestDTO.FileUpload == null)
                 {
-                    invoiceRequest.Status = Lambda.MarkAsGenerated;
-
-                    await _repositoryManager.InvoiceRequestRepository.UpdateAsync(invoiceRequest);
-                    await _unitOfWork.CommitAsync();
-
-                    BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(invoiceRequest.CreatedBy.Email, "Invoice Request Status", "Your invoice for a CPD has been generated", false));
-
-                    return Json(new { message = "Invoice Request marked as generated" });
+                    return BadRequest("File upload is required");
                 }
 
-                
+                if (string.IsNullOrEmpty(invoiceRequestDTO.InvoiceNumber))
+                {
+                    return BadRequest("Invoice number is required");
+                }
+
+                // Get or create attachment type
+                var attachmentType = await _repositoryManager.AttachmentTypeRepository.GetAsync(d => d.Name == "Invoice") 
+                                    ?? new AttachmentType { Name = "Invoice" };
+
+                // Add attachment type if it doesn't exist
+                if (attachmentType.Id == 0)
+                {
+                    await _repositoryManager.AttachmentTypeRepository.AddAsync(attachmentType);
+                    await _unitOfWork.CommitAsync();
+                }
+
+                var hostEnvironment = HttpContext.RequestServices.GetRequiredService<IWebHostEnvironment>();
+                var webRootPath = hostEnvironment.WebRootPath;
+                var uploadsPath = Path.Combine(webRootPath, "Uploads", "Invoices");
+
+                // Ensure directory exists
+                if (!Directory.Exists(uploadsPath))
+                {
+                    Directory.CreateDirectory(uploadsPath);
+                }
+
+                // Generate unique filename with invoice number prefix
+                var uniqueFileName = $"{invoiceRequestDTO.InvoiceNumber}_{FileNameGenerator.GenerateUniqueFileName(invoiceRequestDTO.FileUpload.FileName)}";
+                var filePath = Path.Combine(uploadsPath, uniqueFileName);
+
+                // Save file
+                using (var stream = System.IO.File.Create(filePath))
+                {
+                    await invoiceRequestDTO.FileUpload.CopyToAsync(stream);
+                }
+
+                // Create attachment record
+                var attachment = new Attachment
+                {
+                    FileName = uniqueFileName,
+                    FilePath = filePath,
+                    AttachmentTypeId = attachmentType.Id,
+                    PropertyName = invoiceRequestDTO.FileUpload.Name
+                };
+
+                invoiceRequest.Status = Lambda.MarkAsGenerated;
+                invoiceRequest.InvoiceNumber = invoiceRequestDTO.InvoiceNumber;
+                invoiceRequest.Attachments = new List<Attachment> { attachment };
+
+                await _repositoryManager.InvoiceRequestRepository.UpdateAsync(invoiceRequest);
+                await _unitOfWork.CommitAsync();
+
+                BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(invoiceRequest.CreatedBy.Email, "Invoice Request Status", "Your invoice for a CPD has been generated", false));
+
+                return Json(new { message = "Invoice Request marked as generated", filePath });
             }
             catch (Exception ex)
             {
                 await _errorLogService.LogErrorAsync(ex);
                 return StatusCode(500, "Internal server error");
             }
-
         }
         [HttpPost("MarkAsPaid/{id}")]
         public async Task<IActionResult> MarkPaid(int id, UpdateInvoiceRequestDTO invoiceRequestDTO)
