@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using DataStore.Core.DTOs.Attachment;
 using DataStore.Core.DTOs.InvoiceRequestType;
 using DataStore.Core.DTOs.User;
 using DataStore.Core.DTOs.YearOfOperation;
@@ -29,6 +30,7 @@ namespace DataStore.Core.DTOs.InvoiceRequest
         public string? QBInvoiceId { get; set; }
         public QBInvoice QBInvoice { get; set; }
         public string? InvoiceNumber { get; set; }
-        public List<Attachment> Attachments { get; set; } = new List<Attachment>();
+        public int? AttachmentId { get; set; }
+        public ReadAttachmentDTO Attachment { get; set; }
     }
 }

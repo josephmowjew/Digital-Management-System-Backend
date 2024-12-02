@@ -518,6 +518,7 @@ namespace MLS_Digital_MGM_API.Controllers
                         p => p.CreatedBy,
                         p => p.Customer,
                         p => p.QBInvoice,
+                        p => p.Attachment,
                     },
                 };
 
@@ -680,7 +681,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 invoiceRequest.Status = Lambda.MarkAsGenerated;
                 invoiceRequest.InvoiceNumber = invoiceRequestDTO.InvoiceNumber;
-                invoiceRequest.Attachments = new List<Attachment> { attachment };
+                invoiceRequest.Attachment = attachment;
 
                 await _repositoryManager.InvoiceRequestRepository.UpdateAsync(invoiceRequest);
                 await _unitOfWork.CommitAsync();

@@ -25,7 +25,7 @@ namespace DataStore.Persistence.SQLRepositories
                 .Include(ir => ir.YearOfOperation)
                 .Include(ir => ir.QBInvoice)
                 .Include(ir => ir.CreatedBy)
-                .Include(ir => ir.Attachments)
+                .Include(ir => ir.Attachment)
                     .ThenInclude(a => a.AttachmentType)
                 .FirstOrDefaultAsync(ir => ir.Id == id);
         }

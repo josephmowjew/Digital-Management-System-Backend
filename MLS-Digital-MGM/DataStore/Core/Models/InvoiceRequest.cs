@@ -11,10 +11,7 @@ namespace DataStore.Core.Models
 {
     public class InvoiceRequest: Meta
     {
-        public InvoiceRequest()
-        {
-            Attachments = new List<Attachment>();
-        }
+       
 
         public string? CreatedById { get; set; }
         public virtual ApplicationUser CreatedBy { get; set; }
@@ -37,7 +34,9 @@ namespace DataStore.Core.Models
         public string? QBInvoiceId { get; set; }
         public QBInvoice QBInvoice { get; set; }
         public string? InvoiceNumber { get; set; }
-        public virtual List<Attachment> Attachments { get; set; }
+
+        public int? AttachmentId { get; set; }
+        public virtual Attachment Attachment { get; set; }
     }
 
 }
