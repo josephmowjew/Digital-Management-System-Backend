@@ -248,7 +248,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 {
                     //string attachmentTypeName = attachment.AttachmentType.Name;
 
-                    string newFilePath = $"{Lambda.http}://{HttpContext.Request.Host}{_configuration["APISettings:API_Prefix"]}/Uploads/ProfilePictures/{attachment.FileName}";
+                    string newFilePath = $"{Lambda.http}://{HttpContext.Request.Host}{_configuration["APISettings:API_Prefix"]}/Uploads/UserProfilePictures/{attachment.FileName}";
 
                     attachment.FilePath = newFilePath;
 
