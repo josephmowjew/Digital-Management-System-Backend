@@ -146,14 +146,14 @@ namespace MLS_Digital_MGM_API.Controllers
                     var draw = dataTableParams.Draw;
                     //return NotFound("No customer found for this user.");
                     return Json(new
-                        {
-                            draw,
-                            recordsFiltered = 0,
-                            recordsTotal = 0,
-                            data = Enumerable.Empty<ReadQBInvoiceDTO>()
-                        });
+                    {
+                        draw,
+                        recordsFiltered = 0,
+                        recordsTotal = 0,
+                        data = Enumerable.Empty<ReadQBInvoiceDTO>()
+                    });
 
-                        
+
                 }
 
                 var customerId = customer?.CustomerId;
@@ -264,7 +264,7 @@ namespace MLS_Digital_MGM_API.Controllers
                         p => p.CreatedBy,
                         p => p.Customer,
                         p => p.QBInvoice,
-                        
+
                     },
                 };
 
@@ -288,13 +288,13 @@ namespace MLS_Digital_MGM_API.Controllers
                     return Ok(Enumerable.Empty<ReadInvoiceRequestDTO>());
                 }
 
-               
+
                 var invoiceRequestDTOs = _mapper.Map<List<ReadInvoiceRequestDTO>>(invoiceRequestsPaged);
-                 //loop through the invoice requests and get the invoice and set the referenced entity to a CPDTraining
+                //loop through the invoice requests and get the invoice and set the referenced entity to a CPDTraining
                 foreach (var invoiceRequest in invoiceRequestDTOs)
                 {
-                    
-                    invoiceRequest.ReferencedEntity = await _repositoryManager.CPDTrainingRepository.GetAsync( ir => ir.Id == int.Parse(invoiceRequest.ReferencedEntityId));
+
+                    invoiceRequest.ReferencedEntity = await _repositoryManager.CPDTrainingRepository.GetAsync(ir => ir.Id == int.Parse(invoiceRequest.ReferencedEntityId));
                 }
 
 
@@ -412,7 +412,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
 
-                    
+
 
                 var invoiceRequest = _mapper.Map<InvoiceRequest>(invoiceRequestDTO);
                 string username = _httpContextAccessor.HttpContext.User.Identity.Name;
@@ -425,7 +425,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 var currentYearOfOperation = await _repositoryManager.YearOfOperationRepository.GetCurrentYearOfOperation();
 
                 //set current year of operation when available
-                if(currentYearOfOperation != null)
+                if (currentYearOfOperation != null)
                 {
                     invoiceRequest.YearOfOperationId = currentYearOfOperation.Id;
                 }
@@ -434,10 +434,10 @@ namespace MLS_Digital_MGM_API.Controllers
                 var memberAccount = await _repositoryManager.MemberRepository.GetMemberByUserId(user.Id);
 
 
-                if(memberAccount != null)
+                if (memberAccount != null)
                 {
                     //set the member account id
-                  
+
                     invoiceRequest.CustomerId = memberAccount.CustomerId ?? null;
                 }
 
@@ -452,13 +452,13 @@ namespace MLS_Digital_MGM_API.Controllers
                 }
 
                 //add a description of the invoice request
-               
+
                 await _repositoryManager.InvoiceRequestRepository.AddAsync(invoiceRequest);
                 await _unitOfWork.CommitAsync();
 
-                 invoiceRequest.Description = $"MLS-{invoiceRequest.Id}";
+                invoiceRequest.Description = $"MLS-{invoiceRequest.Id}";
 
-                 await _repositoryManager.InvoiceRequestRepository.UpdateAsync(invoiceRequest);
+                await _repositoryManager.InvoiceRequestRepository.UpdateAsync(invoiceRequest);
 
                 return CreatedAtAction("GetInvoiceRequestById", new { id = invoiceRequest.Id }, invoiceRequest);
             }
@@ -538,9 +538,18 @@ namespace MLS_Digital_MGM_API.Controllers
                     return Ok(Enumerable.Empty<ReadInvoiceRequestDTO>());
                 }
 
-                var invoiceRequestDTOs = _mapper.Map<List<ReadInvoiceRequestDTO>>(invoiceRequestsPaged);
+                var invoiceRequestDTOs = _mapper.Map<List<ReadInvoiceRequestDTO>>(invoiceRequestsPaged.OrderByDescending(x => x.CreatedDate).ToList());
 
+                foreach (var invoiceRequest in invoiceRequestDTOs)
+                {
+                    if(invoiceRequest.Attachment != null){
 
+                        string newfilePath = Path.Combine("Uploads/Invoices/", invoiceRequest.Attachment.FileName);
+
+                        invoiceRequest.Attachment.FilePath = newfilePath;
+                    }
+
+                }
 
                 if (dataTableParams.LoadFromRequest(_httpContextAccessor))
                 {
@@ -638,7 +647,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 }
 
                 // Get or create attachment type
-                var attachmentType = await _repositoryManager.AttachmentTypeRepository.GetAsync(d => d.Name == "Invoice") 
+                var attachmentType = await _repositoryManager.AttachmentTypeRepository.GetAsync(d => d.Name == "Invoice")
                                     ?? new AttachmentType { Name = "Invoice" };
 
                 // Add attachment type if it doesn't exist
@@ -804,7 +813,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
-    
+
         [HttpGet("count")]
         public async Task<IActionResult> count()
         {
