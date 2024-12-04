@@ -102,6 +102,16 @@ namespace DataStore.Persistence.SQLRepositories
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<Member>> GetMembersByFirmIdAsync(int firmId)
+        {
+            return await _context.Members
+                .Include(m => m.User)
+                .Include(m => m.Customer)
+                .Include(m => m.Firm)
+                .Where(m => m.FirmId == firmId && m.Status != Lambda.Deleted)
+                .ToListAsync();
+        }
+
         public new async Task<IEnumerable<Member>> GetPagedAsync(PagingParameters<Member> pagingParameters)
         {
             var query = _context.Set<Member>().Where(pagingParameters.Predicate);

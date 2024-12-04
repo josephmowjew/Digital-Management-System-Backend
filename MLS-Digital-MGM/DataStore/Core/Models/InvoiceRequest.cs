@@ -11,7 +11,6 @@ namespace DataStore.Core.Models
 {
     public class InvoiceRequest: Meta
     {
-       
 
         public string? CreatedById { get; set; }
         public virtual ApplicationUser CreatedBy { get; set; }
@@ -37,6 +36,11 @@ namespace DataStore.Core.Models
 
         public int? AttachmentId { get; set; }
         public virtual Attachment Attachment { get; set; }
-    }
 
+        [StringLength(maximumLength:50)]
+        public string RequestType { get; set; } = "Individual";
+        
+        [StringLength(maximumLength:4000)]
+        public string? FirmMembers { get; set; }
+    }
 }

@@ -263,7 +263,46 @@ namespace MLS_Digital_MGM_API.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
-       
+
+        [HttpGet("getFirmMembers")]
+        public async Task<IActionResult> GetFirmMembers()
+        {
+            try
+            {
+                // Get the current user's email from the token
+                var userEmail = _httpContextAccessor.HttpContext.User.Identity.Name;
+                if (string.IsNullOrEmpty(userEmail))
+                {
+                    return Unauthorized("User not authenticated");
+                }
+
+                // Get the current user's member record
+                var currentMember = await _repositoryManager.MemberRepository.GetMemberByUserId(
+                    (await _repositoryManager.UserRepository.FindByEmailAsync(userEmail)).Id);
+                
+                if (currentMember == null)
+                {
+                    return NotFound("Member record not found");
+                }
+
+                if (!currentMember.FirmId.HasValue)
+                {
+                    return NotFound("Member is not associated with any firm");
+                }
+
+                // Get all members from the same firm
+                var firmMembers = await _repositoryManager.MemberRepository.GetMembersByFirmIdAsync(currentMember.FirmId.Value);
+                
+                var mappedMembers = _mapper.Map<List<ReadMemberDTO>>(firmMembers);
+                return Ok(mappedMembers);
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
         [HttpGet("getAll")]
         public async Task<IActionResult> GetAll()
         {

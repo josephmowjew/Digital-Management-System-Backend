@@ -123,8 +123,6 @@ namespace MLS_Digital_MGM_API.Controllers
                         training.NumberOfPendingRegistrations = training.CPDTrainingRegistration.Count(r => r.RegistrationStatus == Lambda.Pending);
                     }
 
-
-
                 }
 
                 if (dataTableParams.LoadFromRequest(_httpContextAccessor))
