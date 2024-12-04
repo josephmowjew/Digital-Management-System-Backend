@@ -480,9 +480,6 @@ namespace MLS_Digital_MGM_API.Controllers
                 {
                     return NotFound();
                 }
-
-
-
                 var mappedInvoiceRequest = _mapper.Map<ReadInvoiceRequestDTO>(invoiceRequest);
                 return Ok(mappedInvoiceRequest);
             }

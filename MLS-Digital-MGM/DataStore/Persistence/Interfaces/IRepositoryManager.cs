@@ -87,5 +87,6 @@ namespace DataStore.Persistence.Interfaces
         INotaryPublicRepository NotaryPublicRepository { get; }
         IGenericSignatureRepository GenericSignatureRepository { get; }
         IAttachmentRepository AttachmentRepository { get; }
+        IApplicationUserChangeRequestRepository ApplicationUserChangeRequestRepository { get; }
     }
 }

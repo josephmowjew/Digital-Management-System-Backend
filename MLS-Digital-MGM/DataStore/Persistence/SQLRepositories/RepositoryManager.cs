@@ -67,6 +67,7 @@ namespace DataStore.Persistence.SQLRepositories
         private INotaryPublicRepository _notaryPublicRepository;
         private IGenericSignatureRepository _genericSignatureRepository;
         private IAttachmentRepository _attachmentRepository;
+        private IApplicationUserChangeRequestRepository _applicationUserChangeRequestRepository;
 
 
         public RepositoryManager(
@@ -140,5 +141,6 @@ namespace DataStore.Persistence.SQLRepositories
         public IGenericSignatureRepository GenericSignatureRepository => _genericSignatureRepository ??= new GenericSignatureRepository(_context, _unitOfWork);
         
         public IAttachmentRepository AttachmentRepository => _attachmentRepository ??= new AttachmentRepository(_context, _unitOfWork);
+        public IApplicationUserChangeRequestRepository ApplicationUserChangeRequestRepository => _applicationUserChangeRequestRepository ??= new ApplicationUserChangeRequestRepository(_context, _unitOfWork);
     }
 }
