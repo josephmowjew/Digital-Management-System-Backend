@@ -406,9 +406,21 @@ namespace MLS_Digital_MGM_API.Controllers
                 var cpdTrainingRegistration = await _repositoryManager.CPDTrainingRegistrationRepository.GetByIdAsync(id);
                 if (cpdTrainingRegistration == null)
                     return NotFound();
-                    //set the status of the registration to accepted
-                    cpdTrainingRegistration.RegistrationStatus = Lambda.Registered;
+                //set the status of the registration to accepted
+                cpdTrainingRegistration.RegistrationStatus = Lambda.Registered;
                 await _repositoryManager.CPDTrainingRegistrationRepository.UpdateAsync(cpdTrainingRegistration);
+
+                //get invvoice request for the cpd training registration
+                var invoiceRequest = cpdTrainingRegistration.InvoiceRequestId.HasValue ? 
+                    await _repositoryManager.InvoiceRequestRepository.GetByIdAsync(cpdTrainingRegistration.InvoiceRequestId.Value) : 
+                    null;
+
+                if (invoiceRequest != null)
+                {
+                    //set the invoice request status to paid
+                    invoiceRequest.Status = Lambda.Paid;
+                    await _repositoryManager.InvoiceRequestRepository.UpdateAsync(invoiceRequest);
+                }
                 await _unitOfWork.CommitAsync();
 
                 //send email to the user
