@@ -5,6 +5,7 @@ using DataStore.Core.DTOs.InvoiceRequestType;
 using DataStore.Core.DTOs.User;
 using DataStore.Core.DTOs.YearOfOperation;
 using DataStore.Core.Models;
+using DataStore.Core.DTOs.Member;
 
 namespace DataStore.Core.DTOs.InvoiceRequest
 {
@@ -32,5 +33,7 @@ namespace DataStore.Core.DTOs.InvoiceRequest
         public string? InvoiceNumber { get; set; }
         public int? AttachmentId { get; set; }
         public ReadAttachmentDTO Attachment { get; set; }
+        public string RequestType { get; set; }
+        public String? FirmMembers { get; set; }
     }
 }

@@ -21,6 +21,7 @@ using Newtonsoft.Json;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using System.IO;
 using Microsoft.AspNetCore.Hosting;
+using System.Text.Json;
 
 namespace MLS_Digital_MGM_API.Controllers
 {
@@ -412,8 +413,6 @@ namespace MLS_Digital_MGM_API.Controllers
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
 
-
-
                 var invoiceRequest = _mapper.Map<InvoiceRequest>(invoiceRequestDTO);
                 string username = _httpContextAccessor.HttpContext.User.Identity.Name;
                 var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
@@ -433,25 +432,37 @@ namespace MLS_Digital_MGM_API.Controllers
                 //get the member account from the user
                 var memberAccount = await _repositoryManager.MemberRepository.GetMemberByUserId(user.Id);
 
-
                 if (memberAccount != null)
                 {
                     //set the member account id
-
                     invoiceRequest.CustomerId = memberAccount.CustomerId ?? null;
                 }
 
+                // Handle firm members if request type is "Firm"
+                if (invoiceRequestDTO.RequestType == "Firm" && !string.IsNullOrEmpty(invoiceRequestDTO.FirmMembers))
+                {
+                    // Store the firm members string directly
+                    invoiceRequest.FirmMembers = invoiceRequestDTO.FirmMembers;
+                    
+                    // Parse the JSON to count members and calculate total amount
+                    var memberIds = System.Text.Json.JsonSerializer.Deserialize<string[]>(invoiceRequestDTO.FirmMembers);
+                    if (memberIds != null && memberIds.Any() && invoiceRequest.Amount.HasValue)
+                    {
+                        invoiceRequest.Amount = invoiceRequest.Amount.Value * memberIds.Length;
+                    }
+                }
 
                 var existingInvoiceRequest = await _repositoryManager.InvoiceRequestRepository.GetAsync(
-                    d => d.ReferencedEntityType.Trim().Equals(invoiceRequest.ReferencedEntityType.Trim(), StringComparison.OrdinalIgnoreCase) && d.ReferencedEntityId == invoiceRequest.ReferencedEntityId && d.YearOfOperationId == invoiceRequest.YearOfOperationId && d.CreatedById == invoiceRequest.CreatedById);
+                    d => d.ReferencedEntityType.Trim().Equals(invoiceRequest.ReferencedEntityType.Trim(), StringComparison.OrdinalIgnoreCase) && 
+                        d.ReferencedEntityId == invoiceRequest.ReferencedEntityId && 
+                        d.YearOfOperationId == invoiceRequest.YearOfOperationId && 
+                        d.CreatedById == invoiceRequest.CreatedById);
 
                 if (existingInvoiceRequest != null)
                 {
                     ModelState.AddModelError("", "An invoice request with the same details already exists");
                     return BadRequest(ModelState);
                 }
-
-                //add a description of the invoice request
 
                 await _repositoryManager.InvoiceRequestRepository.AddAsync(invoiceRequest);
                 await _unitOfWork.CommitAsync();
@@ -481,9 +492,36 @@ namespace MLS_Digital_MGM_API.Controllers
                     return NotFound();
                 }
 
-
-
                 var mappedInvoiceRequest = _mapper.Map<ReadInvoiceRequestDTO>(invoiceRequest);
+
+                // Handle firm members if present
+                if (!string.IsNullOrEmpty(mappedInvoiceRequest.FirmMembers))
+                {
+                    var memberIds = System.Text.Json.JsonSerializer.Deserialize<string[]>(mappedInvoiceRequest.FirmMembers);
+                    if (memberIds != null && memberIds.Any())
+                    {
+                        var memberDetails = new List<object>();
+                        foreach (var memberId in memberIds)
+                        {
+                            if (int.TryParse(memberId, out int memberId_int))
+                            {
+                                var member = await _repositoryManager.MemberRepository.GetByIdAsync(memberId_int);
+                                if (member != null && member.User != null)
+                                {
+                                    memberDetails.Add(new
+                                    {
+                                        id = member.Id,
+                                        text = $"{member.User.FirstName} {member.User.LastName}"
+                                    });
+                                }
+                            }
+                        }
+                        
+                        // Update the FirmMembers with the full details
+                        mappedInvoiceRequest.FirmMembers = System.Text.Json.JsonSerializer.Serialize(memberDetails);
+                    }
+                }
+
                 return Ok(mappedInvoiceRequest);
             }
             catch (Exception ex)
@@ -830,5 +868,11 @@ namespace MLS_Digital_MGM_API.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+    }
+
+    public class FirmMemberDTO
+    {
+        public int id { get; set; }
+        public string text { get; set; }
     }
 }
