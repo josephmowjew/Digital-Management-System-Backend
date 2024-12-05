@@ -196,46 +196,27 @@ namespace MLS_Digital_MGM_API.Controllers
                                 // Check if it is a paid event/training or not
                 if (cpdTraining.IsFree)
                 {
-                    if (cpdTrainingRegistrationDTO.Attachments.Count < 1)
-                    {
-                        ModelState.AddModelError(nameof(cpdTrainingRegistrationDTO.Attachments), "Please upload proof of payment");
-                        return BadRequest(ModelState);
-                    }
-
-                    // Set the status of the registration to registered for free events
-                    
+                    // Free training - no attachments needed
                     cpdTrainingRegistration.RegistrationStatus = Lambda.Registered;
+                    cpdTrainingRegistration.Fee = 0;
                 }
                 else
                 {
-                    // Check if proof of payment was submitted
-                    if (!cpdTrainingRegistrationDTO.Attachments.Any())
+                    // For paid trainings, validate attachments
+                    if (cpdTrainingRegistrationDTO.Attachments?.Any() != true)
                     {
                         ModelState.AddModelError(nameof(cpdTrainingRegistrationDTO.Attachments), "Please upload proof of payment");
                         return BadRequest(ModelState);
                     }
 
-                    // // Determine the fee based on the user's role and attendance mode
-                    // double fee = currentUserRole switch
-                    // {
-                    //     "Unknown" => GetNonMemberFee(cpdTraining, cpdTrainingRegistrationDTO.AttendanceMode),
-                    //     "NonMember" => GetNonMemberFee(cpdTraining, cpdTrainingRegistrationDTO.AttendanceMode),
-                    //     _ => GetMemberFee(cpdTraining, cpdTrainingRegistrationDTO.AttendanceMode)
-                    // };
-
-                    // Set the status of the registration to pending for paid events
                     cpdTrainingRegistration.RegistrationStatus = Lambda.Pending;
+                    
+                    // Set fee from invoice if exists, otherwise default to 0
+                    var invoiceRequest = await _repositoryManager.InvoiceRequestRepository.GetAsync(
+                        i => i.ReferencedEntityId == cpdTrainingRegistration.CPDTrainingId.ToString() 
+                        && i.ReferencedEntityType == "CPDTrainings");
 
-                    //check for invoice 
-
-                    //search if there is an invoice request beareing the cpd training id 
-                    var invoiceRequest = await _repositoryManager.InvoiceRequestRepository.GetAsync(i => i.ReferencedEntityId == cpdTrainingRegistration.CPDTrainingId.ToString() && i.ReferencedEntityType == "CPDTrainings");
-
-                    if (invoiceRequest != null)
-                    {
-                       cpdTrainingRegistration.Fee = (double)invoiceRequest.Amount;
-                    }
-                    cpdTrainingRegistration.Fee = 0;
+                    cpdTrainingRegistration.Fee = invoiceRequest?.Amount ?? 0;
                 }
 
 
@@ -278,7 +259,9 @@ namespace MLS_Digital_MGM_API.Controllers
             catch (Exception ex)
             {
                 await _errorLogService.LogErrorAsync(ex);
-                return StatusCode(500, "Internal server error");
+                // Log more details about the request
+                await _errorLogService.LogErrorAsync(new Exception($"Request data: {JsonConvert.SerializeObject(cpdTrainingRegistrationDTO)}", ex));
+                return StatusCode(500, new { error = "Internal server error", details = ex.Message });
             }
         }
 
