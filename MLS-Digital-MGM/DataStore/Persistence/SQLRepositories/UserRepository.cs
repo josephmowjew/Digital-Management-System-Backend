@@ -47,7 +47,13 @@ namespace DataStore.Persistence.SQLRepositories
             //add user to role
             return await this._userManager.AddToRoleAsync(applicationUser, roleName);
         }
+
         public async Task<ApplicationUser?> FindByEmailAsync(string email)
+        {
+            return await _context.Users.Where(x => x.Email == email && x.Status != Lambda.Deleted).FirstOrDefaultAsync();
+        }
+
+        public async Task<ApplicationUser?> FindByEmailAsyncPictures(string email)
         {
             // First, let's check if there are any attachments for this user
             var userWithPictures = await _context.Users
