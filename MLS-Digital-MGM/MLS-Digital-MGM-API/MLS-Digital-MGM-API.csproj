@@ -46,6 +46,21 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\" />
+    <Folder Include="wwwroot\Uploads\CommunicationMessageAttachments\" />
+    <Folder Include="wwwroot\Uploads\CPDTrainingRegistration\" />
+    <Folder Include="wwwroot\Uploads\CPDTrainingsAttachments\" />
+    <Folder Include="wwwroot\Uploads\Invoices\" />
+    <Folder Include="wwwroot\Uploads\LevyDeclarationAttachments\" />
+    <Folder Include="wwwroot\Uploads\LicenseApplicationAttachments\" />
+    <Folder Include="wwwroot\Uploads\NotaryPublicAttachments\" />
+    <Folder Include="wwwroot\Uploads\PenaltyAttachments\" />
+    <Folder Include="wwwroot\Uploads\PenaltyPaymentsAttachments\" />
+    <Folder Include="wwwroot\Uploads\ProBonoApplicationAttachments\" />
+    <Folder Include="wwwroot\Uploads\ProBonoReportAttachments\" />
+    <Folder Include="wwwroot\Uploads\QualificationAttachments\" />
+    <Folder Include="wwwroot\Uploads\SignatureAttachments\" />
+    <Folder Include="wwwroot\Uploads\StampAttachments\" />
+    <Folder Include="wwwroot\Uploads\UserProfilePictures\" />
   </ItemGroup>
 
 </Project>
