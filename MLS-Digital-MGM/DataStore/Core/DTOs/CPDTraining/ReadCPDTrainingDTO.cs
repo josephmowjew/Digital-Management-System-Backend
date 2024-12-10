@@ -45,6 +45,6 @@ namespace DataStore.Core.DTOs.CPDTraining
         public List<DataStore.Core.DTOs.Attachment.ReadAttachmentDTO> Attachments { get; set; }
         public int NumberOfPendingRegistrations { get; set; }
         public int? InvoiceRequestId { get; set; }
-        public ReadInvoiceRequestDTO InvoiceRequest{ get; set; }
+        public List<ReadInvoiceRequestDTO> InvoiceRequests{ get; set; }
     }
 }

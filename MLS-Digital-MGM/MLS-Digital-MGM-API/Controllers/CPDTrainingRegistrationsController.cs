@@ -199,6 +199,7 @@ namespace MLS_Digital_MGM_API.Controllers
                     // Free training - no attachments needed
                     cpdTrainingRegistration.RegistrationStatus = Lambda.Registered;
                     cpdTrainingRegistration.Fee = 0;
+                    cpdTrainingRegistration.InvoiceRequestId = null;
                 }
                 else
                 {

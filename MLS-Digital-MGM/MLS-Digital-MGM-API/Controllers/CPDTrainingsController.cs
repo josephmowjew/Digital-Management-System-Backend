@@ -95,14 +95,12 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 foreach (var training in cpdTrainingDTOs)
                 {
+                    // Retrieve all invoice requests for the current CPD training
+                    var invoiceRequests = await _repositoryManager.InvoiceRequestRepository.GetAllAsync(i => i.ReferencedEntityId == training.Id.ToString() && i.ReferencedEntityType == "CPDTrainings");
 
-                    //search if there is an invoice request beareing the cpd training id
-                    var invoiceRequest = await _repositoryManager.InvoiceRequestRepository.GetAsync(i => i.ReferencedEntityId == training.Id.ToString() && i.ReferencedEntityType == "CPDTrainings");
-
-                    if (invoiceRequest != null)
+                    if (invoiceRequests != null && invoiceRequests.Any())
                     {
-                        training.InvoiceRequestId = invoiceRequest.Id;
-                        training.InvoiceRequest = this._mapper.Map<ReadInvoiceRequestDTO>(invoiceRequest);
+                        training.InvoiceRequests = this._mapper.Map<List<ReadInvoiceRequestDTO>>(invoiceRequests);
                     }
 
                     //set the file path for the attachments
