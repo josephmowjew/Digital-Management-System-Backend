@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using AutoMapper;
-using DataStore.Core.DTOs; 
+using DataStore.Core.DTOs;
 using DataStore.Core.Services;
 using DataStore.Persistence.Interfaces;
 using DataStore.Core.Services.Interfaces;
@@ -25,7 +25,7 @@ using Microsoft.AspNetCore.Hosting;
 using System.Collections.Concurrent;
 using Microsoft.AspNetCore.Cors;
 
-namespace MLS_Digital_MGM_API.Controllers 
+namespace MLS_Digital_MGM_API.Controllers
 {
     [Route("api/[controller]")]
     [EnableCors("AllowFrontend")]  // Add this attribute
@@ -33,7 +33,7 @@ namespace MLS_Digital_MGM_API.Controllers
     public class MembersController : Controller
     {
         private readonly IRepositoryManager _repositoryManager;
-        private readonly IErrorLogService _errorLogService; 
+        private readonly IErrorLogService _errorLogService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -41,7 +41,7 @@ namespace MLS_Digital_MGM_API.Controllers
         private readonly IEmailService _emailService;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IConfiguration _configuration;
-        
+
         public MembersController(IRepositoryManager repositoryManager, IErrorLogService errorLogService, IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor, ApplicationDbContext context, IEmailService emailService, IWebHostEnvironment webHostEnvironment, IConfiguration configuration)
         {
             _repositoryManager = repositoryManager;
@@ -55,7 +55,7 @@ namespace MLS_Digital_MGM_API.Controllers
             _configuration = configuration;
         }
 
-       [HttpGet("paged")]
+        [HttpGet("paged")]
         public async Task<IActionResult> GetMembers(int pageNumber = 1, int pageSize = 10)
         {
             try
@@ -73,7 +73,7 @@ namespace MLS_Digital_MGM_API.Controllers
                         p => p.Customer,
                         p => p.User,
                         p => p.Firm,
-                       
+
                     }
                 };
 
@@ -84,11 +84,11 @@ namespace MLS_Digital_MGM_API.Controllers
                     if (dataTableParams.LoadFromRequest(_httpContextAccessor))
                     {
                         var draw = dataTableParams.Draw;
-                        return Json(new 
-                        { 
-                            draw, 
-                            recordsFiltered = 0, 
-                            recordsTotal = 0, 
+                        return Json(new
+                        {
+                            draw,
+                            recordsFiltered = 0,
+                            recordsTotal = 0,
                             data = Enumerable.Empty<ReadMemberDTO>()
                         });
                     }
@@ -103,12 +103,12 @@ namespace MLS_Digital_MGM_API.Controllers
                     var resultTotalFiltred = mappedMembers.Count;
                     var totalRecords = await _repositoryManager.MemberRepository.CountAsync(pagingParameters);
 
-                    return Json(new 
-                    { 
-                        draw, 
-                        recordsFiltered = totalRecords, 
-                        recordsTotal = totalRecords, 
-                        data = mappedMembers.ToList() 
+                    return Json(new
+                    {
+                        draw,
+                        recordsFiltered = totalRecords,
+                        recordsTotal = totalRecords,
+                        data = mappedMembers.ToList()
                     });
                 }
 
@@ -132,7 +132,7 @@ namespace MLS_Digital_MGM_API.Controllers
                     return BadRequest(ModelState);
                 }
 
-              
+
                 var member = _mapper.Map<Member>(memberDTO);
 
                 var user = await _repositoryManager.UserRepository.FindByEmailAsync(_httpContextAccessor.HttpContext.User.Identity.Name);
@@ -279,7 +279,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 // Get the current user's member record
                 var currentMember = await _repositoryManager.MemberRepository.GetMemberByUserId(
                     (await _repositoryManager.UserRepository.FindByEmailAsync(userEmail)).Id);
-                
+
                 if (currentMember == null)
                 {
                     return NotFound("Member record not found");
@@ -292,7 +292,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 // Get all members from the same firm
                 var firmMembers = await _repositoryManager.MemberRepository.GetMembersByFirmIdAsync(currentMember.FirmId.Value);
-                
+
                 var mappedMembers = _mapper.Map<List<ReadMemberDTO>>(firmMembers);
                 return Ok(mappedMembers);
             }
@@ -308,7 +308,7 @@ namespace MLS_Digital_MGM_API.Controllers
         {
             try
             {
-                var memberRecords =  await this._repositoryManager.MemberRepository.GetAllAsync();
+                var memberRecords = await this._repositoryManager.MemberRepository.GetAllAsync();
 
                 var readMemberRecordsMapped = this._mapper.Map<List<ReadMemberDTO>>(memberRecords);
 
@@ -338,14 +338,14 @@ namespace MLS_Digital_MGM_API.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
-        
+
         [HttpGet("countLicensed")]
         public async Task<IActionResult> CountLicensed()
         {
             try
             {
                 var count = await _repositoryManager.MemberRepository.GetLicensedMembersCountAsync();
-        
+
                 return Ok(count);
             }
             catch (Exception ex)
@@ -371,7 +371,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
-        
+
         [HttpGet("getLicensedMembers")]
         public async Task<IActionResult> GetLicensedMembers(int pageNumber = 1, int pageSize = 10)
         {
@@ -402,11 +402,11 @@ namespace MLS_Digital_MGM_API.Controllers
                     if (dataTableParams.LoadFromRequest(_httpContextAccessor))
                     {
                         var draw = dataTableParams.Draw;
-                        return Json(new 
-                        { 
-                            draw, 
-                            recordsFiltered = 0, 
-                            recordsTotal = 0, 
+                        return Json(new
+                        {
+                            draw,
+                            recordsFiltered = 0,
+                            recordsTotal = 0,
                             data = Enumerable.Empty<ReadMemberDTO>()
                         });
                     }
@@ -421,12 +421,12 @@ namespace MLS_Digital_MGM_API.Controllers
                     var resultTotalFiltred = mappedMembers.Count;
                     var totalRecords = await _repositoryManager.MemberRepository.CountAsync(pagingParameters);
 
-                    return Json(new 
-                    { 
-                        draw, 
-                        recordsFiltered = totalRecords, 
-                        recordsTotal = totalRecords, 
-                        data = mappedMembers.ToList() 
+                    return Json(new
+                    {
+                        draw,
+                        recordsFiltered = totalRecords,
+                        recordsTotal = totalRecords,
+                        data = mappedMembers.ToList()
                     });
                 }
 
@@ -468,11 +468,11 @@ namespace MLS_Digital_MGM_API.Controllers
                     if (dataTableParams.LoadFromRequest(_httpContextAccessor))
                     {
                         var draw = dataTableParams.Draw;
-                        return Json(new 
-                        { 
-                            draw, 
-                            recordsFiltered = 0, 
-                            recordsTotal = 0, 
+                        return Json(new
+                        {
+                            draw,
+                            recordsFiltered = 0,
+                            recordsTotal = 0,
                             data = Enumerable.Empty<ReadMemberDTO>()
                         });
                     }
@@ -487,12 +487,12 @@ namespace MLS_Digital_MGM_API.Controllers
                     var resultTotalFiltred = mappedMembers.Count;
                     var totalRecords = await _repositoryManager.MemberRepository.CountAsync(pagingParameters);
 
-                    return Json(new 
-                    { 
-                        draw, 
-                        recordsFiltered = totalRecords, 
-                        recordsTotal = totalRecords, 
-                        data = mappedMembers.ToList() 
+                    return Json(new
+                    {
+                        draw,
+                        recordsFiltered = totalRecords,
+                        recordsTotal = totalRecords,
+                        data = mappedMembers.ToList()
                     });
                 }
 
@@ -503,49 +503,55 @@ namespace MLS_Digital_MGM_API.Controllers
                 await _errorLogService.LogErrorAsync(ex);
                 return StatusCode(500, "Internal server error");
             }
-        }        
-        
+        }
+
         [HttpPost("bulk-register")]
         public async Task<IActionResult> BulkRegisterMembers(IFormFile uploadedFile)
         {
-            var secretariatUsers = await _repositoryManager.UserRepository.GetUsersByRoleAsync("Secretariat");
-            
-
-            if (uploadedFile == null || uploadedFile.Length == 0)
-                return BadRequest("File is empty or not provided.");
-
-            var extension = Path.GetExtension(uploadedFile.FileName).ToLower();
-            if (extension != ".xlsx" && extension != ".xls")
-                return BadRequest("Invalid file format. Only .xlsx and .xls files are allowed.");
-
-            if (secretariatUsers == null || !secretariatUsers.Any())
-                return BadRequest("Secretariat users are required");
-
-            var webRootPath = _webHostEnvironment.WebRootPath;
-            var uploadsFolder = Path.Combine(webRootPath, "Uploads");
-            
-            // Ensure the Uploads folder exists
-            if (!Directory.Exists(uploadsFolder))
+            try
             {
-                Directory.CreateDirectory(uploadsFolder);
+                var secretariatUsers = await _repositoryManager.UserRepository.GetUsersByRoleAsync("Secretariat");
+
+
+                if (uploadedFile == null || uploadedFile.Length == 0)
+                    return BadRequest("File is empty or not provided.");
+
+                var extension = Path.GetExtension(uploadedFile.FileName).ToLower();
+                if (extension != ".xlsx" && extension != ".xls")
+                    return BadRequest("Invalid file format. Only .xlsx and .xls files are allowed.");
+
+                if (secretariatUsers == null || !secretariatUsers.Any())
+                    return BadRequest("Secretariat users are required");
+
+                var webRootPath = _webHostEnvironment.WebRootPath;
+                var uploadsFolder = Path.Combine(webRootPath, "Uploads");
+
+                // Ensure the Uploads folder exists
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+
+                // Save the file to the Uploads folder
+                var fileName = Guid.NewGuid().ToString() + extension;
+                var filePath = Path.Combine(uploadsFolder, fileName);
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await uploadedFile.CopyToAsync(stream);
+                }
+
+                // Enqueue the background job
+                BackgroundJob.Enqueue(() => ProcessBulkRegistration(filePath, secretariatUsers));
+
+                return Ok("Bulk registration process has been started. You will receive an email when it's completed.");
+            }catch(Exception ex){
+                await _errorLogService.LogErrorAsync(ex);                
+                return StatusCode(500, "Internal server error");
             }
-
-            // Save the file to the Uploads folder
-            var fileName = Guid.NewGuid().ToString() + extension;
-            var filePath = Path.Combine(uploadsFolder, fileName);
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await uploadedFile.CopyToAsync(stream);
-            }
-
-            // Enqueue the background job
-            BackgroundJob.Enqueue(() => ProcessBulkRegistration(filePath, secretariatUsers));
-
-            return Ok("Bulk registration process has been started. You will receive an email when it's completed.");
         }
 
         [AutomaticRetry(Attempts = 3)]
-        private async Task ProcessBulkRegistration(string filePath, List<ApplicationUser> secretariatUsers)
+        public async Task ProcessBulkRegistration(string filePath, List<ApplicationUser> secretariatUsers)
         {
             var result = new BulkRegistrationResult();
             var successfulRegistrations = new List<(ApplicationUser User, string Password)>();
@@ -571,124 +577,124 @@ namespace MLS_Digital_MGM_API.Controllers
                 {
                     if (IsRowEmpty(worksheet, row)) continue;
 
-                
-                        try
+
+                    try
+                    {
+                        var memberData = ExtractMemberData(worksheet, row);
+                        if (memberData == null) continue;
+
+                        if (!ValidateMemberData(memberData, out var validationErrors))
                         {
-                            var memberData = ExtractMemberData(worksheet, row);
-                            if (memberData == null) continue;
-
-                            if (!ValidateMemberData(memberData, out var validationErrors))
-                            {
-                                errors.Add(new RegistrationError { Row = row, Errors = validationErrors });
-                                continue;
-                            }
-
-                            var existingUser = await _repositoryManager.UserRepository.FindByEmailAsync(memberData.Email);
-                            if (existingUser != null)
-                            {
-                                errors.Add(new RegistrationError { Row = row, Errors = new List<string> { "Email already exists" } });
-                                continue;
-                            }
-
-                            var department = departments.FirstOrDefault(d => d.Name == Lambda.MemberDepartment);
-                            if (department == null)
-                            {
-                                errors.Add(new RegistrationError { Row = row, Errors = new List<string> { "Invalid Department" } });
-                                continue;
-                            }
-
-                            var identityType = identityTypes.FirstOrDefault(i => i.Name == memberData.IdentityType);
-                            var country = countries.FirstOrDefault(c => c.Name.Equals(string.IsNullOrWhiteSpace(memberData.Country) ? "Malawi" : memberData.Country, StringComparison.OrdinalIgnoreCase));
-                            if (country == null)
-                            {
-                                errors.Add(new RegistrationError { Row = row, Errors = new List<string> { $"Invalid Country: {memberData.Country}" } });
-                                continue;
-                            }
-
-                            var title = titles.FirstOrDefault(t => t.Name.Equals(memberData.Title, StringComparison.OrdinalIgnoreCase)) 
-                                        ?? new Title { Name = memberData.Title };
-                            
-                            if (title.Id == 0)
-                            {
-                                await _repositoryManager.TitleRepository.AddAsync(title);
-                                titles.Add(title);
-                            }
-
-                            var password = $"M@l@wi{DateTime.Now.Year}#L@wS0c!ety"; // Fixed, strong password with dynamic year
-                            var user = new ApplicationUser
-                            {
-                                UserName = memberData.Email,
-                                Email = memberData.Email,
-                                FirstName = memberData.FirstName,
-                                LastName = memberData.LastName,
-                                OtherName = memberData.OtherName,
-                                Gender = memberData.Gender,
-                                PhoneNumber = memberData.PhoneNumber,
-                                IdentityNumber = memberData.IdentityNumber,
-                                IdentityExpiryDate = string.IsNullOrEmpty(memberData.IdentityExpiryDate) ? (DateTime?)null : DateTime.Parse(memberData.IdentityExpiryDate),
-                                DateOfBirth = string.IsNullOrEmpty(memberData.DateOfBirth) ? (DateTime?)null : DateTime.Parse(memberData.DateOfBirth),
-                                DepartmentId = department.Id,
-                                IdentityTypeId = identityType?.Id,
-                                TitleId = title.Id,
-                                CountryId = country?.Id,
-                                Status = Lambda.Active,
-                                CreatedDate = DateTime.Now,
-                                UpdatedDate = DateTime.Now,
-                                EmailConfirmed = true,
-                            };
-
-                            var createUserResult = await _repositoryManager.UserRepository.AddAsync(user, password);
-                            if (!createUserResult.Succeeded)
-                            {
-                                errors.Add(new RegistrationError { Row = row, Errors = createUserResult.Errors.Select(e => e.Description).ToList() });
-                                continue;
-                            }
-
-                            var roleResult = await _repositoryManager.UserRepository.AddUserToRoleAsync(user, "Member");
-                            if (!roleResult.Succeeded)
-                            {
-                                errors.Add(new RegistrationError { Row = row, Errors = new List<string> { "Failed to assign Member role." } });
-                                continue;
-                            }
-
-                            var member = new Member
-                            {
-                                UserId = user.Id,
-                                PostalAddress = memberData.PostalAddress,
-                                PermanentAddress = memberData.PermanentAddress,
-                                ResidentialAddress = memberData.ResidentialAddress,
-                                DateOfAdmissionToPractice = DateTime.Parse(memberData.DateOfAdmissionToPractice),
-                                Status = Lambda.Active
-                            };
-
-                            var memberQualification = new MemberQualification
-                            {
-                                Name = memberData.EducationQualification,
-                                IssuingInstitution = memberData.Institution,
-                                DateObtained = string.IsNullOrEmpty(memberData.DateQualificationObtained) ? (DateTime?)null : DateTime.Parse(memberData.DateQualificationObtained),
-                                Member = member
-                            };
-
-                            member.QualificationTypes = new List<QualificationType> { new QualificationType { Name = memberData.EducationQualification } };
-
-                            await _repositoryManager.MemberRepository.AddAsync(member);
-                            successfulRegistrations.Add((user, password));
-
-                            // Check for missing optional fields
-                            var missingFields = CheckMissingOptionalFields(memberData);
-                            if (missingFields.Any())
-                            {
-                                await _emailService.QueueEmailAsync(user.Email, "Please Update Your Member Profile", GenerateMissingFieldsEmailBody(missingFields), "MissingFields");
-                            }
+                            errors.Add(new RegistrationError { Row = row, Errors = validationErrors });
+                            continue;
                         }
-                        catch (Exception ex)
+
+                        var existingUser = await _repositoryManager.UserRepository.FindByEmailAsync(memberData.Email);
+                        if (existingUser != null)
                         {
-                            errors.Add(new RegistrationError { Row = row, Errors = new List<string> { ex.Message } });
+                            errors.Add(new RegistrationError { Row = row, Errors = new List<string> { "Email already exists" } });
+                            continue;
                         }
-                    
+
+                        var department = departments.FirstOrDefault(d => d.Name == Lambda.MemberDepartment);
+                        if (department == null)
+                        {
+                            errors.Add(new RegistrationError { Row = row, Errors = new List<string> { "Invalid Department" } });
+                            continue;
+                        }
+
+                        var identityType = identityTypes.FirstOrDefault(i => i.Name == memberData.IdentityType);
+                        var country = countries.FirstOrDefault(c => c.Name.Equals(string.IsNullOrWhiteSpace(memberData.Country) ? "Malawi" : memberData.Country, StringComparison.OrdinalIgnoreCase));
+                        if (country == null)
+                        {
+                            errors.Add(new RegistrationError { Row = row, Errors = new List<string> { $"Invalid Country: {memberData.Country}" } });
+                            continue;
+                        }
+
+                        var title = titles.FirstOrDefault(t => t.Name.Equals(memberData.Title, StringComparison.OrdinalIgnoreCase))
+                                    ?? new Title { Name = memberData.Title };
+
+                        if (title.Id == 0)
+                        {
+                            await _repositoryManager.TitleRepository.AddAsync(title);
+                            titles.Add(title);
+                        }
+
+                        var password = $"M@l@wi{DateTime.Now.Year}#L@wS0c!ety"; // Fixed, strong password with dynamic year
+                        var user = new ApplicationUser
+                        {
+                            UserName = memberData.Email,
+                            Email = memberData.Email,
+                            FirstName = memberData.FirstName,
+                            LastName = memberData.LastName,
+                            OtherName = memberData.OtherName,
+                            Gender = memberData.Gender,
+                            PhoneNumber = memberData.PhoneNumber,
+                            IdentityNumber = memberData.IdentityNumber,
+                            IdentityExpiryDate = string.IsNullOrEmpty(memberData.IdentityExpiryDate) ? (DateTime?)null : DateTime.Parse(memberData.IdentityExpiryDate),
+                            DateOfBirth = string.IsNullOrEmpty(memberData.DateOfBirth) ? (DateTime?)null : DateTime.Parse(memberData.DateOfBirth),
+                            DepartmentId = department.Id,
+                            IdentityTypeId = identityType?.Id,
+                            TitleId = title.Id,
+                            CountryId = country?.Id,
+                            Status = Lambda.Active,
+                            CreatedDate = DateTime.Now,
+                            UpdatedDate = DateTime.Now,
+                            EmailConfirmed = true,
+                        };
+
+                        var createUserResult = await _repositoryManager.UserRepository.AddAsync(user, password);
+                        if (!createUserResult.Succeeded)
+                        {
+                            errors.Add(new RegistrationError { Row = row, Errors = createUserResult.Errors.Select(e => e.Description).ToList() });
+                            continue;
+                        }
+
+                        var roleResult = await _repositoryManager.UserRepository.AddUserToRoleAsync(user, "Member");
+                        if (!roleResult.Succeeded)
+                        {
+                            errors.Add(new RegistrationError { Row = row, Errors = new List<string> { "Failed to assign Member role." } });
+                            continue;
+                        }
+
+                        var member = new Member
+                        {
+                            UserId = user.Id,
+                            PostalAddress = memberData.PostalAddress,
+                            PermanentAddress = memberData.PermanentAddress,
+                            ResidentialAddress = memberData.ResidentialAddress,
+                            DateOfAdmissionToPractice = DateTime.Parse(memberData.DateOfAdmissionToPractice),
+                            Status = Lambda.Active
+                        };
+
+                        var memberQualification = new MemberQualification
+                        {
+                            Name = memberData.EducationQualification,
+                            IssuingInstitution = memberData.Institution,
+                            DateObtained = string.IsNullOrEmpty(memberData.DateQualificationObtained) ? (DateTime?)null : DateTime.Parse(memberData.DateQualificationObtained),
+                            Member = member
+                        };
+
+                        member.QualificationTypes = new List<QualificationType> { new QualificationType { Name = memberData.EducationQualification } };
+
+                        await _repositoryManager.MemberRepository.AddAsync(member);
+                        successfulRegistrations.Add((user, password));
+
+                        // Check for missing optional fields
+                        var missingFields = CheckMissingOptionalFields(memberData);
+                        if (missingFields.Any())
+                        {
+                            await _emailService.QueueEmailAsync(user.Email, "Please Update Your Member Profile", GenerateMissingFieldsEmailBody(missingFields), "MissingFields");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        errors.Add(new RegistrationError { Row = row, Errors = new List<string> { ex.Message } });
+                    }
+
                 }
 
-               
+
 
                 await _unitOfWork.CommitAsync();
 
@@ -800,8 +806,8 @@ namespace MLS_Digital_MGM_API.Controllers
             };
 
             // Check if essential fields are empty
-            if (string.IsNullOrWhiteSpace(data.FirstName) || 
-                string.IsNullOrWhiteSpace(data.LastName) || 
+            if (string.IsNullOrWhiteSpace(data.FirstName) ||
+                string.IsNullOrWhiteSpace(data.LastName) ||
                 string.IsNullOrWhiteSpace(data.Email))
             {
                 return null; // Return null for invalid data
@@ -878,7 +884,7 @@ namespace MLS_Digital_MGM_API.Controllers
         //     const string digits = "0123456789";
         //     const string special = "!@#$%^&*()";
         //     var random = new Random();
-            
+
         //     var password = new StringBuilder();
         //     password.Append(upperCase[random.Next(upperCase.Length)]);
         //     password.Append(lowerCase[random.Next(lowerCase.Length)]);
