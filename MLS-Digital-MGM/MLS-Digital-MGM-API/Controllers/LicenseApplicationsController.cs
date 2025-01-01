@@ -625,7 +625,15 @@ namespace MLS_Digital_MGM_API.Controllers
                         //check if the member has made successfuly licence applications in the past
                         var hasPreviousApplications = await this._repositoryManager.LicenseApplicationRepository.HasPreviousApplicationsAsync(member.Id);
 
-                        return Ok(hasPreviousApplications);
+                        if(!hasPreviousApplications){
+                            //check if there's a license with the memberId
+                            var license = await this._repositoryManager.LicenseRepository.GetLicenseByMemberId(member.Id);
+                            if(license != null){
+                                return Ok(true);
+                            }
+                        }else{
+                            return Ok(hasPreviousApplications);
+                        }
                     }
                     return Ok(false);
                 }

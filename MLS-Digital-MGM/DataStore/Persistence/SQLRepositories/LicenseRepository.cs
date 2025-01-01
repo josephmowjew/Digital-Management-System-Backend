@@ -58,5 +58,12 @@ namespace DataStore.Persistence.SQLRepositories
                 .CountAsync(l => l.Status == Lambda.Active);
         }
 
+    public async Task<License?> GetLicenseByMemberId(int memberId)
+    {
+        return await _context.Licenses
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.MemberId == memberId);
+    }
+
     }
 }
