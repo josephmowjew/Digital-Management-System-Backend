@@ -739,7 +739,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 }
             }
         }
-        private async Task SendCompletionEmailAsync(string? email, BulkRegistrationResult result)
+        public async Task SendCompletionEmailAsync(string? email, BulkRegistrationResult result)
         {
             if (string.IsNullOrWhiteSpace(email)) return;
 
@@ -770,7 +770,7 @@ namespace MLS_Digital_MGM_API.Controllers
             await _emailService.SendMailWithKeyVarReturn(email, subject, body);
         }
 
-        private async Task SendErrorEmailAsync(string? email, string errorMessage)
+        public async Task SendErrorEmailAsync(string? email, string errorMessage)
         {
             if (string.IsNullOrWhiteSpace(email)) return;
 
@@ -953,7 +953,7 @@ namespace MLS_Digital_MGM_API.Controllers
             return missingFields;
         }
 
-        private async Task SendMissingFieldsEmailAsync(string email, List<string> missingFields)
+        public async Task SendMissingFieldsEmailAsync(string email, List<string> missingFields)
         {
             var subject = "Please Update Your Member Profile";
             var body = $@"Dear Member,
@@ -970,7 +970,7 @@ namespace MLS_Digital_MGM_API.Controllers
             await _emailService.SendMailWithKeyVarReturn(email, subject, body);
         }
 
-        private async Task SendWelcomeEmailAsync(ApplicationUser user, string password)
+        public async Task SendWelcomeEmailAsync(ApplicationUser user, string password)
         {
             // Send login details email
             string passwordBody = $@"Dear Member,
@@ -1071,7 +1071,7 @@ namespace MLS_Digital_MGM_API.Controllers
         }
 
         [AutomaticRetry(Attempts = 3)]
-        private async Task ProcessEmailQueue()
+        public async Task ProcessEmailQueue()
         {
             await _emailService.ProcessEmailQueueAsync();
         }
