@@ -460,6 +460,9 @@ namespace DataStore.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<string>("RejectionReason")
+                        .HasColumnType("longtext");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("longtext");

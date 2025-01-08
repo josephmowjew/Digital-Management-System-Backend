@@ -406,6 +406,8 @@ namespace MLS_Digital_MGM_API.Controllers
                     notaryPublic.Attachments = await SaveAttachmentsAsync(notaryPublicDTO.Attachments, attachmentType.Id);
                 }
 
+                notaryPublic.UserId = user.Id;
+
                 await _repositoryManager.NotaryPublicRepository.AddAsync(notaryPublic);
                 await _unitOfWork.CommitAsync();
 
