@@ -361,7 +361,7 @@ namespace MLS_Digital_MGM_API.Controllers
         }
       
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(string id, [FromForm]UpdateUserDTO userDTO)
+        public async Task<IActionResult> UpdateUser(string id, [FromBody]UpdateUserDTO userDTO)
         {
             try
             {
@@ -382,6 +382,11 @@ namespace MLS_Digital_MGM_API.Controllers
                     userDTO.DepartmentId = user.DepartmentId;
                 }
                 _mapper.Map(userDTO, user);
+
+                user.NormalizedEmail = user.Email.ToUpper();
+                user.NormalizedUserName = user.Email.ToUpper();
+                user.UserName = user.Email;
+                user.NormalizedEmail = user.Email.ToUpper();
 
                 var attachmentType = await _repositoryManager.AttachmentTypeRepository.GetAsync(d => d.Name == "UserProfilePicture")
                                 ?? new AttachmentType { Name = "UserProfilePicture" };
@@ -436,6 +441,16 @@ namespace MLS_Digital_MGM_API.Controllers
                 if (user == null)
                 {
                     return NotFound();
+                }
+
+                //if the user is a member, delete the member record
+                if (user.Status == Lambda.Active)
+                {
+                    var member = await _repositoryManager.MemberRepository.GetMemberByUserId(id);
+                    if (member != null)
+                    {
+                        await _repositoryManager.MemberRepository.DeleteAsync(member);
+                    }
                 }
 
                 await _repositoryManager.UserRepository.DeleteAsync(user);
