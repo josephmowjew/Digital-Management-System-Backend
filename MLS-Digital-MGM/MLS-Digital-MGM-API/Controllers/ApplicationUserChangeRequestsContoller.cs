@@ -15,6 +15,7 @@ using System.Text.Json;
 using DataStore.Core.Services;
 using DataStore.Core.DTOs.ApplicationUserChangeRequest;
 using System.Security.Claims;
+using Hangfire;
 
 namespace MLS_Digital_MGM_API.Controllers
 {
@@ -56,7 +57,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 var pagingParameters = new PagingParameters<ApplicationUserChangeRequest>
                 {
-                    Predicate = u => u.Status != Lambda.Deleted,
+                    Predicate = u => u.Status != Lambda.Deleted && u.Status != Lambda.Approved,
                     PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
                     PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
                     SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
@@ -220,14 +221,56 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 if (changeRequest != null)
                 {
-                    changeRequest.Status = Lambda.Active;
+                    changeRequest.Status = Lambda.Approved;
+                    string oldEmail = changeRequest.User.Email ?? string.Empty;
+
+                    //check if the email from the change request is empty
+                    if (!string.IsNullOrEmpty(changeRequest.Email))
+                    {
+                        //check if the email already exists in the system
+                        var user = await _repositoryManager.UserRepository.FindByEmailAsync(changeRequest.Email);
+                        if (user != null)
+                        {
+                            changeRequest.Status = Lambda.Rejected;
+                            changeRequest.RejectionReason = "Email already exists in the system";
+                            await _repositoryManager.ApplicationUserChangeRequestRepository.UpdateAsync(changeRequest);
+                            await _unitOfWork.CommitAsync();
+                            return BadRequest("Email already exists in the system");
+                        }
+
+                        changeRequest.User.Email = changeRequest.Email;
+                        changeRequest.User.NormalizedEmail = changeRequest.Email.ToUpper();
+                        changeRequest.User.UserName = changeRequest.Email;
+                        changeRequest.User.NormalizedUserName = changeRequest.Email.ToUpper();
+                    }
+                    if (!string.IsNullOrEmpty(changeRequest.PhoneNumber))
+                    {
+                        changeRequest.User.PhoneNumber = changeRequest.PhoneNumber;
+                    }
 
                     await _repositoryManager.ApplicationUserChangeRequestRepository.UpdateAsync(changeRequest);
+                    await _repositoryManager.UserRepository.UpdateAsync(changeRequest.User);
                     await _unitOfWork.CommitAsync();
 
+                    // Prepare email body
+                    string emailBody;
+                    if (!string.IsNullOrEmpty(changeRequest.Email))
+                    {
+                        emailBody = $"Your change request has been approved. To log into your account, please use the new email: {changeRequest.Email}";
+                        // Send email to both old and new email addresses
+                        BackgroundJob.Enqueue(() => this._emailService.SendCPDStatusEmailsAsync(new List<string> { changeRequest.Email, oldEmail }, emailBody, "Change Request Status"));
+                    }
+                    else
+                    {
+                        emailBody = $"Your change request has been approved.";
+                        // If no email change, just notify the old email
+                        BackgroundJob.Enqueue(() => this._emailService.SendCPDStatusEmailsAsync(new List<string> { oldEmail }, emailBody, "Change Request Status"));
+                    }
 
-                    return Ok();
-                }else{
+                    return Ok("Change request approved successfully");
+                }
+                else
+                {
                     return BadRequest("There's already a pending change request for this user");
                 }
             }
@@ -258,8 +301,10 @@ namespace MLS_Digital_MGM_API.Controllers
                     await _unitOfWork.CommitAsync();
 
 
-                    return Ok();
-                }else{
+                    return Ok("Change request denied successfully");
+                }
+                else
+                {
                     return BadRequest("There's already a pending change request for this user");
                 }
             }

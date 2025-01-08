@@ -8,12 +8,11 @@ namespace DataStore.Core.DTOs.ApplicationUserChangeRequest
         [Required]
         public string UserId { get; set; }
 
-        [Required]
+        
         [Phone]
-        public string PhoneNumber { get; set; }
-
-        [Required]
+        public string? PhoneNumber { get; set; }
+        
         [EmailAddress]
-        public string Email { get; set; }
+        public string? Email { get; set; }
     }
 }

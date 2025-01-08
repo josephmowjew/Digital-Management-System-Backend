@@ -22,6 +22,8 @@ namespace DataStore.Core.Models
         [Required]
         public string Email { get; set; }
 
+        public string? RejectionReason { get; set; }
+
         //Meta properties
         public DateTime CreatedDate { get; set; } = DateTime.Now;
         public string? CreatedById { get; set; }
