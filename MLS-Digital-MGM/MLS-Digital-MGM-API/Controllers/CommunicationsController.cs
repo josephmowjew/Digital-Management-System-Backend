@@ -134,6 +134,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 }
 
                 var communicationDTO = _mapper.Map<ReadCommunicationMessageDTO>(communicationMessage);
+                communicationDTO.Body = communicationDTO.Body.Replace("\r\n", "<br>").Replace("\n", "<br>");
 
                 return Ok(communicationDTO);
             }

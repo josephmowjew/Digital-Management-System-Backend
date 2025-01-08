@@ -286,7 +286,7 @@ namespace DataStore.Core.Services
                 var bodyBuilder = new BodyBuilder();
                 
                 // Add signature logic
-                string emailBody = message.Body;
+                string emailBody = message.Body.Replace("\r\n", "<br>").Replace("\n", "<br>");
                 if (includeSignature)
                 {
                     if (!string.IsNullOrEmpty(senderUserId))
