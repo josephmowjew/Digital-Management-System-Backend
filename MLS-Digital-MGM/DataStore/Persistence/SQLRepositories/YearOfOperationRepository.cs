@@ -26,5 +26,24 @@ namespace DataStore.Persistence.SQLRepositories
             // get current year of operation based on the current date
             return await _context.YearOfOperations.FirstOrDefaultAsync(x => x.StartDate <= DateTime.Now && x.EndDate >= DateTime.Now);
         }
+
+        public async Task<YearOfOperation> GetNextYearOfOperation()
+        {
+            // Get the current year of operation
+            var currentYearOfOperation = await _context.YearOfOperations
+                .FirstOrDefaultAsync(x => x.StartDate <= DateTime.Now && x.EndDate >= DateTime.Now);
+
+            if (currentYearOfOperation != null)
+            {
+                // Calculate the next year
+                int nextYear = currentYearOfOperation.StartDate.Year + 1;
+
+                // Retrieve the next year of operation
+                return await _context.YearOfOperations
+                    .FirstOrDefaultAsync(x => x.StartDate.Year == nextYear);
+            }
+
+            return null; // Return null if no current year of operation is found
+        }
     }
 }

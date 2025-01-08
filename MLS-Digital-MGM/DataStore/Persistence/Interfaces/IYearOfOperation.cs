@@ -12,5 +12,6 @@ namespace DataStore.Persistence.Interfaces
         // Additional methods specific to the YearOfOperation entity, if needed
 
         Task<YearOfOperation> GetCurrentYearOfOperation();
+        Task<YearOfOperation> GetNextYearOfOperation();
     }
 }
