@@ -242,6 +242,35 @@ namespace MLS_Digital_MGM_API.Controllers
             }
         }
 
+        [HttpGet("stampByName/{name}")]
+        public async Task<IActionResult> GetStampByName(string name)
+        {
+            try
+            {
+                var stamp = await _repositoryManager.StampRepository.GetStampByNameAsync(name);
+                if (stamp == null)
+                {
+                    return NotFound();
+                }
+
+                foreach (var attachment in stamp.Attachments)
+                {
+                    string attachmentTypeName = attachment.AttachmentType.Name;
+                    string newFilePath = Path.Combine($"http://{HttpContext.Request.Host}{_configuration["APISettings:API_Prefix"]}/Uploads/{Lambda.StampFolderName}", attachment.FileName);
+                    attachment.FilePath = newFilePath;
+
+                }
+
+                var readStampDTO = _mapper.Map<ReadStampDTO>(stamp);
+
+                return Ok(readStampDTO);
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
         private async Task<List<Attachment>> SaveAttachmentsAsync(IEnumerable<IFormFile> attachments, int attachmentTypeId)
         {
             var attachmentsList = new List<Attachment>();

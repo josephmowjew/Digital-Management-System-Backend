@@ -13,8 +13,8 @@ namespace DataStore.Core.DTOs.Signature
         }
         public string Id { get; set; }
         public string Name { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime? UpdatedAt { get; set; }
+        public DateTime CreatedDate { get; set; }
+        public DateTime? UpdatedDate { get; set; }
         public List<ReadAttachmentDTO> Attachments { get; set; }
         public int YearOfOperationId { get; set; }
         public ReadYearOfOperationDTO YearOfOperation{ get; set; }

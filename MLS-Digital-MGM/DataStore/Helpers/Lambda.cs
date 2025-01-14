@@ -78,6 +78,7 @@ namespace DataStore.Helpers
         //stamps and signatures
         public static string HonorarySecretarySignature = "Honorary Secretary Signature";
         public static string PresidentSignature = "President Signature";
+        public static string ChairmanSignature = "Chairman Signature";
         public static string Seal = "Seal";
 
 

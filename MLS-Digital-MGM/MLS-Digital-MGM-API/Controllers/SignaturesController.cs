@@ -247,6 +247,35 @@ namespace MLS_Digital_MGM_API.Controllers
             }
         }
 
+        [HttpGet("signature/{name}")]
+        public async Task<IActionResult> GetSignatureByName(string name)
+        {
+            try
+            {
+                var signature = await _repositoryManager.SignatureRepository.GetSignatureByNameAsync(name);
+                if (signature == null)
+                {
+                    return NotFound();
+                }
+
+                var signatureDTO = _mapper.Map<ReadSignatureDTO>(signature);
+
+                foreach (var attachment in signatureDTO.Attachments)
+                {
+                    string attachmentTypeName = attachment.AttachmentType.Name;
+                    string newFilePath = Path.Combine($"http://{HttpContext.Request.Host}{_configuration["APISettings:API_Prefix"]}/Uploads/{Lambda.SignatureFolderName}", attachment.FileName);
+                    attachment.FilePath = newFilePath;
+                }
+
+                return Ok(signatureDTO);
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
         private async Task<List<Attachment>> SaveAttachmentsAsync(IEnumerable<IFormFile> attachments, int attachmentTypeId)
         {
             var attachmentsList = new List<Attachment>();
