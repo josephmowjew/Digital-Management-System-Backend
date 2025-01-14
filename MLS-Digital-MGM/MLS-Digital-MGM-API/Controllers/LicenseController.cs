@@ -17,6 +17,7 @@ using System.Linq.Expressions;
 using Microsoft.AspNetCore.Authorization;
 using Hangfire;
 using DataStore.Core.DTOs.Attachment;
+using Newtonsoft.Json;
 
 namespace MLS_Digital_MGM_API.Controllers
 {
@@ -115,7 +116,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 //get the honorary sec signatue 
                 var honorarySignature = await _repositoryManager.SignatureRepository.GetSignatureByNameAsync(Lambda.HonorarySecretarySignature);
 
-               if (honorarySignature != null)
+                if (honorarySignature != null)
                 {
                     var attachment = honorarySignature.Attachments.FirstOrDefault();
                     if (attachment != null)
@@ -139,12 +140,25 @@ namespace MLS_Digital_MGM_API.Controllers
                     }
                 }
 
+                //get the chairman's signature
+                /*var chairmanSignature = await _repositoryManager.SignatureRepository.GetSignatureByNameAsync(Lambda.ChairmanSignature);
+                if (chairmanSignature != null)
+                {
+                    var attachment = chairmanSignature.Attachments.FirstOrDefault();
+                    if (attachment != null)
+                    {
+                        var attachmentDTO = _mapper.Map<ReadAttachmentDTO>(attachment);
+                        attachmentDTO.FilePath = Path.Combine($"{Lambda.http}://{HttpContext.Request.Host}{_configuration["APISettings:API_Prefix"]}/Uploads/{Lambda.SignatureFolderName}", attachment.FileName);
+                        signatures.Add(attachmentDTO);
+                    }
+                }*/
+
                 licenseDTO.Attachments.AddRange(signatures);
 
                 return Ok(licenseDTO);
-               
 
-               
+
+
             }
             catch (Exception ex)
             {
@@ -193,7 +207,7 @@ namespace MLS_Digital_MGM_API.Controllers
             }
         }
 
-         
+
         // GET api/licenseByLicenseNumber/{licenseNumber}
         [HttpGet("licenseByLicenseNumber/{licenseNumber}")]
         public async Task<IActionResult> GetLicenseByLicenseNumber(string licenseNumber)
@@ -205,7 +219,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 {
                     return NotFound();
                 }
-                
+
                 var licenseDTO = _mapper.Map<ReadLicenseDTO>(license);
 
                 /*foreach (var attachment in licenseDTO.LicenseApplication.Attachments)
@@ -224,6 +238,78 @@ namespace MLS_Digital_MGM_API.Controllers
                 await _errorLogService.LogErrorAsync(ex);
                 return StatusCode(500, "Internal server error");
             }
+        }
+
+        [HttpPost("MarkAsLicensed")]
+        public async Task<IActionResult> MarkAsLicensed([FromForm] string memberIds)
+        {
+            try
+            {
+                var yearOfOperation = await _repositoryManager.YearOfOperationRepository.GetCurrentYearOfOperation();
+
+                if (yearOfOperation == null) throw new ArgumentException("No valid year of operation found");
+
+                //iterate through the member ids and mark them as licensed
+                var memberIdsArray = JsonConvert.DeserializeObject<string[]>(memberIds);
+                foreach (var memberId in memberIdsArray)
+                {
+                    var member = await _repositoryManager.MemberRepository.GetMemberByUserId(memberId);
+                    if (member == null) throw new ArgumentException("No valid member found");
+
+                    // Check if the member already has a license for the current year of operation
+                    var existingLicense = await _repositoryManager.LicenseRepository
+                    .GetAsync(l => l.MemberId == member.Id && l.YearOfOperationId == yearOfOperation.Id);
+
+                    if (existingLicense != null) continue; // Skip if license already exists
+
+                    // Generate a new license number
+                    var licenseNumber = await GenerateLicenseNumber(yearOfOperation);
+
+                    // Create a new license object
+                    var license = new License
+                    {
+                        MemberId = member.Id,
+                        YearOfOperationId = yearOfOperation.Id,
+                        LicenseNumber = licenseNumber,
+                        ExpiryDate = yearOfOperation.EndDate,
+                        Status = "Active"
+                    };
+
+                    // Add the new license to the repository and commit the transaction
+                    await _repositoryManager.LicenseRepository.AddAsync(license);
+                    await _unitOfWork.CommitAsync();
+
+                    // Send email notification to the member
+                    await _emailService.SendMailWithKeyVarReturn(
+                        member.User.Email,
+                        "License Generated",
+                        $"Your license for {yearOfOperation.StartDate.Year}-{yearOfOperation.EndDate.Year} has been generated. License Number: {licenseNumber}",
+                        false
+                    );
+                }
+                return Ok("License generated successfully");
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+
+        }
+
+        private async Task<string> GenerateLicenseNumber(YearOfOperation yearOfOperation)
+        {
+            var lastLicense = await _repositoryManager.LicenseRepository.GetLastLicenseNumber(yearOfOperation.Id);
+
+            // If no licenses exist, start with the first license number
+            if (lastLicense == null)
+            {
+                return $"{yearOfOperation.StartDate.Year}{yearOfOperation.EndDate.Year}MLS0001";
+            }
+
+            // Extract the last number and increment it for the new license
+            var lastNumber = int.Parse(lastLicense.LicenseNumber.Substring(lastLicense.LicenseNumber.Length - 4));
+            return $"{yearOfOperation.StartDate.Year}{yearOfOperation.EndDate.Year}MLS{(lastNumber + 1).ToString("D4")}";
         }
 
     }
