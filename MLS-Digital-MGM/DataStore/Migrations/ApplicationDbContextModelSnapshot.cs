@@ -1068,6 +1068,9 @@ namespace DataStore.Migrations
                         .HasMaxLength(250)
                         .HasColumnType("varchar(250)");
 
+                    b.Property<int?>("InstitutionTypeId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -1115,6 +1118,8 @@ namespace DataStore.Migrations
                     b.HasIndex("CreatedById");
 
                     b.HasIndex("CustomerId");
+
+                    b.HasIndex("InstitutionTypeId");
 
                     b.ToTable("Firms");
                 });
@@ -1201,6 +1206,35 @@ namespace DataStore.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("IdentityTypes");
+                });
+
+            modelBuilder.Entity("DataStore.Core.Models.InstitutionType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("InstitutionTypes");
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.InvoiceRequest", b =>
@@ -3686,9 +3720,15 @@ namespace DataStore.Migrations
                         .WithMany()
                         .HasForeignKey("CustomerId");
 
+                    b.HasOne("DataStore.Core.Models.InstitutionType", "InstitutionType")
+                        .WithMany("Firms")
+                        .HasForeignKey("InstitutionTypeId");
+
                     b.Navigation("CreatedBy");
 
                     b.Navigation("Customer");
+
+                    b.Navigation("InstitutionType");
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.InvoiceRequest", b =>
@@ -4457,6 +4497,11 @@ namespace DataStore.Migrations
             modelBuilder.Entity("DataStore.Core.Models.Firm", b =>
                 {
                     b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("DataStore.Core.Models.InstitutionType", b =>
+                {
+                    b.Navigation("Firms");
                 });
 
             modelBuilder.Entity("DataStore.Core.Models.LicenseApplication", b =>

@@ -22,6 +22,7 @@ namespace DataStore.Persistence.SQLRepositories
         private ITitleRepository _titleRepository;
         private IRoleRepository _roleRepository;
         private IIdentityTypeRepository _identityTypeRepository;
+        private IInstitutionTypeRepository _institutionTypeRepository;
         private IYearOfOperationRepository _yearOfOperationRepository;
         private ILicenseApprovalLevelRepository _licenseApprovalLevelRepository;
         private IFirmRepository _firmRepository;
@@ -92,6 +93,7 @@ namespace DataStore.Persistence.SQLRepositories
         public ITitleRepository TitleRepository => _titleRepository ??= new TitleRepository(_context, _unitOfWork);
         public IRoleRepository RoleRepository => _roleRepository ??= new RoleRepository(_context, _unitOfWork);
         public IIdentityTypeRepository IdentityTypeRepository => _identityTypeRepository ??= new IdentityTypeRepository(_context, _unitOfWork);
+        public IInstitutionTypeRepository InstitutionTypeRepository => _institutionTypeRepository ??= new InstitutionTypeRepository(_context, _unitOfWork);
         public IUnitOfWork UnitOfWork => _unitOfWork;
         public UserManager<ApplicationUser> UserManager => _userManager;
         public IYearOfOperationRepository YearOfOperationRepository => _yearOfOperationRepository ??= new YearOfOperationRepository(_context, _unitOfWork);
