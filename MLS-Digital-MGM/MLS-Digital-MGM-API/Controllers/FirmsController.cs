@@ -7,6 +7,7 @@ using DataStore.Persistence.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MLS_Digital_MGM.DataStore.Helpers;
+using System.Linq.Expressions;
 
 [Route("api/[controller]")]
 [Authorize(AuthenticationSchemes = "Bearer")]
@@ -43,7 +44,7 @@ public class FirmsController : Controller
             string CreatedById = user.Id;
 
 
-            string currentRole  = Lambda.GetCurrentUserRole(_repositoryManager,user.Id);
+            string currentRole = Lambda.GetCurrentUserRole(_repositoryManager, user.Id);
             // Create a new DataTablesParameters object
             var dataTableParams = new DataTablesParameters();
 
@@ -54,7 +55,10 @@ public class FirmsController : Controller
                 PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
                 SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
                 SortColumn = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumn : null,
-                SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null
+                SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null,
+                Includes = new Expression<Func<Firm, object>>[] {
+                        f => f.InstitutionType,
+                    },
             };
 
             // Fetch paginated firms using the FirmRepository
@@ -124,7 +128,7 @@ public class FirmsController : Controller
             }
 
             // Map firms to DTOs and return as Ok result
-            var mappedFirms= _mapper.Map<IEnumerable<ReadFirmDTO>>(firms);
+            var mappedFirms = _mapper.Map<IEnumerable<ReadFirmDTO>>(firms);
 
             return Ok(mappedFirms);
         }
@@ -146,12 +150,12 @@ public class FirmsController : Controller
                 return BadRequest(ModelState);
             }
 
-             string username = _httpContextAccessor.HttpContext.User.Identity.Name;
+            string username = _httpContextAccessor.HttpContext.User.Identity.Name;
 
 
             var firm = _mapper.Map<Firm>(firmDTO);
 
-            
+
             var existingFirm = await _repositoryManager.FirmRepository.GetAsync(f => f.Name.Trim().Equals(firm.Name.Trim(), StringComparison.OrdinalIgnoreCase));
             if (existingFirm != null)
             {
@@ -159,11 +163,11 @@ public class FirmsController : Controller
                 return BadRequest(ModelState);
             }
 
-             //get user id from username
+            //get user id from username
             var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
             firm.CreatedById = user.Id;
 
-             string currentRole  = Lambda.GetCurrentUserRole(_repositoryManager,user.Id);
+            string currentRole = Lambda.GetCurrentUserRole(_repositoryManager, user.Id);
 
 
             if (string.Equals(currentRole, "administrator", StringComparison.OrdinalIgnoreCase) || string.Equals(currentRole, "Secretariat", StringComparison.OrdinalIgnoreCase))
@@ -174,7 +178,7 @@ public class FirmsController : Controller
             {
                 firm.Status = Lambda.Pending;
             }
-            
+
 
             await _repositoryManager.FirmRepository.AddAsync(firm);
             await _unitOfWork.CommitAsync();
@@ -204,11 +208,22 @@ public class FirmsController : Controller
                 return NotFound();
             }
 
+            // Validate that the InstitutionTypeId exists before attempting update
+            if (firmDTO.InstitutionTypeId != null)
+            {
+                var institutionTypeExists = await _repositoryManager.InstitutionTypeRepository
+                    .GetByIdAsync(firmDTO.InstitutionTypeId.Value) != null;
+                if (!institutionTypeExists)
+                {
+                    return BadRequest($"InstitutionType with id {firmDTO.InstitutionTypeId} does not exist");
+                }
+            }
+
             _mapper.Map(firmDTO, firm);
             await _repositoryManager.FirmRepository.UpdateAsync(firm);
             await _unitOfWork.CommitAsync();
 
-            return NoContent();
+            return Ok(firmDTO);
         }
         catch (Exception ex)
         {
@@ -267,25 +282,25 @@ public class FirmsController : Controller
             // Fetch  firm using the UserRepository
             var firm = await _repositoryManager.FirmRepository.GetByIdAsync(id);
 
-            if(firm != null)
+            if (firm != null)
             {
-                firm.Status = Lambda.Active; 
-               
+                firm.Status = Lambda.Active;
+
                 await _repositoryManager.FirmRepository.UpdateAsync(firm);
                 await _unitOfWork.CommitAsync();
 
 
-                if(string.IsNullOrEmpty(firm.CreatedById))
+                if (string.IsNullOrEmpty(firm.CreatedById))
                 {
                     //get user id from username
                     var user = await _repositoryManager.UserRepository.GetSingleUser(firm.CreatedById);
-                    
+
                     // Send status details email
                     string emailBody = $"The firm that you added {firm.Name} has been approved. Thank you for choosing us.";
                     var passwordEmailResult = await _emailService.SendMailWithKeyVarReturn(user.Email, "Firm Application Status", emailBody);
                 }
 
-              
+
                 return Ok();
             }
             return BadRequest("firm not found");
@@ -303,54 +318,54 @@ public class FirmsController : Controller
     }
     [HttpPost("deny")]
     public async Task<IActionResult> DenyFirmApplication(DenyFirmApplicationDTO denyFirmDTO)
+    {
+        try
         {
-            try
+            var firm = await _repositoryManager.FirmRepository.GetByIdAsync(denyFirmDTO.FirmId);
+            firm.Status = Lambda.Denied;
+            firm.DenialReason = denyFirmDTO.Reason;
+
+            await _repositoryManager.FirmRepository.UpdateAsync(firm);
+            await _unitOfWork.CommitAsync();
+
+            //send email to the user who created the probono application
+
+            if (string.IsNullOrEmpty(firm.CreatedById))
             {
-                var firm = await _repositoryManager.FirmRepository.GetByIdAsync(denyFirmDTO.FirmId);
-                firm.Status = Lambda.Denied;
-                firm.DenialReason = denyFirmDTO.Reason;
-
-                await _repositoryManager.FirmRepository.UpdateAsync(firm);
-                await _unitOfWork.CommitAsync();
-
-                //send email to the user who created the probono application
-
-                if(string.IsNullOrEmpty(firm.CreatedById))
-                {
-                    //get user id from username
-                    var user = await _repositoryManager.UserRepository.GetSingleUser(firm.CreatedById);
-                    // Send status details email
-                    string emailBody = $"Your application for the firm {firm.Name} has been denied. <br/> Reason: {denyFirmDTO.Reason}";
-                    var passwordEmailResult = await _emailService.SendMailWithKeyVarReturn(user.Email, "Firm Application Status", emailBody);
-                }
-
-             
-                
-
-
-                return Ok();
+                //get user id from username
+                var user = await _repositoryManager.UserRepository.GetSingleUser(firm.CreatedById);
+                // Send status details email
+                string emailBody = $"Your application for the firm {firm.Name} has been denied. <br/> Reason: {denyFirmDTO.Reason}";
+                var passwordEmailResult = await _emailService.SendMailWithKeyVarReturn(user.Email, "Firm Application Status", emailBody);
             }
-            catch (Exception ex)
-            {
-                await _errorLogService.LogErrorAsync(ex);
-                return StatusCode(500, "Internal server error");
-            }
+
+
+
+
+
+            return Ok();
         }
+        catch (Exception ex)
+        {
+            await _errorLogService.LogErrorAsync(ex);
+            return StatusCode(500, "Internal server error");
+        }
+    }
 
     [HttpGet("count")]
-        public async Task<IActionResult> count()
+    public async Task<IActionResult> count()
+    {
+        try
         {
-            try
-            {
-                var count = await _repositoryManager.FirmRepository.GetFirmsCountAsync();
+            var count = await _repositoryManager.FirmRepository.GetFirmsCountAsync();
 
-                return Ok(count);
-            }
-            catch (Exception ex)
-            {
-
-                await _errorLogService.LogErrorAsync(ex);
-                return StatusCode(500, "Internal server error");
-            }
+            return Ok(count);
         }
+        catch (Exception ex)
+        {
+
+            await _errorLogService.LogErrorAsync(ex);
+            return StatusCode(500, "Internal server error");
+        }
+    }
 }

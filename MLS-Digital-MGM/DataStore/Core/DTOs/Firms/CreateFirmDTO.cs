@@ -20,6 +20,7 @@ namespace DataStore.Core.DTOs.Firms
         [Required]
         [StringLength(maximumLength: 250)]
         public string PhysicalAddress { get; set; }
+        public int InstitutionTypeId { get; set; }
 
         [Required]
         [StringLength(maximumLength: 100)]

@@ -32,6 +32,7 @@ namespace DataStore.Core.DTOs.Firms
         [StringLength(15)]
         public string SecondaryPhoneNumber { get; set; }
         public string? CustomerId {get; set;}
+        public int? InstitutionTypeId { get; set; }
 
     }
 }

@@ -181,5 +181,6 @@ namespace DataStore.Data
         public DbSet<NotaryPublic> NotariesPublic { get; set; }
         public DbSet<GenericSignature> GenericSignatures { get; set; }
         public DbSet<ApplicationUserChangeRequest> ApplicationUserChangeRequests { get; set; }
+        public DbSet<InstitutionType> InstitutionTypes { get; set; }
     }
 }

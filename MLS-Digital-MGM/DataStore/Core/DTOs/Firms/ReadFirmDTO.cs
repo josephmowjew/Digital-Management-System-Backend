@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DataStore.Core.DTOs.InstitutionType;
 using DataStore.Core.Models;
 
 namespace DataStore.Core.DTOs.Firms
@@ -36,5 +37,7 @@ namespace DataStore.Core.DTOs.Firms
         public ApplicationUser CreatedBy { get; set; }
          public string? CustomerId {get; set;}
         public QBCustomer Customer {get; set;}
+        public int? InstitutionTypeId { get; set; }
+        public virtual ReadInstitutionTypeDTO InstitutionType { get; set; }
     }
 }
