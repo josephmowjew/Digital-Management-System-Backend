@@ -219,13 +219,24 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 }
 
+                currentMember.FirmId = licenseApplicationDTO.FirmId;
+                await _repositoryManager.MemberRepository.UpdateAsync(currentMember);
+
                 //check if this is first application 
                 var hasPreviousApplication = await _repositoryManager.LicenseApplicationRepository.HasPreviousApplicationsAsync(currentMember.Id);
                 //set first application to true
                 if (hasPreviousApplication is false)
                 {
-                    application.FirstApplicationForLicense = true;
-                    licenseApplicationDTO.FirstApplicationForLicense = true;
+                    //check if the current member has a license
+                    var license = await _repositoryManager.LicenseRepository.GetLicenseByMemberId(currentMember.Id);
+                    if (license is null)
+                    {
+                        application.FirstApplicationForLicense = true;
+                        licenseApplicationDTO.FirstApplicationForLicense = true;
+                    }else{
+                        application.FirstApplicationForLicense = false;
+                        licenseApplicationDTO.FirstApplicationForLicense = false;
+                    }
                 }
 
                 //create TODO code to check and set if the application has been created outside the allowed window
@@ -309,28 +320,20 @@ namespace MLS_Digital_MGM_API.Controllers
 
                             // Update the application
                             await _repositoryManager.LicenseApplicationRepository.UpdateAsync(existingApplication);
-
-
                         }
-
-
                     }
-
-
                 }
 
 
                 // Update member firm details if the firmId is not null or 0
                 if (licenseApplicationDTO.FirmId is not null && licenseApplicationDTO.FirmId != 0)
                 {
-
                     if (currentMember is not null && currentMember.FirmId != licenseApplicationDTO.FirmId)
                     {
                         currentMember.FirmId = licenseApplicationDTO.FirmId;
                         await _repositoryManager.MemberRepository.UpdateAsync(currentMember);
                     }
                 }
-
 
                 await _unitOfWork.CommitAsync();
 
