@@ -79,6 +79,7 @@ namespace MLS_Digital_MGM_API.Controllers
                     Includes = new Expression<Func<InvoiceRequest, object>>[] {
                         p => p.CreatedBy,
                         p => p.Customer,
+                        p => p.Firm,
                         p => p.QBInvoice,
                     },
                 };
@@ -335,6 +336,7 @@ namespace MLS_Digital_MGM_API.Controllers
                     SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null,
                     Includes = new Expression<Func<InvoiceRequest, object>>[] {
                         p => p.CreatedBy,
+                        p => p.Firm,
                         p => p.Customer,
                         p => p.QBInvoice,
 
@@ -508,6 +510,9 @@ namespace MLS_Digital_MGM_API.Controllers
                 {
                     //set the member account id
                     invoiceRequest.CustomerId = memberAccount.CustomerId ?? null;
+
+                    //add member's firm id to the invoice request
+                    invoiceRequest.FirmId = memberAccount.FirmId ?? null;
                 }
 
                 // Handle firm members if request type is "Firm"
@@ -563,6 +568,13 @@ namespace MLS_Digital_MGM_API.Controllers
                 {
                     return NotFound();
                 }
+
+                //get firm from the invoice request
+                if (invoiceRequest.FirmId.HasValue)
+                {
+                    var firm = await _repositoryManager.FirmRepository.GetByIdAsync(invoiceRequest.FirmId.Value);
+                }
+                
 
                 var mappedInvoiceRequest = _mapper.Map<ReadInvoiceRequestDTO>(invoiceRequest);
 
@@ -625,6 +637,7 @@ namespace MLS_Digital_MGM_API.Controllers
                     Includes = new Expression<Func<InvoiceRequest, object>>[] {
                         p => p.CreatedBy,
                         p => p.Customer,
+                        p => p.Firm,
                         p => p.QBInvoice,
                         p => p.Attachment,
                     },
