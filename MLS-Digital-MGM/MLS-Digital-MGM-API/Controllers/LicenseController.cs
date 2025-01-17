@@ -127,6 +127,19 @@ namespace MLS_Digital_MGM_API.Controllers
                     }
                 }
 
+                //get the chairman's signature
+                var seal = await _repositoryManager.StampRepository.GetStampByNameAsync(Lambda.Seal);
+                if (seal != null)
+                {
+                    var attachment = seal.Attachments.FirstOrDefault();
+                    if (attachment != null)
+                    {
+                        var attachmentDTO = _mapper.Map<ReadAttachmentDTO>(attachment);
+                        attachmentDTO.FilePath = Path.Combine($"{Lambda.http}://{HttpContext.Request.Host}{_configuration["APISettings:API_Prefix"]}/Uploads/{Lambda.StampFolderName}", attachment.FileName);
+                        signatures.Add(attachmentDTO);
+                    }
+                }
+
                 //get the president signature
                 var presidentSignature = await _repositoryManager.SignatureRepository.GetSignatureByNameAsync(Lambda.PresidentSignature);
                 if (presidentSignature != null)
