@@ -283,6 +283,91 @@ namespace MLS_Digital_MGM_API.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+
+        [HttpGet("getMembersWithMissingMemberRecord")]
+        public async Task<IActionResult> GetUserWithMemberRoleAndMissingMemberRecord(int pageNumber = 1, int pageSize = 10)
+        {
+            try
+            {
+                var dataTableParams = new DataTablesParameters();
+
+                var pagingParameters = new PagingParameters<ApplicationUser>
+                {
+                    Predicate = u => u.Status != Lambda.Deleted,
+                    PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
+                    PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
+                    SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
+                    SortColumn = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumn : null,
+                    SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null
+
+                };
+
+                // Fetch paginated users using the UserRepository
+                var users = await _repositoryManager.UserRepository.GetMembersWithMissingMemberRecordAsync(pagingParameters);
+
+
+                // Check if users exist
+                if (users == null || !users.Any())
+                {
+                    if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                    {
+                        var draw = dataTableParams.Draw;
+                        return Json(new
+                        {
+                            draw,
+                            recordsFiltered = 0,
+                            recordsTotal = 0,
+                            data = Enumerable.Empty<ReadUserDTO>()
+                        });
+                    }
+                    return Ok(Enumerable.Empty<ReadUserDTO>()); // Return empty list
+                }
+
+                // Map User entities to ReadUserDTOs
+                var mappedUsers = _mapper.Map<IEnumerable<ReadUserDTO>>(users);
+
+                //get the user role of the user
+                var usersWithRoles = new List<ReadUserDTO>();
+
+                mappedUsers.ToList().ForEach(user =>
+                {
+                    var userRole = this._repositoryManager.UserRepository.GetUserRoleByUserId(user.Id);
+                    string roleName = this._repositoryManager.UserRepository.GetRoleName(userRole.RoleId);
+                    user.RoleName = FormatRoleName(roleName);
+                    usersWithRoles.Add(user);
+
+                });
+
+
+                // Return datatable JSON if the request came from a datatable
+                if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                {
+                    var draw = dataTableParams.Draw;
+                    var resultTotalFiltred = usersWithRoles.Count;
+
+                    return Json(new
+                    {
+                        draw,
+                        recordsFiltered = resultTotalFiltred,
+                        recordsTotal = resultTotalFiltred,
+                        data = usersWithRoles.ToList() // Materialize the enumerable
+                    });
+                }
+
+                return Ok(mappedUsers); // Return paginated users
+
+            }
+            catch (Exception ex)
+            {
+                // Log the exception using ErrorLogService
+                await _errorLogService.LogErrorAsync(ex);
+
+                // Return 500 Internal Server Error
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+
         [HttpGet("getDeletedUsers")]
         public async Task<IActionResult> DeletedUsers(int pageNumber = 1, int pageSize = 10)
         {

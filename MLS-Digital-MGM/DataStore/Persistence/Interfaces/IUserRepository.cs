@@ -33,6 +33,7 @@ namespace DataStore.Persistence.Interfaces
         Task<List<ApplicationUser>> GetAllConfirmedUsersAsync();
 
         Task<IEnumerable<ApplicationUser>> GetPagedStaffUsersAsync(PagingParameters<ApplicationUser> pagingParameters);
+        Task<IEnumerable<ApplicationUser>> GetMembersWithMissingMemberRecordAsync(PagingParameters<ApplicationUser> pagingParameters);
         Task<int> CountStaffUsersAsync(PagingParameters<ApplicationUser> pagingParameters);
          Task<List<Attachment>> GetProfilePictures(ApplicationUser user);
          
