@@ -32,6 +32,7 @@ namespace DataStore.Persistence.SQLRepositories
             .Include(t => t.Attachments)
             .ThenInclude(t => t.AttachmentType)
             .Include(t => t.YearOfOperation)
+            .Where(t => t.Status != Lambda.Deleted)
             .FirstOrDefaultAsync(t => t.Id == stampId);
         }
 
@@ -41,6 +42,7 @@ namespace DataStore.Persistence.SQLRepositories
             .Include(t => t.Attachments)
             .ThenInclude(t => t.AttachmentType)
             .Include(t => t.YearOfOperation)
+            .Where(t => t.Status != Lambda.Deleted)
             .FirstOrDefaultAsync(x => x.Name == stampName);
         }
     }
