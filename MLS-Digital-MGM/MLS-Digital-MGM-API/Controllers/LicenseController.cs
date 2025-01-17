@@ -57,7 +57,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 var pagingParameters = new PagingParameters<License>
                 {
-                    Predicate = l => l.Status != Lambda.Deleted && (memberId > 0 ? l.MemberId == memberId : true),
+                    Predicate = l => l.Status != Lambda.Deleted && (memberId > 0 ? l.MemberId == memberId : false),
                     PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
                     PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
                     SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
@@ -322,7 +322,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
             // Extract the last number and increment it for the new license
             var lastNumber = int.Parse(lastLicense.LicenseNumber.Substring(lastLicense.LicenseNumber.Length - 4));
-            return $"{yearOfOperation.StartDate.Year}{yearOfOperation.EndDate.Year}MLS{(lastNumber + 1).ToString("D4")}";
+            return $"{yearOfOperation.StartDate.Year}/{yearOfOperation.EndDate.Year}MLS{(lastNumber + 1).ToString("D4")}";
         }
 
     }
