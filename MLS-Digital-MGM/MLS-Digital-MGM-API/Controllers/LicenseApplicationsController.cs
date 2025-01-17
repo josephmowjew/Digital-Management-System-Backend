@@ -789,16 +789,16 @@ namespace MLS_Digital_MGM_API.Controllers
                     int startIndex = indexOfMLS + 3;
                     string numberAfterMLS = lastLicenseNumberString.Substring(startIndex);
                     int newNumber = int.Parse(numberAfterMLS) + 1;
-                    licenseNumber = $"{activeYear.StartDate.Year}{activeYear.EndDate.Year}MLS{newNumber.ToString("D4")}";
+                    licenseNumber = $"{activeYear.StartDate.Year}/{activeYear.EndDate.Year}MLS{newNumber.ToString("D4")}";
                 }
                 else
                 {
-                    licenseNumber = $"{activeYear.StartDate.Year}{activeYear.EndDate.Year}MLS0001";
+                    licenseNumber = $"{activeYear.StartDate.Year}/{activeYear.EndDate.Year}MLS0001";
                 }
             }
             else
             {
-                licenseNumber = $"{activeYear.StartDate.Year}{activeYear.EndDate.Year}MLS0001";
+                licenseNumber = $"{activeYear.StartDate.Year}/{activeYear.EndDate.Year}MLS0001";
             }
 
             return licenseNumber;

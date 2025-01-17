@@ -304,7 +304,7 @@ namespace MLS_Digital_MGM_API.Controllers
             // If no licenses exist, start with the first license number
             if (lastLicense == null)
             {
-                return $"{yearOfOperation.StartDate.Year}{yearOfOperation.EndDate.Year}MLS0001";
+                return $"{yearOfOperation.StartDate.Year}/{yearOfOperation.EndDate.Year}MLS0001";
             }
 
             // Extract the last number and increment it for the new license
