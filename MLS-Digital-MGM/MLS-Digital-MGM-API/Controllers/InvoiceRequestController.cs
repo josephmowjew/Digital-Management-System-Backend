@@ -418,6 +418,7 @@ namespace MLS_Digital_MGM_API.Controllers
                     SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null,
                     Includes = new Expression<Func<InvoiceRequest, object>>[] {
                         p => p.CreatedBy,
+                        p => p.Firm,
                         p => p.Customer,
                         p => p.QBInvoice,
 
@@ -506,11 +507,19 @@ namespace MLS_Digital_MGM_API.Controllers
                 //get the member account from the user
                 var memberAccount = await _repositoryManager.MemberRepository.GetMemberByUserId(user.Id);
 
+                var firms = await _repositoryManager.FirmRepository.GetAllAsync();
+
                 if (memberAccount != null)
                 {
-                    //set the member account id
-                    invoiceRequest.CustomerId = memberAccount.CustomerId ?? null;
-
+                    //if the invoice request of the type firm, then the customerId should be the firm's id
+                    if (invoiceRequestDTO.RequestType == "Firm")
+                    {
+                        invoiceRequest.CustomerId = memberAccount.Firm.CustomerId ?? null;
+                    }
+                    else
+                    {
+                        invoiceRequest.CustomerId = memberAccount.CustomerId ?? null;
+                    }
                     //add member's firm id to the invoice request
                     invoiceRequest.FirmId = memberAccount.FirmId ?? null;
                 }
