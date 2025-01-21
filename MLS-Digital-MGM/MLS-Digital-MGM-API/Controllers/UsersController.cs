@@ -47,7 +47,7 @@ namespace MLS_Digital_MGM_API.Controllers
             try
             {
                 var dataTableParams = new DataTablesParameters();
-            
+
                 var pagingParameters = new PagingParameters<ApplicationUser>
                 {
                     Predicate = u => u.Status != Lambda.Deleted && u.EmailConfirmed == true,
@@ -67,25 +67,25 @@ namespace MLS_Digital_MGM_API.Controllers
                     if (dataTableParams.LoadFromRequest(_httpContextAccessor))
                     {
                         var draw = dataTableParams.Draw;
-                        return Json(new 
-                        { 
-                            draw, 
-                            recordsFiltered = 0, 
-                            recordsTotal = 0, 
+                        return Json(new
+                        {
+                            draw,
+                            recordsFiltered = 0,
+                            recordsTotal = 0,
                             data = Enumerable.Empty<ReadUserDTO>()
                         });
                     }
                     return Ok(Enumerable.Empty<ReadUserDTO>()); // Return empty list
                 }
-        
+
                 // Map User entities to ReadUserDTOs
                 var mappedUsers = _mapper.Map<IEnumerable<ReadUserDTO>>(staffUsers);
 
                 var usersWithRoles = mappedUsers.Select(user =>
                 {
                     var userRole = _repositoryManager.UserRepository.GetUserRoleByUserId(user.Id);
-                    string roleName = userRole != null 
-                        ? _repositoryManager.UserRepository.GetRoleName(userRole.RoleId) 
+                    string roleName = userRole != null
+                        ? _repositoryManager.UserRepository.GetRoleName(userRole.RoleId)
                         : string.Empty;
                     user.RoleName = FormatRoleName(roleName);
                     return user;
@@ -99,23 +99,23 @@ namespace MLS_Digital_MGM_API.Controllers
                     var totalRecords = await _repositoryManager.UserRepository.CountStaffUsersAsync(pagingParameters);
 
 
-                    return Json(new 
-                    { 
-                        draw, 
-                        recordsFiltered = totalRecords, 
-                        recordsTotal = totalRecords, 
+                    return Json(new
+                    {
+                        draw,
+                        recordsFiltered = totalRecords,
+                        recordsTotal = totalRecords,
                         data = usersWithRoles.ToList() // Materialize the enumerable
                     });
                 }
 
                 return Ok(mappedUsers); // Return paginated users
-        
+
             }
             catch (Exception ex)
             {
                 // Log the exception using ErrorLogService
                 await _errorLogService.LogErrorAsync(ex);
-        
+
                 // Return 500 Internal Server Error
                 return StatusCode(500, "Internal server error");
             }
@@ -126,7 +126,7 @@ namespace MLS_Digital_MGM_API.Controllers
             try
             {
                 var dataTableParams = new DataTablesParameters();
-            
+
                 var pagingParameters = new PagingParameters<ApplicationUser>
                 {
                     Predicate = u => u.Status == Lambda.Deleted,
@@ -140,24 +140,24 @@ namespace MLS_Digital_MGM_API.Controllers
                 // Fetch paginated users using the UserRepository
                 var users = await _repositoryManager.UserRepository.GetPagedAsync(pagingParameters);
 
-            
-               // Check if users exist
+
+                // Check if users exist
                 if (users == null || !users.Any())
                 {
                     if (dataTableParams.LoadFromRequest(_httpContextAccessor))
                     {
                         var draw = dataTableParams.Draw;
-                        return Json(new 
-                        { 
-                            draw, 
-                            recordsFiltered = 0, 
-                            recordsTotal = 0, 
+                        return Json(new
+                        {
+                            draw,
+                            recordsFiltered = 0,
+                            recordsTotal = 0,
                             data = Enumerable.Empty<ReadUserDTO>()
                         });
                     }
                     return Ok(Enumerable.Empty<ReadUserDTO>()); // Return empty list
                 }
-        
+
                 // Map User entities to ReadUserDTOs
                 var mappedUsers = _mapper.Map<IEnumerable<ReadUserDTO>>(users);
 
@@ -166,37 +166,37 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 mappedUsers.ToList().ForEach(user =>
                 {
-                   var userRole =  this._repositoryManager.UserRepository.GetUserRoleByUserId(user.Id);
-                   string roleName = this._repositoryManager.UserRepository.GetRoleName(userRole.RoleId);
-                   user.RoleName = FormatRoleName(roleName);
-                   usersWithRoles.Add(user);
-                
+                    var userRole = this._repositoryManager.UserRepository.GetUserRoleByUserId(user.Id);
+                    string roleName = this._repositoryManager.UserRepository.GetRoleName(userRole.RoleId);
+                    user.RoleName = FormatRoleName(roleName);
+                    usersWithRoles.Add(user);
+
                 });
 
-               
+
                 // Return datatable JSON if the request came from a datatable
                 if (dataTableParams.LoadFromRequest(_httpContextAccessor))
                 {
                     var draw = dataTableParams.Draw;
                     var resultTotalFiltred = usersWithRoles.Count;
 
-                    return Json(new 
-                    { 
-                        draw, 
-                        recordsFiltered = resultTotalFiltred, 
-                        recordsTotal = resultTotalFiltred, 
+                    return Json(new
+                    {
+                        draw,
+                        recordsFiltered = resultTotalFiltred,
+                        recordsTotal = resultTotalFiltred,
                         data = usersWithRoles.ToList() // Materialize the enumerable
                     });
                 }
 
                 return Ok(mappedUsers); // Return paginated users
-        
+
             }
             catch (Exception ex)
             {
                 // Log the exception using ErrorLogService
                 await _errorLogService.LogErrorAsync(ex);
-        
+
                 // Return 500 Internal Server Error
                 return StatusCode(500, "Internal server error");
             }
@@ -208,7 +208,7 @@ namespace MLS_Digital_MGM_API.Controllers
             try
             {
                 var dataTableParams = new DataTablesParameters();
-            
+
                 var pagingParameters = new PagingParameters<ApplicationUser>
                 {
                     Predicate = u => u.Status != Lambda.Deleted && u.EmailConfirmed == false,
@@ -222,24 +222,24 @@ namespace MLS_Digital_MGM_API.Controllers
                 // Fetch paginated users using the UserRepository
                 var users = await _repositoryManager.UserRepository.GetPagedAsync(pagingParameters);
 
-            
-               // Check if users exist
+
+                // Check if users exist
                 if (users == null || !users.Any())
                 {
                     if (dataTableParams.LoadFromRequest(_httpContextAccessor))
                     {
                         var draw = dataTableParams.Draw;
-                        return Json(new 
-                        { 
-                            draw, 
-                            recordsFiltered = 0, 
-                            recordsTotal = 0, 
+                        return Json(new
+                        {
+                            draw,
+                            recordsFiltered = 0,
+                            recordsTotal = 0,
                             data = Enumerable.Empty<ReadUserDTO>()
                         });
                     }
                     return Ok(Enumerable.Empty<ReadUserDTO>()); // Return empty list
                 }
-        
+
                 // Map User entities to ReadUserDTOs
                 var mappedUsers = _mapper.Map<IEnumerable<ReadUserDTO>>(users);
 
@@ -248,31 +248,31 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 mappedUsers.ToList().ForEach(user =>
                 {
-                   var userRole =  this._repositoryManager.UserRepository.GetUserRoleByUserId(user.Id);
-                   string roleName = this._repositoryManager.UserRepository.GetRoleName(userRole.RoleId);
-                   user.RoleName = FormatRoleName(roleName);
-                   usersWithRoles.Add(user);
-                
+                    var userRole = this._repositoryManager.UserRepository.GetUserRoleByUserId(user.Id);
+                    string roleName = this._repositoryManager.UserRepository.GetRoleName(userRole.RoleId);
+                    user.RoleName = FormatRoleName(roleName);
+                    usersWithRoles.Add(user);
+
                 });
 
-               
+
                 // Return datatable JSON if the request came from a datatable
                 if (dataTableParams.LoadFromRequest(_httpContextAccessor))
                 {
                     var draw = dataTableParams.Draw;
                     var resultTotalFiltred = usersWithRoles.Count;
 
-                    return Json(new 
-                    { 
-                        draw, 
-                        recordsFiltered = resultTotalFiltred, 
-                        recordsTotal = resultTotalFiltred, 
+                    return Json(new
+                    {
+                        draw,
+                        recordsFiltered = resultTotalFiltred,
+                        recordsTotal = resultTotalFiltred,
                         data = usersWithRoles.ToList() // Materialize the enumerable
                     });
                 }
 
                 return Ok(mappedUsers); // Return paginated users
-        
+
             }
             catch (Exception ex)
             {
@@ -373,9 +373,10 @@ namespace MLS_Digital_MGM_API.Controllers
         {
             try
             {
-                
+
                 // Create PagingParameters object
-                var pagingParameters = new PagingParameters<ApplicationUser>{
+                var pagingParameters = new PagingParameters<ApplicationUser>
+                {
                     Predicate = u => u.Status == Lambda.Deleted,
                     PageNumber = pageNumber,
                     PageSize = pageSize
@@ -385,21 +386,21 @@ namespace MLS_Digital_MGM_API.Controllers
                 // Fetch paginated users using the UserRepository
                 var users = await _repositoryManager.UserRepository.GetPagedAsync(pagingParameters);
 
-        
+
                 // Check if users exist
                 if (users == null || !users.Any())
                 {
-                    return Ok(Enumerable.Empty<ReadUserDTO>()); 
+                    return Ok(Enumerable.Empty<ReadUserDTO>());
                 }
-        
+
                 // Map User entities to ReadUserDTOs
                 var mappedUsers = _mapper.Map<IEnumerable<ReadUserDTO>>(users);
 
                 //get the user role of the user
 
-               
+
                 return Ok(mappedUsers); // Return paginated users
-        
+
             }
             catch (Exception ex)
             {
@@ -410,7 +411,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
-        
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUser(string id)
         {
@@ -419,7 +420,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 // Fetch paginated users using the UserRepository
                 var user = await _repositoryManager.UserRepository.GetSingleUser(id);
 
-                if(user != null)
+                if (user != null)
                 {
                     var mappedData = _mapper.Map<ReadUserDTO>(user);
 
@@ -444,9 +445,9 @@ namespace MLS_Digital_MGM_API.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
-      
+
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(string id, [FromForm]UpdateUserDTO userDTO)
+        public async Task<IActionResult> UpdateUser(string id, [FromForm] UpdateUserDTO userDTO)
         {
             try
             {
@@ -461,7 +462,14 @@ namespace MLS_Digital_MGM_API.Controllers
                     return NotFound();
                 }
 
-                if(userDTO.DepartmentId == 0 || userDTO.DepartmentId == null)
+                //get the picture associated with the user
+                var previousPicture = user.ProfilePictures.FirstOrDefault();
+
+                await _repositoryManager.AttachmentRepository.DeleteAsync(previousPicture);
+                await _unitOfWork.CommitAsync();
+
+
+                if (userDTO.DepartmentId == 0 || userDTO.DepartmentId == null)
                 {
                     //get the department of the user from the database
                     userDTO.DepartmentId = user.DepartmentId;
@@ -473,35 +481,38 @@ namespace MLS_Digital_MGM_API.Controllers
                 user.UserName = user.Email;
                 user.NormalizedEmail = user.Email.ToUpper();
 
-                var attachmentType = await _repositoryManager.AttachmentTypeRepository.GetAsync(d => d.Name == "UserProfilePicture")
+                if (userDTO.ProfilePictures?.Any() == true)  // Process new pictures if provided
+                {
+                    var attachmentType = await _repositoryManager.AttachmentTypeRepository.GetAsync(d => d.Name == "UserProfilePicture")
                                 ?? new AttachmentType { Name = "UserProfilePicture" };
 
-                if (attachmentType.Id == 0)
-                {
-                    await _repositoryManager.AttachmentTypeRepository.AddAsync(attachmentType);
-                    await _unitOfWork.CommitAsync();
-                }
-
-                if (userDTO.ProfilePictures?.Any() == true)
-                {
-                    // Clear existing profile pictures from the linking table
-                    if (user.ProfilePictures?.Any() == true)
+                    if (attachmentType.Id == 0)
                     {
-                        foreach (var picture in user.ProfilePictures.ToList())
-                        {
-                            await _repositoryManager.AttachmentRepository.DeleteAsync(picture);
-                        }
-                        user.ProfilePictures.Clear();
+                        await _repositoryManager.AttachmentTypeRepository.AddAsync(attachmentType);
+                        await _unitOfWork.CommitAsync();
                     }
 
                     // Save and add new profile picture
                     var attachmentsList = await SaveProfilePicturesAsync(userDTO.ProfilePictures, attachmentType.Id);
                     user.ProfilePictures = new List<Attachment>(attachmentsList);
                 }
+                else
+                {
+                    var attachmentType = await _repositoryManager.AttachmentTypeRepository.GetAsync(d => d.Name == "UserProfilePicture")
+                                ?? new AttachmentType { Name = "UserProfilePicture" };
+
+                    if (attachmentType.Id == 0)
+                    {
+                        await _repositoryManager.AttachmentTypeRepository.AddAsync(attachmentType);
+                        await _unitOfWork.CommitAsync();
+                    }
+                    var attachmentsList = await SaveExistingProfilePictureAsync(previousPicture, attachmentType.Id);
+                    user.ProfilePictures = new List<Attachment>(attachmentsList);
+                }
 
                 await _repositoryManager.UserRepository.UpdateAsync(user);
 
-                if(userDTO.RoleName != null)
+                if (userDTO.RoleName != null)
                 {
                     var roleResult = await _repositoryManager.UserRepository.AddUserToRoleAsync(user, userDTO.RoleName);
 
@@ -509,7 +520,7 @@ namespace MLS_Digital_MGM_API.Controllers
                     {
                         ModelState.AddModelError("Role", "Failed to associate the user with the specified role.");
                         return BadRequest(ModelState);
-                    }                    
+                    }
                 }
 
                 await _unitOfWork.CommitAsync();
@@ -566,7 +577,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 {
                     return NotFound();
                 }
-               
+
                 _repositoryManager.UserRepository.ActivateAccount(user);
                 await _repositoryManager.UserRepository.UpdateAsync(user);
                 await _unitOfWork.CommitAsync();
@@ -580,7 +591,7 @@ namespace MLS_Digital_MGM_API.Controllers
             }
         }
 
-       private string FormatRoleName(string roleName)
+        private string FormatRoleName(string roleName)
         {
             if (string.IsNullOrEmpty(roleName))
             {
@@ -595,7 +606,7 @@ namespace MLS_Digital_MGM_API.Controllers
         {
             try
             {
-               
+
                 // Fetch paginated users using the DepartmentRepository
                 var users = await _repositoryManager.UserRepository.GetAllAsync();
 
@@ -645,9 +656,9 @@ namespace MLS_Digital_MGM_API.Controllers
             try
             {
                 var user = await Lambda.GetCurrentUser(_repositoryManager, _httpContextAccessor.HttpContext);
-                
+
                 // Get or create attachment type
-                var attachmentType = await _repositoryManager.AttachmentTypeRepository.GetAsync(d => d.Name == "Signature") 
+                var attachmentType = await _repositoryManager.AttachmentTypeRepository.GetAsync(d => d.Name == "Signature")
                                     ?? new AttachmentType { Name = "Signature" };
 
                 // Add attachment type if it doesn't exist
@@ -664,7 +675,7 @@ namespace MLS_Digital_MGM_API.Controllers
                     if (attachmentsToUpdate.Any())
                     {
                         var attachmentsList = await SaveAttachmentsAsync(attachmentsToUpdate, attachmentType.Id);
-                        signatureDTO.BannerImageUrl = "Uploads/SignatureAttachments/"+attachmentsList.FirstOrDefault()?.FileName;
+                        signatureDTO.BannerImageUrl = "Uploads/SignatureAttachments/" + attachmentsList.FirstOrDefault()?.FileName;
                     }
                 }
 
@@ -672,7 +683,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 user.SignatureData = JsonSerializer.Serialize(signatureDTO);
                 await _repositoryManager.UserRepository.UpdateAsync(user);
                 await _unitOfWork.CommitAsync();
-                
+
                 return Ok("Email signature updated successfully");
             }
             catch (Exception ex)
@@ -745,7 +756,7 @@ namespace MLS_Digital_MGM_API.Controllers
             }
 
             var AttachmentsPath = Path.Combine(webRootPath, "Uploads/UserProfilePictures");
-            
+
             // Ensure the directory exists
             if (!Directory.Exists(AttachmentsPath))
             {
@@ -788,6 +799,22 @@ namespace MLS_Digital_MGM_API.Controllers
             return attachmentsList;
         }
 
+        private async Task<List<Attachment>> SaveExistingProfilePictureAsync(Attachment previousPicture, int attachmentTypeId)
+        {
+            var attachmentsList = new List<Attachment>();
+            if (previousPicture != null)
+            {
+                attachmentsList.Add(new Attachment
+                {
+                    FileName = previousPicture.FileName,
+                    FilePath = previousPicture.FilePath,
+                    AttachmentTypeId = attachmentTypeId,
+                    PropertyName = previousPicture.PropertyName
+                });
+            }
+            return attachmentsList;
+        }
+
         [HttpGet("signature")]
         public async Task<IActionResult> GetSignature()
         {
@@ -796,15 +823,15 @@ namespace MLS_Digital_MGM_API.Controllers
                 var user = await Lambda.GetCurrentUser(_repositoryManager, _httpContextAccessor.HttpContext);
                 if (string.IsNullOrEmpty(user.SignatureData))
                     return Ok(new SignatureDTO());
-                    
+
                 var signatureData = JsonSerializer.Deserialize<SignatureDTO>(user.SignatureData);
                 if (!string.IsNullOrEmpty(signatureData.BannerImageUrl))
                 {
-                    signatureData.BannerImageUrl = signatureData.BannerImageUrl.StartsWith("http") 
-                        ? signatureData.BannerImageUrl 
+                    signatureData.BannerImageUrl = signatureData.BannerImageUrl.StartsWith("http")
+                        ? signatureData.BannerImageUrl
                         : $"{_configuration.GetValue<string>("AppSettings:APP_URL")?.TrimEnd('/')}/{signatureData.BannerImageUrl.TrimStart('/')}";
                 }
-                
+
                 return Ok(signatureData);
             }
             catch (Exception ex)
@@ -820,16 +847,16 @@ namespace MLS_Digital_MGM_API.Controllers
             try
             {
                 // Get user first and complete that operation
-                var user =  _repositoryManager.UserRepository.FindByEmailAsync(_httpContextAccessor.HttpContext.User.Identity.Name).Result;
+                var user = _repositoryManager.UserRepository.FindByEmailAsync(_httpContextAccessor.HttpContext.User.Identity.Name).Result;
                 if (user == null || string.IsNullOrEmpty(user.SignatureData))
                 {
                     return Ok(string.Empty);
                 }
-                
+
                 // Then process the signature data
                 var signatureData = JsonSerializer.Deserialize<SignatureDTO>(user.SignatureData);
                 var htmlSignature = await Task.Run(() => _signatureService.GenerateSignatureHtml(signatureData));
-                
+
                 return Ok(new { html = htmlSignature });
             }
             catch (Exception ex)
@@ -847,13 +874,13 @@ namespace MLS_Digital_MGM_API.Controllers
                 var user = await _repositoryManager.UserRepository.GetSingleUser(userId);
                 if (user == null)
                     return NotFound("User not found");
-                    
+
                 if (string.IsNullOrEmpty(user.SignatureData))
                     return Ok(string.Empty);
-                    
+
                 var signatureData = JsonSerializer.Deserialize<SignatureDTO>(user.SignatureData);
                 var htmlSignature = _signatureService.GenerateSignatureHtml(signatureData);
-                
+
                 return Ok(new { html = htmlSignature });
             }
             catch (Exception ex)
@@ -873,7 +900,7 @@ namespace MLS_Digital_MGM_API.Controllers
                     return NotFound("No signature found");
 
                 var signatureData = JsonSerializer.Deserialize<SignatureDTO>(user.SignatureData);
-                
+
                 // Remove banner image file if it exists
                 if (!string.IsNullOrEmpty(signatureData.BannerImageUrl))
                 {
@@ -888,7 +915,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 // Clear banner URL from signature data
                 signatureData.BannerImageUrl = null;
                 user.SignatureData = JsonSerializer.Serialize(signatureData);
-                
+
                 await _repositoryManager.UserRepository.UpdateAsync(user);
                 await _unitOfWork.CommitAsync();
 
@@ -903,5 +930,5 @@ namespace MLS_Digital_MGM_API.Controllers
 
     }
 
-    
+
 }
