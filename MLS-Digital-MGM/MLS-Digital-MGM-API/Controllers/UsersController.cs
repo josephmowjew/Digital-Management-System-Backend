@@ -476,6 +476,12 @@ namespace MLS_Digital_MGM_API.Controllers
                 var attachmentType = await _repositoryManager.AttachmentTypeRepository.GetAsync(d => d.Name == "UserProfilePicture")
                                 ?? new AttachmentType { Name = "UserProfilePicture" };
 
+                if (attachmentType.Id == 0)
+                {
+                    await _repositoryManager.AttachmentTypeRepository.AddAsync(attachmentType);
+                    await _unitOfWork.CommitAsync();
+                }
+
                 if (userDTO.ProfilePictures?.Any() == true)
                 {
                     // Clear existing profile pictures from the linking table
