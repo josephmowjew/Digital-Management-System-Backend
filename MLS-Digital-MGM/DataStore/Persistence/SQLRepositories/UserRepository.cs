@@ -26,15 +26,15 @@ namespace DataStore.Persistence.SQLRepositories
             this._unitOfWork = unitOfWork;
         }
 
-        public UserRepository(ApplicationDbContext context, IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, RoleManager<Role> roleManager) :base(context, unitOfWork)
+        public UserRepository(ApplicationDbContext context, IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, RoleManager<Role> roleManager) : base(context, unitOfWork)
         {
             this._context = context;
             this._unitOfWork = unitOfWork;
             this._userManager = userManager;
             this._roleManager = roleManager;
         }
-       
-        public  async Task<IdentityResult> AddAsync(ApplicationUser entity, string password)
+
+        public async Task<IdentityResult> AddAsync(ApplicationUser entity, string password)
         {
             return await this._userManager.CreateAsync(entity, password);
         }
@@ -72,7 +72,7 @@ namespace DataStore.Persistence.SQLRepositories
                 var pictures = await _context.Attachments
                     .Where(a => a.ApplicationUsers.Any(u => u.Id == userWithPictures.Id) && a.Status != Lambda.Deleted)
                     .ToListAsync();
-                
+
 
                 //add the pictures to the user
                 userWithPictures.ProfilePictures = pictures;
@@ -93,7 +93,7 @@ namespace DataStore.Persistence.SQLRepositories
                 .ToListAsync();
         }
 
-         public async Task<ApplicationUser?> GetSingleUserNoFilter(string id)
+        public async Task<ApplicationUser?> GetSingleUserNoFilter(string id)
         {
 
             return await this._context.Users.FirstOrDefaultAsync(u => u.Id == id);
@@ -120,7 +120,7 @@ namespace DataStore.Persistence.SQLRepositories
                 var pictures = await _context.Attachments
                     .Where(a => a.ApplicationUsers.Any(u => u.Id == userWithPictures.Id) && a.Status != Lambda.Deleted)
                     .ToListAsync();
-                
+
 
                 //add the pictures to the user
                 userWithPictures.ProfilePictures = pictures;
@@ -157,10 +157,12 @@ namespace DataStore.Persistence.SQLRepositories
         {
             var role = this._context.Roles.FirstOrDefault(r => r.Id == roleId);
 
-            if(role != null)
+            if (role != null)
             {
                 return role.Name;
-            }else{
+            }
+            else
+            {
                 return "";
             }
         }
@@ -170,9 +172,10 @@ namespace DataStore.Persistence.SQLRepositories
             return (List<ApplicationUser>)await this._userManager.GetUsersInRoleAsync(finance);
         }
 
-        public async Task<int> GetUsersCountAsync(){
+        public async Task<int> GetUsersCountAsync()
+        {
             return await _context.Users
-                .Where(us => us.EmailConfirmed == true)
+                .Where(us => us.EmailConfirmed == true && us.Status != Lambda.Deleted)
                 .CountAsync();
         }
 
@@ -190,48 +193,92 @@ namespace DataStore.Persistence.SQLRepositories
                 .ToListAsync();
         }
 
-public async Task<IEnumerable<ApplicationUser>> GetPagedStaffUsersAsync(PagingParameters<ApplicationUser> pagingParameters)
-{
-    // Build the query first
-    var query = _context.Users.AsNoTracking() // Add AsNoTracking() for better performance
-        .Where(pagingParameters.Predicate)
-        .Where(u => !_context.UserRoles.Any(ur => 
-            ur.UserId == u.Id && 
-            _context.Roles.Any(r => r.Id == ur.RoleId && r.Name.ToLower() == "member")));
+        public async Task<IEnumerable<ApplicationUser>> GetPagedStaffUsersAsync(PagingParameters<ApplicationUser> pagingParameters)
+        {
+            // Build the query first
+            var query = _context.Users.AsNoTracking() // Add AsNoTracking() for better performance
+                .Where(pagingParameters.Predicate)
+                .Where(u => !_context.UserRoles.Any(ur =>
+                    ur.UserId == u.Id &&
+                    _context.Roles.Any(r => r.Id == ur.RoleId && r.Name.ToLower() == "member")));
 
-    // Apply search if provided
-    if (!string.IsNullOrEmpty(pagingParameters.SearchTerm))
-    {
-        query = query.Where(u => 
-            u.UserName.Contains(pagingParameters.SearchTerm) || 
-            u.Email.Contains(pagingParameters.SearchTerm));
-    }
+            // Apply search if provided
+            if (!string.IsNullOrEmpty(pagingParameters.SearchTerm))
+            {
+                query = query.Where(u =>
+                    u.UserName.Contains(pagingParameters.SearchTerm) ||
+                    u.Email.Contains(pagingParameters.SearchTerm));
+            }
 
-    // Apply sorting
-    if (!string.IsNullOrEmpty(pagingParameters.SortColumn))
-    {
-        var parameter = Expression.Parameter(typeof(ApplicationUser), "u");
-        var property = Expression.Property(parameter, pagingParameters.SortColumn);
-        var lambda = Expression.Lambda<Func<ApplicationUser, object>>(
-            Expression.Convert(property, typeof(object)), 
-            parameter);
+            // Apply sorting
+            if (!string.IsNullOrEmpty(pagingParameters.SortColumn))
+            {
+                var parameter = Expression.Parameter(typeof(ApplicationUser), "u");
+                var property = Expression.Property(parameter, pagingParameters.SortColumn);
+                var lambda = Expression.Lambda<Func<ApplicationUser, object>>(
+                    Expression.Convert(property, typeof(object)),
+                    parameter);
 
-        query = pagingParameters.SortDirection == "asc"
-            ? query.OrderBy(lambda)
-            : query.OrderByDescending(lambda);
-    }
-    else
-    {
-        query = query.OrderBy(u => u.UserName);
-    }
+                query = pagingParameters.SortDirection == "asc"
+                    ? query.OrderBy(lambda)
+                    : query.OrderByDescending(lambda);
+            }
+            else
+            {
+                query = query.OrderBy(u => u.UserName);
+            }
 
-    // Execute the query in a single operation
-    return await query
-        .Skip((pagingParameters.PageNumber - 1) * pagingParameters.PageSize)
-        .Take(pagingParameters.PageSize)
-        .ToListAsync()
-        .ConfigureAwait(false);
-}
+            // Execute the query in a single operation
+            return await query
+                .Skip((pagingParameters.PageNumber - 1) * pagingParameters.PageSize)
+                .Take(pagingParameters.PageSize)
+                .ToListAsync()
+                .ConfigureAwait(false);
+        }
+
+        public async Task<IEnumerable<ApplicationUser>> GetMembersWithMissingMemberRecordAsync(PagingParameters<ApplicationUser> pagingParameters)
+        {
+            // Build the query first
+            var query = _context.Users.AsNoTracking()
+                .Where(pagingParameters.Predicate)
+                .Where(u => _context.UserRoles.Any(ur =>
+                    ur.UserId == u.Id &&
+                    _context.Roles.Any(r => r.Id == ur.RoleId && r.Name.ToLower() == "member")))
+                .Where(u => !_context.Members.Any(m => m.UserId == u.Id));
+
+            if (!string.IsNullOrEmpty(pagingParameters.SearchTerm))
+            {
+                query = query.Where(u =>
+                    u.UserName.Contains(pagingParameters.SearchTerm) ||
+                    u.Email.Contains(pagingParameters.SearchTerm));
+            }
+
+            // Apply sorting
+            if (!string.IsNullOrEmpty(pagingParameters.SortColumn))
+            {
+                var parameter = Expression.Parameter(typeof(ApplicationUser), "u");
+                var property = Expression.Property(parameter, pagingParameters.SortColumn);
+                var lambda = Expression.Lambda<Func<ApplicationUser, object>>(
+                    Expression.Convert(property, typeof(object)),
+                    parameter);
+
+                query = pagingParameters.SortDirection == "asc"
+                    ? query.OrderBy(lambda)
+                    : query.OrderByDescending(lambda);
+            }
+            else
+            {
+                query = query.OrderBy(u => u.UserName);
+            }
+
+            // Execute the query in a single operation
+            return await query
+                .Skip((pagingParameters.PageNumber - 1) * pagingParameters.PageSize)
+                .Take(pagingParameters.PageSize)
+                .ToListAsync()
+                .ConfigureAwait(false);
+
+        }
 
 
         public async Task<int> CountStaffUsersAsync(PagingParameters<ApplicationUser> pagingParameters)
@@ -244,8 +291,8 @@ public async Task<IEnumerable<ApplicationUser>> GetPagedStaffUsersAsync(PagingPa
             if (!string.IsNullOrEmpty(pagingParameters.SearchTerm))
             {
                 var searchTerm = pagingParameters.SearchTerm.ToLower();
-                query = query.Where(u => 
-                u.UserName.ToLower().Contains(searchTerm) || 
+                query = query.Where(u =>
+                u.UserName.ToLower().Contains(searchTerm) ||
                 u.Email.ToLower().Contains(searchTerm) ||
                 u.FirstName.ToLower().Contains(searchTerm) ||
                     u.LastName.ToLower().Contains(searchTerm)

@@ -57,7 +57,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 var pagingParameters = new PagingParameters<License>
                 {
-                    Predicate = l => l.Status != Lambda.Deleted && (memberId > 0 ? l.MemberId == memberId : true),
+                    Predicate = l => l.Status != Lambda.Deleted && (memberId > 0 ? l.MemberId == memberId : false),
                     PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
                     PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
                     SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
@@ -123,6 +123,19 @@ namespace MLS_Digital_MGM_API.Controllers
                     {
                         var attachmentDTO = _mapper.Map<ReadAttachmentDTO>(attachment);
                         attachmentDTO.FilePath = Path.Combine($"{Lambda.http}://{HttpContext.Request.Host}{_configuration["APISettings:API_Prefix"]}/Uploads/{Lambda.SignatureFolderName}", attachment.FileName);
+                        signatures.Add(attachmentDTO);
+                    }
+                }
+
+                //get the chairman's signature
+                var seal = await _repositoryManager.StampRepository.GetStampByNameAsync(Lambda.Seal);
+                if (seal != null)
+                {
+                    var attachment = seal.Attachments.FirstOrDefault();
+                    if (attachment != null)
+                    {
+                        var attachmentDTO = _mapper.Map<ReadAttachmentDTO>(attachment);
+                        attachmentDTO.FilePath = Path.Combine($"{Lambda.http}://{HttpContext.Request.Host}{_configuration["APISettings:API_Prefix"]}/Uploads/{Lambda.StampFolderName}", attachment.FileName);
                         signatures.Add(attachmentDTO);
                     }
                 }
@@ -304,12 +317,12 @@ namespace MLS_Digital_MGM_API.Controllers
             // If no licenses exist, start with the first license number
             if (lastLicense == null)
             {
-                return $"{yearOfOperation.StartDate.Year}{yearOfOperation.EndDate.Year}MLS0001";
+                return $"{yearOfOperation.StartDate.Year}/{yearOfOperation.EndDate.Year}MLS0001";
             }
 
             // Extract the last number and increment it for the new license
             var lastNumber = int.Parse(lastLicense.LicenseNumber.Substring(lastLicense.LicenseNumber.Length - 4));
-            return $"{yearOfOperation.StartDate.Year}{yearOfOperation.EndDate.Year}MLS{(lastNumber + 1).ToString("D4")}";
+            return $"{yearOfOperation.StartDate.Year}/{yearOfOperation.EndDate.Year}MLS{(lastNumber + 1).ToString("D4")}";
         }
 
     }

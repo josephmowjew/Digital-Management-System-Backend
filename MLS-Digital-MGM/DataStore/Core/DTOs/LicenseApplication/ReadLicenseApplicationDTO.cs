@@ -21,6 +21,7 @@ namespace DataStore.Core.DTOs.LicenseApplication
         public ReadLicenseDTO License { get; set; }
         public int MemberId { get; set; }
         public ReadMemberDTO Member { get; set; }
+        public DateTime? DateSubmitted { get; set; }
         public DataStore.Core.DTOs.YearOfOperation.ReadYearOfOperationDTO YearOfOperation { get; set; } 
         public ICollection<ReadAttachmentDTO> Attachments { get; set; } = new List<ReadAttachmentDTO>();
 

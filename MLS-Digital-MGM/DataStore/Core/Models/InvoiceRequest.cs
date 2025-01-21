@@ -36,6 +36,8 @@ namespace DataStore.Core.Models
 
         public int? AttachmentId { get; set; }
         public virtual Attachment Attachment { get; set; }
+        public int? FirmId { get; set; }
+        public virtual Firm Firm { get; set; }
 
         [StringLength(maximumLength:50)]
         public string RequestType { get; set; } = "Individual";

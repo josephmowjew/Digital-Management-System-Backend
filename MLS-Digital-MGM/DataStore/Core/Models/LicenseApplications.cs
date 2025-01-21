@@ -29,6 +29,7 @@ namespace DataStore.Core.Models
         public int MemberId { get; set; }
         public  Member Member { get; set; }
         public License License { get; set; }
+        public DateTime? DateSubmitted { get; set; }
         public virtual List<Attachment> Attachments { get; set; }
         // Extra properties
         public bool FirstApplicationForLicense { get; set; }

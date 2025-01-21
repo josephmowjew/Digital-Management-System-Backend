@@ -3,6 +3,7 @@ using System;
 using DataStore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250115100924_Add FirmId to Invoice Requests Table")]
+    partial class AddFirmIdtoInvoiceRequestsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1477,9 +1480,6 @@ namespace DataStore.Migrations
 
                     b.Property<int>("CurrentApprovalLevelID")
                         .HasColumnType("int");
-
-                    b.Property<DateTime?>("DateSubmitted")
-                        .HasColumnType("datetime(6)");
 
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime(6)");

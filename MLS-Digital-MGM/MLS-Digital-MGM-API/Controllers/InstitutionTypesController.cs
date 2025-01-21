@@ -161,6 +161,28 @@ namespace MLS_Digital_MGM_API.Controllers
             }
         }
 
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetInstitutionTypeById(int id)
+        {
+            try
+            {
+                var institutionType = await _repositoryManager.InstitutionTypeRepository.GetByIdAsync(id);
+                if (institutionType == null)
+                {
+                    return NotFound();
+                }
+
+                var mappedInstitutionType = _mapper.Map<ReadInstitutionTypeDTO>(institutionType);
+
+                return Ok(mappedInstitutionType);
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
         // Action for updating an existing institution type
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateinstitutionType(int id, [FromBody] UpdateInstitutionTypeDTO institutionTypeDTO)

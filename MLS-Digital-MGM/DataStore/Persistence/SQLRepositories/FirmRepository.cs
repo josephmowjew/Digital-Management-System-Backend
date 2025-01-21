@@ -24,7 +24,11 @@ namespace DataStore.Persistence.SQLRepositories
 
         public async Task<Firm> GetByIdAsync(int id)
         {
-            return await _context.Firms.Include(f => f.CreatedBy).Include(f => f.Customer).FirstOrDefaultAsync(f => f.Id == id);
+            return await _context.Firms
+                .Include(f => f.CreatedBy)
+                .Include(f => f.Customer)
+                .Include(f => f.InstitutionType)
+                .FirstOrDefaultAsync(f => f.Id == id);
         }
 
         public async Task<int> GetFirmsCountAsync(){

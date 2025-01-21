@@ -24,6 +24,8 @@ namespace DataStore.Core.DTOs.Member
     public DateTime DateOfAdmissionToPractice { get; set; }
 
     public string? CustomerId {get; set;}
+
+    public int? FirmId { get; set; }
     
   }
 }

@@ -58,8 +58,8 @@ namespace MLS_Digital_MGM_API.Controllers
                 var pagingParameters = new PagingParameters<ProBono>
                 {
                     Predicate = u => u.Status != Lambda.Deleted &&
-                                    ((string.Equals(currentRole, "secretariat", StringComparison.OrdinalIgnoreCase) ||
-                                      string.Equals(currentRole, "ceo", StringComparison.OrdinalIgnoreCase)) ||
+                                    (string.Equals(currentRole, "secretariat", StringComparison.OrdinalIgnoreCase) ||
+                                      string.Equals(currentRole, "ceo", StringComparison.OrdinalIgnoreCase) || string.Equals(currentRole, "president", StringComparison.OrdinalIgnoreCase) || string.Equals(currentRole, "honarary secretary", StringComparison.OrdinalIgnoreCase) ||
                                      u.CreatedById == CreatedById ||
                                      u.Members.Any(m => m.UserId == CreatedById)),
                     PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,

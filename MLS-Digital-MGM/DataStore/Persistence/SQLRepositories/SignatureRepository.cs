@@ -33,6 +33,7 @@ namespace DataStore.Persistence.SQLRepositories
             .ThenInclude(t => t.AttachmentType)
             .Include(s => s.YearOfOperation)
             .Include(s => s.CreatedBy)
+            .Where(s => s.Status != Lambda.Deleted)
             .FirstOrDefaultAsync(s => s.Id == signatureId);
         }
 
@@ -41,7 +42,7 @@ namespace DataStore.Persistence.SQLRepositories
 
             string signatureNameToLower = signatureName.ToLower().Trim();
 
-            return _context.Signatures.Include(s => s.Attachments).ThenInclude(t => t.AttachmentType).FirstOrDefaultAsync(x => x.Name.Trim().ToLower() == signatureNameToLower);
+            return _context.Signatures.Include(s => s.Attachments).ThenInclude(t => t.AttachmentType).Where(s => s.Status != Lambda.Deleted).FirstOrDefaultAsync(x => x.Name.Trim().ToLower() == signatureNameToLower);
         }
     }
 }

@@ -68,7 +68,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 // Check if the user is secretariat and approve the application if so
                 pagingParameters = new PagingParameters<LicenseApplication>
                 {
-                    Predicate = u => u.Status != Lambda.Deleted && ((!string.Equals(currentRole, "member", StringComparison.OrdinalIgnoreCase) && u.ApplicationStatus != Lambda.Draft) ||
+                    Predicate = u => u.Status != Lambda.Deleted && ((!string.Equals(currentRole, "member", StringComparison.OrdinalIgnoreCase) && u.ApplicationStatus != Lambda.Draft && u.ApplicationStatus != Lambda.Approved) ||
                         (string.Equals(currentRole, "member", StringComparison.OrdinalIgnoreCase) && u.CreatedById == user.Id)),
                     PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
                     PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
@@ -162,6 +162,9 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 var application = _mapper.Map<LicenseApplication>(licenseApplicationDTO);
 
+                if(!licenseApplicationDTO.ActionType.Equals(Lambda.Draft, StringComparison.CurrentCultureIgnoreCase))
+                    application.DateSubmitted = DateTime.Now;
+
 
                 string username = _httpContextAccessor.HttpContext.User.Identity.Name;
 
@@ -176,7 +179,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 if (currentYearOfOperation != null)
                 {
-                    if (DateTime.Now.Month == 1)
+                    if (DateTime.Now.Month == currentYearOfOperation.EndDate.Month)
                     {
                         // Assign the next year of operation (current year + 1)
                         var nextYearOfOperation = await _repositoryManager.YearOfOperationRepository.GetNextYearOfOperation();
@@ -233,6 +236,7 @@ namespace MLS_Digital_MGM_API.Controllers
                     {
                         application.FirstApplicationForLicense = true;
                         licenseApplicationDTO.FirstApplicationForLicense = true;
+                        
                     }else{
                         application.FirstApplicationForLicense = false;
                         licenseApplicationDTO.FirstApplicationForLicense = false;
@@ -340,7 +344,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 if (!application.ApplicationStatus.Equals(Lambda.Draft, StringComparison.CurrentCultureIgnoreCase))
                 {
                     // Send status details email
-                    string emailBody = $"Your have made a license application for {yearOfOperation.StartDate.Year} - {yearOfOperation.EndDate.Year} practice year. You can view the status of your application by clicking the link below.";
+                    string emailBody = $"Your have made a license application for {yearOfOperation.StartDate.Year} - {yearOfOperation.EndDate.Year} practice year. You can view the status of your application by clicking the link below.<br/><br/><a href='https://members.malawilawsociety.net'>Click here to view your application</a>";
                     BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(user.Email, "Annual Membership Application Status", emailBody, false));
                 }
 
@@ -688,7 +692,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 var currentDepartment = currentLicenseApprovalLevel.Department;
                 string licenseNumber = string.Empty;
 
-                if (currentDepartment.Name.Equals("Executive", StringComparison.OrdinalIgnoreCase) && currentRole.Equals("president", StringComparison.OrdinalIgnoreCase) || currentRole.Equals("honarary secretary", StringComparison.OrdinalIgnoreCase))
+                if (currentDepartment.Name.Equals("Executive", StringComparison.OrdinalIgnoreCase) && (currentRole.Equals("president", StringComparison.OrdinalIgnoreCase) || currentRole.Equals("honarary secretary", StringComparison.OrdinalIgnoreCase) || currentRole.Equals("ceo", StringComparison.OrdinalIgnoreCase)))
                 {
                     licenseApplication.ApplicationStatus = Lambda.Approved;
                     licenseNumber = await GenerateLicenseNumber(licenseApplication);
@@ -776,8 +780,10 @@ namespace MLS_Digital_MGM_API.Controllers
         private async Task<string> GenerateLicenseNumber(LicenseApplication licenseApplication)
         {
             string licenseNumber = string.Empty;
-            var activeYear = await _repositoryManager.YearOfOperationRepository.GetCurrentYearOfOperation();
-            var lastLicenseNumber = await _repositoryManager.LicenseRepository.GetLastLicenseNumber(activeYear.Id);
+            var licenseYearOfApplication = await _repositoryManager.YearOfOperationRepository.GetByIdAsync(licenseApplication.YearOfOperationId);
+            //var activeYear = await _repositoryManager.YearOfOperationRepository.GetCurrentYearOfOperation();
+
+            var lastLicenseNumber = await _repositoryManager.LicenseRepository.GetLastLicenseNumber(licenseYearOfApplication.Id);
 
             if (lastLicenseNumber != null)
             {
@@ -789,16 +795,16 @@ namespace MLS_Digital_MGM_API.Controllers
                     int startIndex = indexOfMLS + 3;
                     string numberAfterMLS = lastLicenseNumberString.Substring(startIndex);
                     int newNumber = int.Parse(numberAfterMLS) + 1;
-                    licenseNumber = $"{activeYear.StartDate.Year}{activeYear.EndDate.Year}MLS{newNumber.ToString("D4")}";
+                    licenseNumber = $"{licenseYearOfApplication.StartDate.Year}/{licenseYearOfApplication.EndDate.Year}MLS{newNumber.ToString("D4")}";
                 }
                 else
                 {
-                    licenseNumber = $"{activeYear.StartDate.Year}{activeYear.EndDate.Year}MLS0001";
+                    licenseNumber = $"{licenseYearOfApplication.StartDate.Year}/{licenseYearOfApplication.EndDate.Year}MLS0001";
                 }
             }
             else
             {
-                licenseNumber = $"{activeYear.StartDate.Year}{activeYear.EndDate.Year}MLS0001";
+                licenseNumber = $"{licenseYearOfApplication.StartDate.Year}/{licenseYearOfApplication.EndDate.Year}MLS0001";
             }
 
             return licenseNumber;
