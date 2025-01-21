@@ -446,7 +446,7 @@ namespace MLS_Digital_MGM_API.Controllers
         }
       
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(string id, [FromBody]UpdateUserDTO userDTO)
+        public async Task<IActionResult> UpdateUser(string id, [FromForm]UpdateUserDTO userDTO)
         {
             try
             {
@@ -508,7 +508,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 await _unitOfWork.CommitAsync();
 
-                return NoContent();
+                return Ok(user);
             }
             catch (Exception ex)
             {

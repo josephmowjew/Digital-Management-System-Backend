@@ -46,14 +46,13 @@ namespace MLS_Digital_MGM_API.Controllers
             try
             {
                 // Find the user by email
-                var user = await _repositoryManager.UserRepository.FindByEmailAsync(loginViewModel.Email);
+                var user = await _repositoryManager.UserRepository.FindByEmailAsyncPictures(loginViewModel.Email);
 
                 //get the profile picture if the user is not null
-                /*if (user != null)
+                if (user != null)
                 {
                     var profilePicture = await _repositoryManager.UserRepository.GetProfilePictures(user);
-                    //bla bla bla
-                }*/
+                }
 
                 // Check if the user exists, is not deleted, and has confirmed their email
                 if (user == null || user.DeletedDate != null || !user.EmailConfirmed)
