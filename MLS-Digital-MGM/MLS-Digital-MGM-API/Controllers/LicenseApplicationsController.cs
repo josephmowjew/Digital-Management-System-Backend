@@ -235,11 +235,13 @@ namespace MLS_Digital_MGM_API.Controllers
                     if (license is null)
                     {
                         application.FirstApplicationForLicense = true;
-                        licenseApplicationDTO.FirstApplicationForLicense = true;
+                        application.FirstApplicationForLicense = true;
+                        application.RenewedLicensePreviousYear = false;
                         
                     }else{
                         application.FirstApplicationForLicense = false;
-                        licenseApplicationDTO.FirstApplicationForLicense = false;
+                        application.FirstApplicationForLicense = false;
+                        application.RenewedLicensePreviousYear = true;
                     }
                 }
 
