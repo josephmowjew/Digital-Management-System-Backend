@@ -133,6 +133,8 @@ namespace MLS_Digital_MGM_API.Controllers
         }
 
         // POST api/licenseapplications
+        [RequestFormLimits(MultipartBodyLengthLimit = 104857600)]
+        [RequestSizeLimit(104857600)]
         [HttpPost]
         public async Task<IActionResult> AddLicenseApplication([FromForm] CreateLicenseApplicationDTO licenseApplicationDTO)
         {
