@@ -14,6 +14,8 @@ using Hangfire;
 using Hangfire.MemoryStorage;
 using Microsoft.Extensions.FileProviders;
 using StackExchange.Redis;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.AspNetCore.Http.Features;
 //using MLS_Digital_MGM_API.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -143,6 +145,24 @@ builder.Services.AddHangfireServer();
 
 builder.Services.AddSignalR();
 
+builder.Services.Configure<IISServerOptions>(options =>
+{
+    options.MaxRequestBodySize = 104857600; // 100 MB
+});
+
+builder.Services.Configure<KestrelServerOptions>(options =>
+{
+    options.Limits.MaxRequestBodySize = 104857600; // 100 MB
+    options.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(10);
+    options.Limits.RequestHeadersTimeout = TimeSpan.FromMinutes(5);
+});
+
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 104857600; // 100 MB
+    options.ValueLengthLimit = 104857600;
+    options.MultipartHeadersLengthLimit = 104857600;
+});
 
 var app = builder.Build();
 // Use the CORS policy

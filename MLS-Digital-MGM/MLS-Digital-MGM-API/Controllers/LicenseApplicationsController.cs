@@ -133,6 +133,8 @@ namespace MLS_Digital_MGM_API.Controllers
         }
 
         // POST api/licenseapplications
+        [RequestFormLimits(MultipartBodyLengthLimit = 104857600)]
+        [RequestSizeLimit(104857600)]
         [HttpPost]
         public async Task<IActionResult> AddLicenseApplication([FromForm] CreateLicenseApplicationDTO licenseApplicationDTO)
         {
@@ -162,7 +164,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 var application = _mapper.Map<LicenseApplication>(licenseApplicationDTO);
 
-                if(!licenseApplicationDTO.ActionType.Equals(Lambda.Draft, StringComparison.CurrentCultureIgnoreCase))
+                if (!licenseApplicationDTO.ActionType.Equals(Lambda.Draft, StringComparison.CurrentCultureIgnoreCase))
                     application.DateSubmitted = DateTime.Now;
 
 
@@ -187,14 +189,17 @@ namespace MLS_Digital_MGM_API.Controllers
                         {
                             application.YearOfOperationId = nextYearOfOperation.Id;
                             yearOfOperation = nextYearOfOperation;
-                        }else{
+                        }
+                        else
+                        {
                             return BadRequest("No next year of operation found or the current year of operation is not set");
                         }
                     }
-                    else{
+                    else
+                    {
                         application.YearOfOperationId = currentYearOfOperation.Id;
                     }
-                    
+
                 }
                 else
                 {
@@ -235,11 +240,11 @@ namespace MLS_Digital_MGM_API.Controllers
                     if (license is null)
                     {
                         application.FirstApplicationForLicense = true;
-                        application.FirstApplicationForLicense = true;
                         application.RenewedLicensePreviousYear = false;
-                        
-                    }else{
-                        application.FirstApplicationForLicense = false;
+
+                    }
+                    else
+                    {
                         application.FirstApplicationForLicense = false;
                         application.RenewedLicensePreviousYear = true;
                     }
@@ -260,7 +265,8 @@ namespace MLS_Digital_MGM_API.Controllers
                 {
                     ModelState.AddModelError("", "You already have a license application in the same year and it is pending or approved");
                     return BadRequest(ModelState);
-                };
+                }
+                ;
 
 
                 // Get or create attachment type
@@ -315,7 +321,19 @@ namespace MLS_Digital_MGM_API.Controllers
 
                             if (hasPreviousApplication is false)
                             {
-                                existingApplication.FirstApplicationForLicense = true;
+                                //check if the current member has a license
+                                var license = await _repositoryManager.LicenseRepository.GetLicenseByMemberId(currentMember.Id);
+                                if (license is null)
+                                {
+                                    existingApplication.FirstApplicationForLicense = true;
+                                    existingApplication.RenewedLicensePreviousYear = false;
+
+                                }
+                                else
+                                {
+                                    existingApplication.FirstApplicationForLicense = false;
+                                    existingApplication.RenewedLicensePreviousYear = true;
+                                }
                             }
 
                             //map update to existing application

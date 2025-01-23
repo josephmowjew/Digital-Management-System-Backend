@@ -38,6 +38,7 @@ namespace DataStore.Core.DTOs.LicenseApplication
         public bool AttainedMinimumNumberOfCLEUnits { get; set; }
         [StringLength(250)]
         public string ExplanationForNoMinimumNumberOfCLEUnits { get; set; }
+        public string ExplanationForMinimumNumberOfCLEUnits { get; set; }
         public bool HasValidAnnualProfessionalIndemnityInsuranceCover { get; set; }
         [StringLength(250)]
         public string ExplanationForNoProfessionalIndemnityInsuranceCover { get; set; }
