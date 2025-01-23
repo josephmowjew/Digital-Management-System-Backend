@@ -42,6 +42,7 @@ namespace DataStore.Core.DTOs.LicenseApplication
         public IFormFile? AttainedMinimumNumberOfCLEUnitsAttachment { get; set; }
         [StringLength(maximumLength: 250)]
         public string? ExplanationForNoMinimumNumberOfCLEUnits { get; set; }
+        public string? ExplanationForMinimumNumberOfCLEUnits { get; set; }
         public bool HasValidAnnualProfessionalIndemnityInsuranceCover { get; set; }
         public IFormFile? HasValidAnnualProfessionalIndemnityInsuranceCoverAttachment { get; set; }
         [StringLength(maximumLength: 250)]
