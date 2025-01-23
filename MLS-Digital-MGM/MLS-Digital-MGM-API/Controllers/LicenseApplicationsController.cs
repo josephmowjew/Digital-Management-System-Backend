@@ -266,8 +266,6 @@ namespace MLS_Digital_MGM_API.Controllers
                     ModelState.AddModelError("", "You already have a license application in the same year and it is pending or approved");
                     return BadRequest(ModelState);
                 }
-                ;
-
 
                 // Get or create attachment type
                 var attachmentType = await _repositoryManager.AttachmentTypeRepository.GetAsync(d => d.Name == Lambda.LicenseApplication)

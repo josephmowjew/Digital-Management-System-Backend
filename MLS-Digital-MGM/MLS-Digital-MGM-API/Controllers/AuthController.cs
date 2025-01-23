@@ -144,6 +144,12 @@ namespace MLS_Digital_MGM_API.Controllers
                     ModelState.AddModelError("Role", "Failed to associate the user with the specified role.");
                     return BadRequest(ModelState);
                 }
+
+                if (string.Equals(model.RoleName, "Member", StringComparison.CurrentCultureIgnoreCase))
+                {
+                    user.EmailConfirmed = true;
+                    await _repositoryManager.UserRepository.UpdateAsync(user);
+                }
             }
 
             // Send login details email
