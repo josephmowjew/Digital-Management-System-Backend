@@ -268,7 +268,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 }
                 //add stamp to the attachments from stamps folder
-                var stamp = await _repositoryManager.StampRepository.GetStampByNameAsync(Lambda.Seal);
+                var stamp = await _repositoryManager.StampRepository.GetStampByNameAsync(Lambda.CPDSeal);
                 if (stamp != null)
                 {
                     string stampFilePath = $"{Lambda.http}://{HttpContext.Request.Host}{_configuration["APISettings:API_Prefix"]}/Uploads/{Lambda.StampFolderName}/{stamp.Attachments[0].FileName}";

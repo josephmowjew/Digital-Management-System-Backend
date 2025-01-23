@@ -80,6 +80,7 @@ namespace DataStore.Helpers
         public static string PresidentSignature = "President Signature";
         public static string ChairmanSignature = "Chairman Signature";
         public static string Seal = "Seal";
+        public static string CPDSeal = "CPD Seal";
 
 
         public static int RandomNumber()
