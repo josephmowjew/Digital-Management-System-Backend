@@ -846,7 +846,7 @@ namespace MLS_Digital_MGM_API.Controllers
             string emailBody = $"You have approved a license application for a member {licenseApplication.CreatedBy.FirstName} {licenseApplication.CreatedBy.LastName}. It has been sent to {licenseApplication.CurrentApprovalLevel.Department.Name} department for further review.";
             BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(emailTo, "License Application Status", emailBody, false));
 
-            emailBody = $"You license application is under review and currently it has been sent to {licenseApplication.CurrentApprovalLevel.Department.Name} department for review.";
+            emailBody = $"Your license application is under review and currently it has been sent to {licenseApplication.CurrentApprovalLevel.Department.Name} department for review.";
             BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(licenseApplication.CreatedBy.Email, "License Application Status", emailBody, false));
 
         }
