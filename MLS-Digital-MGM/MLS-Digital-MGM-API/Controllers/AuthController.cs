@@ -27,7 +27,7 @@ namespace MLS_Digital_MGM_API.Controllers
     {
         private readonly IRepositoryManager _repositoryManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly IEmailService _emailService; 
+        private readonly IEmailService _emailService;
         public IConfiguration Configuration { get; }
 
         public AuthController(IRepositoryManager repositoryManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration, IEmailService emailService)
@@ -90,7 +90,7 @@ namespace MLS_Digital_MGM_API.Controllers
         [HttpPost]
         [AllowAnonymous]
         [Route("Register")]
-        public async Task<ActionResult> Register([FromBody]RegisterDTO model)
+        public async Task<ActionResult> Register([FromBody] RegisterDTO model)
         {
             // Validate the model
             if (!ModelState.IsValid)
@@ -98,6 +98,13 @@ namespace MLS_Digital_MGM_API.Controllers
 
             // Generate a random PIN
             int pin = Lambda.RandomNumber();
+
+            bool emailConfirmed = false;
+
+            if (string.Equals(model.RoleName, "Member", StringComparison.CurrentCultureIgnoreCase))
+            {
+                emailConfirmed = true;
+            }
 
             var user = new ApplicationUser
             {
@@ -107,6 +114,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 Gender = model.Gender,
                 UserName = model.Email,
                 Email = model.Email,
+                EmailConfirmed = emailConfirmed,
                 PhoneNumber = model.PhoneNumber,
                 IdentityNumber = model.IdentityNumber,
                 IdentityExpiryDate = model.IdentityExpiryDate,
@@ -144,12 +152,6 @@ namespace MLS_Digital_MGM_API.Controllers
                     ModelState.AddModelError("Role", "Failed to associate the user with the specified role.");
                     return BadRequest(ModelState);
                 }
-
-                if (string.Equals(model.RoleName, "Member", StringComparison.CurrentCultureIgnoreCase))
-                {
-                    user.EmailConfirmed = true;
-                    await _repositoryManager.UserRepository.UpdateAsync(user);
-                }
             }
 
             // Send login details email
@@ -172,11 +174,11 @@ namespace MLS_Digital_MGM_API.Controllers
             Best regards,
             Malawi Law Society";
             var passwordEmailResult = BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(user.Email, "Login Details", passwordBody, false));
-          
+
             // // Send OTP email
             // string pinBody = $"An account has been created on Malawi Law Society. Your OTP is {pin} <br /> Enter the OTP to activate your account <br /> You can activate your account by clicking <a href='https://mls.sparcsystems.africa'>here</a>";
             // var pinEmailResult = BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(user.Email, "Login Details", pinBody));
-           
+
 
             return Ok(user);
         }
@@ -198,7 +200,7 @@ namespace MLS_Digital_MGM_API.Controllers
             var token = tokenHandler.CreateToken(tokenDescriptor);
             var tokenString = tokenHandler.WriteToken(token);
 
-            var role = _repositoryManager.UserRepository.GetUserRoleByUserId( user.Id);
+            var role = _repositoryManager.UserRepository.GetUserRoleByUserId(user.Id);
             var roleData = await _repositoryManager.RoleRepository.GetRoleByIdAsync(role.RoleId);
 
             // login DTO
@@ -213,7 +215,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 TokenType = "bearer",
                 DateOfBirth = user.DateOfBirth,
                 TokenExpiryMinutes = (DateTime)tokenDescriptor.Expires,
-                ProfilePicture = user.ProfilePictures?.FirstOrDefault()?.FileName == null ? null : 
+                ProfilePicture = user.ProfilePictures?.FirstOrDefault()?.FileName == null ? null :
                     $"{Lambda.http}://{HttpContext.Request.Host}{Configuration["APISettings:API_Prefix"]}/Uploads/UserProfilePictures/{user.ProfilePictures.FirstOrDefault()?.FileName}",
 
             };
@@ -256,7 +258,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
             await _repositoryManager.UnitOfWork.CommitAsync();
 
-            return Ok(new {isSuccess=true, response = "Account confirmed", user = user });
+            return Ok(new { isSuccess = true, response = "Account confirmed", user = user });
 
         }
         [HttpGet]
@@ -290,9 +292,9 @@ namespace MLS_Digital_MGM_API.Controllers
             string PinBody = "Your OTP for Malawi Law Society Account is " + pin + " <br /> Enter the OTP, email address and the new password to reset your account";
             var pinEmailResult = BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(user.Email, "Account Reset Details", PinBody, false));
 
-           
 
-            return Json( new {isSuccess=true, message="Check your email for the pin"});
+
+            return Json(new { isSuccess = true, message = "Check your email for the pin" });
 
 
         }
@@ -333,7 +335,7 @@ namespace MLS_Digital_MGM_API.Controllers
             // If the password reset is successful, return a success message
             if (result.Succeeded)
             {
-               return Json(new {isSuccess=true, message = "Password reset successfully" });
+                return Json(new { isSuccess = true, message = "Password reset successfully" });
             }
 
             // If the password reset fails, return an error
@@ -379,15 +381,16 @@ namespace MLS_Digital_MGM_API.Controllers
             // If the password reset is successful, return a success message
             if (result.Succeeded)
             {
-                 return Json(new { isSuccess=true, message = "Password  has been reset successfully" });
+                return Json(new { isSuccess = true, message = "Password  has been reset successfully" });
             }
-            else{
+            else
+            {
                 // If the password reset fails, return an error
                 ModelState.AddModelError("GeneralError", "Failed to reset password");
                 return BadRequest(ModelState);
             }
 
-           
+
         }
 
         //generate forgot password link
@@ -423,20 +426,20 @@ namespace MLS_Digital_MGM_API.Controllers
             var pinEmailResult = BackgroundJob.Enqueue(() => _emailService.SendMailWithKeyVarReturn(user.Email, "Reset Password", body, false));
 
             //return  json with message
-            return Json(new { isSuccess=true, message = "Password reset link was sent to your email successfully" });
+            return Json(new { isSuccess = true, message = "Password reset link was sent to your email successfully" });
 
         }
 
         [HttpPost]
         [Route("ChangePassword")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordModel model)
-        {   
-           
+        {
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            
+
             var user = await this._repositoryManager.UserRepository.FindByEmailAsync(model.Email);
             if (user == null)
             {

@@ -73,8 +73,178 @@ namespace MLS_Digital_MGM_API.Controllers
                     PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
                     PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
                     SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
-                    SortColumn = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumn : null,
-                    SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null,
+                    SortColumn = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumn : "dateSubmitted",
+                    SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : "desc",
+                    Includes = new Expression<Func<LicenseApplication, object>>[] {
+                        p => p.YearOfOperation,
+                        p => p.Member,
+                        p => p.CurrentApprovalLevel,
+                        p => p.License
+                    },
+                    CreatedById = string.Equals(currentRole, "member", StringComparison.OrdinalIgnoreCase) ? CreatedById : null,
+                };
+
+                var licenseApplicationsPaged = await _repositoryManager.LicenseApplicationRepository.GetPagedAsync(pagingParameters);
+
+                if (licenseApplicationsPaged == null || !licenseApplicationsPaged.Any())
+                {
+                    if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                    {
+                        var draw = dataTableParams.Draw;
+                        return Json(new
+                        {
+                            draw,
+                            recordsFiltered = 0,
+                            recordsTotal = 0,
+                            data = Enumerable.Empty<ReadLicenseApplicationDTO>()
+                        });
+                    }
+                    return Ok(Enumerable.Empty<ReadLicenseApplicationDTO>()); // Return empty list
+                }
+
+                // Map the Roles to a list of ReadFirmDTOs
+                var licenseApplicationFirms = _mapper.Map<List<ReadLicenseApplicationDTO>>(licenseApplicationsPaged);
+
+                // Return datatable JSON if the request came from a datatable
+                if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                {
+                    var draw = dataTableParams.Draw;
+                    var resultTotalFiltred = licenseApplicationFirms.Count;
+                    var totalRecords = await _repositoryManager.LicenseApplicationRepository.CountAsync(pagingParameters);
+
+
+                    return Json(new
+                    {
+                        draw,
+                        recordsFiltered = totalRecords,
+                        recordsTotal = totalRecords,
+                        data = licenseApplicationFirms.ToList() // Materialize the enumerable
+                    });
+                }
+
+                // Return an Ok result with the mapped Roles
+                return Ok(licenseApplicationFirms);
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpGet("denied/paged")]
+        public async Task<IActionResult> GetDeniedLicenseApplications(int pageNumber = 1, int pageSize = 10)
+        {
+            try
+            {
+                // Create a new DataTablesParameters object
+                var dataTableParams = new DataTablesParameters();
+
+                string username = _httpContextAccessor.HttpContext.User.Identity.Name;
+
+                // get user id from username
+                var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
+                string CreatedById = user.Id;
+
+                string currentRole = Lambda.GetCurrentUserRole(_repositoryManager, (user.Id));
+
+                var pagingParameters = new PagingParameters<LicenseApplication>();
+
+
+
+                // Check if the user is secretariat and approve the application if so
+                pagingParameters = new PagingParameters<LicenseApplication>
+                {
+                    Predicate = u => u.Status != Lambda.Deleted && u.ApplicationStatus == Lambda.Denied,
+                    PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
+                    PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
+                    SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
+                    SortColumn = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumn : "dateSubmitted",
+                    SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : "desc",
+                    Includes = new Expression<Func<LicenseApplication, object>>[] {
+                        p => p.YearOfOperation,
+                        p => p.Member,
+                        p => p.CurrentApprovalLevel,
+                        p => p.License
+                    },
+                    CreatedById = string.Equals(currentRole, "member", StringComparison.OrdinalIgnoreCase) ? CreatedById : null,
+                };
+
+                var licenseApplicationsPaged = await _repositoryManager.LicenseApplicationRepository.GetPagedAsync(pagingParameters);
+
+                if (licenseApplicationsPaged == null || !licenseApplicationsPaged.Any())
+                {
+                    if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                    {
+                        var draw = dataTableParams.Draw;
+                        return Json(new
+                        {
+                            draw,
+                            recordsFiltered = 0,
+                            recordsTotal = 0,
+                            data = Enumerable.Empty<ReadLicenseApplicationDTO>()
+                        });
+                    }
+                    return Ok(Enumerable.Empty<ReadLicenseApplicationDTO>()); // Return empty list
+                }
+
+                // Map the Roles to a list of ReadFirmDTOs
+                var licenseApplicationFirms = _mapper.Map<List<ReadLicenseApplicationDTO>>(licenseApplicationsPaged);
+
+                // Return datatable JSON if the request came from a datatable
+                if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                {
+                    var draw = dataTableParams.Draw;
+                    var resultTotalFiltred = licenseApplicationFirms.Count;
+                    var totalRecords = await _repositoryManager.LicenseApplicationRepository.CountAsync(pagingParameters);
+
+
+                    return Json(new
+                    {
+                        draw,
+                        recordsFiltered = totalRecords,
+                        recordsTotal = totalRecords,
+                        data = licenseApplicationFirms.ToList() // Materialize the enumerable
+                    });
+                }
+
+                // Return an Ok result with the mapped Roles
+                return Ok(licenseApplicationFirms);
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpGet("approved/paged")]
+        public async Task<IActionResult> GetApprovedLicenseApplications(int pageNumber = 1, int pageSize = 10)
+        {
+            try
+            {
+                // Create a new DataTablesParameters object
+                var dataTableParams = new DataTablesParameters();
+
+                string username = _httpContextAccessor.HttpContext.User.Identity.Name;
+
+                // get user id from username
+                var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
+                string CreatedById = user.Id;
+
+                string currentRole = Lambda.GetCurrentUserRole(_repositoryManager, (user.Id));
+
+                var pagingParameters = new PagingParameters<LicenseApplication>();
+
+
+                pagingParameters = new PagingParameters<LicenseApplication>
+                {
+                    Predicate = u => u.Status != Lambda.Deleted && u.ApplicationStatus == Lambda.Approved,
+                    PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
+                    PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
+                    SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
+                    SortColumn = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumn : "dateSubmitted",
+                    SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : "desc",
                     Includes = new Expression<Func<LicenseApplication, object>>[] {
                         p => p.YearOfOperation,
                         p => p.Member,
