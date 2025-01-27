@@ -68,7 +68,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 // Check if the user is secretariat and approve the application if so
                 pagingParameters = new PagingParameters<LicenseApplication>
                 {
-                    Predicate = u => u.Status != Lambda.Deleted && ((!string.Equals(currentRole, "member", StringComparison.OrdinalIgnoreCase) && u.ApplicationStatus != Lambda.Draft && u.ApplicationStatus != Lambda.Approved) ||
+                    Predicate = u => u.Status != Lambda.Deleted && ((!string.Equals(currentRole, "member", StringComparison.OrdinalIgnoreCase) && u.ApplicationStatus != Lambda.Draft && u.ApplicationStatus != Lambda.Approved && u.ApplicationStatus != Lambda.Denied) ||
                         (string.Equals(currentRole, "member", StringComparison.OrdinalIgnoreCase) && u.CreatedById == user.Id)),
                     PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
                     PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
