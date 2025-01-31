@@ -464,16 +464,15 @@ namespace MLS_Digital_MGM_API.Controllers
                 }
                 else
                 {
-                    // Save attachments if any
-                    if (formFileProperties.Any())
+                    existingApplication = await _repositoryManager.LicenseApplicationRepository.GetByIdAsync(application.Id);
+
+                    if (existingApplication != null)
                     {
-
-                        existingApplication = await this._repositoryManager.LicenseApplicationRepository.GetByIdAsync(application.Id);
-
-                        if (existingApplication != null)
+                        // Save attachments if any
+                        if (formFileProperties.Any())
                         {
 
-                            //get attachments from the cpdTrainingDTO that have at least greater than zero kb
+                            //get attachments from the LicenseApplicationDTO that have at least greater than zero kb
                             var attachmentsToUpdate = formFileProperties.Where(a => a.Length > 0).ToList();
 
                             //save attachments
@@ -486,33 +485,37 @@ namespace MLS_Digital_MGM_API.Controllers
 
                             // Add fresh list of attachments
                             existingApplication.Attachments.AddRange(attachmentsList);
-
-                            if (hasPreviousApplication is false)
-                            {
-                                //check if the current member has a license
-                                var license = await _repositoryManager.LicenseRepository.GetLicenseByMemberId(currentMember.Id);
-                                if (license is null)
-                                {
-                                    existingApplication.FirstApplicationForLicense = true;
-                                    existingApplication.RenewedLicensePreviousYear = false;
-
-                                }
-                                else
-                                {
-                                    existingApplication.FirstApplicationForLicense = false;
-                                    existingApplication.RenewedLicensePreviousYear = true;
-                                }
-                            }
-
-                            //map update to existing application
-                            _mapper.Map(licenseApplicationDTO, existingApplication);
-
-
-
-
-                            // Update the application
-                            await _repositoryManager.LicenseApplicationRepository.UpdateAsync(existingApplication);
                         }
+
+                        if (hasPreviousApplication is false)
+                        {
+                            //check if the current member has a license
+                            var license = await _repositoryManager.LicenseRepository.GetLicenseByMemberId(currentMember.Id);
+                            if (license is null)
+                            {
+                                existingApplication.FirstApplicationForLicense = true;
+                                existingApplication.RenewedLicensePreviousYear = false;
+
+                            }
+                            else
+                            {
+                                existingApplication.FirstApplicationForLicense = false;
+                                existingApplication.RenewedLicensePreviousYear = true;
+                            }
+                        }
+
+                        //map update to existing application
+                        //_mapper.Map(application, existingApplication);
+
+                        if (!licenseApplicationDTO.ActionType.Equals(Lambda.Draft, StringComparison.CurrentCultureIgnoreCase))
+                        {
+                            existingApplication.DateSubmitted = DateTime.Now;
+                            existingApplication.ApplicationStatus = Lambda.Pending;
+                        }
+
+
+                        // Update the application
+                        await _repositoryManager.LicenseApplicationRepository.UpdateAsync(existingApplication);
                     }
                 }
 
