@@ -69,36 +69,37 @@ namespace DataStore.Persistence.SQLRepositories
         }
 
         
-        public async Task<int> GetLicensedMembersCountAsync()
+        public async Task<int> GetLicensedMembersCountAsync(int yearOfOperationId)
         {
+
             return await _context.Members
-                .CountAsync(m => _context.Licenses.Any(l => l.MemberId == m.Id) && m.Status != Lambda.Deleted);
+                .CountAsync(m => _context.Licenses.Any(l => l.MemberId == m.Id && l.YearOfOperationId == yearOfOperationId && l.Status == Lambda.Active) && m.Status != Lambda.Deleted);
         }
 
         //get unlicensed members count
-        public async Task<int> GetUnlicensedMembersCountAsync()
+        public async Task<int> GetUnlicensedMembersCountAsync(int yearOfOperationId)
         {
             return await _context.Members
-                .CountAsync(m => !_context.Licenses.Any(l => l.MemberId == m.Id) && m.Status != Lambda.Deleted);
+                .CountAsync(m => !_context.Licenses.Any(l => l.MemberId == m.Id && l.Status == Lambda.Active && l.YearOfOperationId == yearOfOperationId) && m.Status != Lambda.Deleted);
         }
 
-        public async Task<IEnumerable<Member>> GetUnlicensedMembersAsync()
+        public async Task<IEnumerable<Member>> GetUnlicensedMembersAsync(int yearOfOperationId)
         {
             return await _context.Members
                 .Include(m => m.User)
                 .Include(m => m.Customer)
-                .Where(m => !_context.Licenses.Any(l => l.MemberId == m.Id) && m.Status != Lambda.Deleted)
+                .Where(m => !_context.Licenses.Any(l => l.MemberId == m.Id && l.Status == Lambda.Active && l.YearOfOperationId == yearOfOperationId) && m.Status != Lambda.Deleted)
                 .ToListAsync();
         }
 
         
-        public async Task<IEnumerable<Member>> GetLicensedMembersAsync()
+        public async Task<IEnumerable<Member>> GetLicensedMembersAsync(int yearOfOperationId)
         {
             return await _context.Members
                 .Include(m => m.User)
                 .Include(m => m.Customer)
                 .Include(m => m.Firm)
-                .Where(m => _context.Licenses.Any(l => l.MemberId == m.Id) && m.Status != Lambda.Deleted)
+                .Where(m => _context.Licenses.Any(l => l.MemberId == m.Id && l.Status == Lambda.Active && l.YearOfOperationId == yearOfOperationId) && m.Status != Lambda.Deleted)
                 .ToListAsync();
         }
 

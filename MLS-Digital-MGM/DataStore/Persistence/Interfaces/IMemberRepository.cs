@@ -19,10 +19,10 @@ namespace DataStore.Persistence.Interfaces;
      Task<Member?> GetByIdAsync(int id);
 
      Task<int> GetMembersCountAsync();
-     Task<int> GetLicensedMembersCountAsync();
-     Task<int> GetUnlicensedMembersCountAsync();
-     Task<IEnumerable<Member>> GetLicensedMembersAsync();
-     Task<IEnumerable<Member>> GetUnlicensedMembersAsync();
+     Task<int> GetLicensedMembersCountAsync(int year);
+     Task<int> GetUnlicensedMembersCountAsync(int year);
+     Task<IEnumerable<Member>> GetLicensedMembersAsync(int year);
+     Task<IEnumerable<Member>> GetUnlicensedMembersAsync(int year);
      Task<IEnumerable<Member>> GetMembersByFirmIdAsync(int firmId);
   
   }

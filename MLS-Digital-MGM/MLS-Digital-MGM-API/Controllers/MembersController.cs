@@ -344,7 +344,9 @@ namespace MLS_Digital_MGM_API.Controllers
         {
             try
             {
-                var count = await _repositoryManager.MemberRepository.GetLicensedMembersCountAsync();
+                //get current year of operation
+                var yearOfOperation = await _repositoryManager.YearOfOperationRepository.GetCurrentYearOfOperation();
+                var count = await _repositoryManager.MemberRepository.GetLicensedMembersCountAsync(yearOfOperation.Id);
 
                 return Ok(count);
             }
@@ -361,7 +363,9 @@ namespace MLS_Digital_MGM_API.Controllers
         {
             try
             {
-                var count = await _repositoryManager.MemberRepository.GetUnlicensedMembersCountAsync();
+                //get current year of operation
+                var yearOfOperation = await _repositoryManager.YearOfOperationRepository.GetCurrentYearOfOperation();
+                var count = await _repositoryManager.MemberRepository.GetUnlicensedMembersCountAsync(yearOfOperation.Id);
 
                 return Ok(count);
             }
@@ -377,11 +381,13 @@ namespace MLS_Digital_MGM_API.Controllers
         {
             try
             {
+                //get current year of operation
+                var yearOfOperation = await _repositoryManager.YearOfOperationRepository.GetCurrentYearOfOperation();
                 var dataTableParams = new DataTablesParameters();
 
                 var pagingParameters = new PagingParameters<Member>
                 {
-                    Predicate = u => u.Status != Lambda.Deleted && _context.Licenses.Any(l => l.MemberId == u.Id),
+                    Predicate = u => u.Status != Lambda.Deleted && _context.Licenses.Any(l => l.MemberId == u.Id && l.Status == Lambda.Active && l.YearOfOperationId == yearOfOperation.Id),
                     PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
                     PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
                     SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
@@ -444,11 +450,13 @@ namespace MLS_Digital_MGM_API.Controllers
         {
             try
             {
+                //get current year of operation
+                var yearOfOperation = await _repositoryManager.YearOfOperationRepository.GetCurrentYearOfOperation();
                 var dataTableParams = new DataTablesParameters();
 
                 var pagingParameters = new PagingParameters<Member>
                 {
-                    Predicate = u => u.Status != Lambda.Deleted && !_context.Licenses.Any(l => l.MemberId == u.Id),
+                    Predicate = u => u.Status != Lambda.Deleted && !_context.Licenses.Any(l => l.MemberId == u.Id && l.Status == Lambda.Active && l.YearOfOperationId == yearOfOperation.Id),
                     PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
                     PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
                     SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
