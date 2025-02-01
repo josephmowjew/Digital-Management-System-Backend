@@ -36,7 +36,7 @@ public class LicenseGenerationService : ILicenseGenerationService
         if (yearOfOperation == null) throw new ArgumentException("No valid year of operation found");
 
         // Get all unlicensed members
-        var members = await _repositoryManager.MemberRepository.GetUnlicensedMembersAsync();
+        var members = await _repositoryManager.MemberRepository.GetUnlicensedMembersAsync(yearOfOperation.Id);
         
         // Iterate through each member to generate licenses
         foreach (var member in members)
