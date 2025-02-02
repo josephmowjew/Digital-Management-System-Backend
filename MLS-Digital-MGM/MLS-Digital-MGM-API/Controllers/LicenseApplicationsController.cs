@@ -395,10 +395,11 @@ namespace MLS_Digital_MGM_API.Controllers
                 {
                     application.MemberId = currentMember.Id;
 
-                }
+                    currentMember.FirmId = licenseApplicationDTO.FirmId;
 
-                currentMember.FirmId = licenseApplicationDTO.FirmId;
-                await _repositoryManager.MemberRepository.UpdateAsync(currentMember);
+                    await _repositoryManager.MemberRepository.UpdateAsync(currentMember);
+
+                }
 
                 //check if this is first application 
                 var hasPreviousApplication = await _repositoryManager.LicenseApplicationRepository.HasPreviousApplicationsAsync(currentMember.Id);
@@ -423,10 +424,10 @@ namespace MLS_Digital_MGM_API.Controllers
                 //create TODO code to check and set if the application has been created outside the allowed window
 
 
-                // Check if a license application has been made in the same year and it is pending or hasn't been approved yet
+                // Check if a license application has been made in the same year and it is under review or hasn't been approved yet
                 var existingApplication = await _repositoryManager.LicenseApplicationRepository.GetAsync(
                     a => a.YearOfOperationId == currentYearOfOperation.Id && a.MemberId == currentMember.Id &&
-                    (a.ApplicationStatus == Lambda.Pending || a.ApplicationStatus == Lambda.Approved)
+                    (a.ApplicationStatus == Lambda.UnderReview || a.ApplicationStatus == Lambda.Approved)
                 );
 
 
@@ -505,7 +506,7 @@ namespace MLS_Digital_MGM_API.Controllers
                         }
 
                         //map update to existing application
-                        //_mapper.Map(application, existingApplication);
+                        _mapper.Map(licenseApplicationDTO, existingApplication);
 
                         if (!licenseApplicationDTO.ActionType.Equals(Lambda.Draft, StringComparison.CurrentCultureIgnoreCase))
                         {

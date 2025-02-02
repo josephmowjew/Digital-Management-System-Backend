@@ -26,6 +26,10 @@ namespace DataStore.Core.DTOs.LicenseApplication
         public IFormFile? MadeContributionToFidelityFundAttachment { get; set; }
         [StringLength(maximumLength: 250)]
         public string? ExplanationForNoContributionToFidelityFund { get; set; }
+        public bool MadeContributionToSocialWelfare { get; set; }
+        [StringLength(maximumLength:250)]
+        public string? ExplanationForNoContributionToSocialWelfare { get; set; }
+        public IFormFile? MadeContributionToSocialWelfareAttachment { get; set; }
         public bool RemittedSocietysLevy { get; set; }
         public IFormFile? RemittedSocietysLevyAttachment { get; set; }
         [StringLength(maximumLength: 250)]

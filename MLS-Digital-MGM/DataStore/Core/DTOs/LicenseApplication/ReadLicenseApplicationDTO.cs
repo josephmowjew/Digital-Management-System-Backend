@@ -54,7 +54,7 @@ namespace DataStore.Core.DTOs.LicenseApplication
         public string ExplanationForNoComplianceWithPenalties { get; set; }
         public bool CertificateOfAdmission { get; set; }
         public string ExplanationForNotSubmittingCertificateOfAdmission { get; set; }
-
-
+        public bool MadeContributionToSocialWelfare { get; set; }
+        public string? ExplanationForNoContributionToSocialWelfare { get; set; }
     }
 }

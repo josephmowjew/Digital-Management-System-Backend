@@ -37,6 +37,9 @@ namespace DataStore.Core.Models
         public bool ObtainedLeaveToRenewLicenseOutOfTime { get; set; }
         public bool PaidAnnualSubscriptionToSociety { get; set; }
         public string? ExplanationForNoAnnualSubscriptionToSociety { get; set; }
+        public bool MadeContributionToSocialWelfare { get; set; }
+        [StringLength(maximumLength:250)]
+        public string? ExplanationForNoContributionToSocialWelfare { get; set; }
         public bool MadeContributionToFidelityFund { get; set; }
         [StringLength(maximumLength:250)]
         public string? ExplanationForNoContributionToFidelityFund { get; set; }

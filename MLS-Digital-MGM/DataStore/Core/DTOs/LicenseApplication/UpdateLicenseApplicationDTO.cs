@@ -16,6 +16,7 @@ namespace DataStore.Core.DTOs.LicenseApplication
         public int CurrentApprovalLevelID { get; set; }
 
         public int MemberId { get; set; }
+        public int? FirmId { get; set; }
 
         public bool FirstApplicationForLicense { get; set; }
         public bool RenewedLicensePreviousYear { get; set; }
@@ -54,5 +55,8 @@ namespace DataStore.Core.DTOs.LicenseApplication
         public bool CertificateOfAdmission { get; set; }
         [StringLength(maximumLength: 250)]
         public string? ExplanationForNotSubmittingCertificateOfAdmission { get; set; }
+        public bool MadeContributionToSocialWelfare { get; set; }
+        [StringLength(maximumLength:250)]
+        public string? ExplanationForNoContributionToSocialWelfare { get; set; }
     }
 }
