@@ -50,7 +50,171 @@ public class FirmsController : Controller
 
             var pagingParameters = new PagingParameters<Firm>
             {
-                Predicate = u => u.Status != Lambda.Deleted,
+                Predicate = u => u.Status == Lambda.Active,
+                PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
+                PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
+                SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
+                SortColumn = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumn : null,
+                SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null,
+                Includes = new Expression<Func<Firm, object>>[] {
+                        f => f.InstitutionType,
+                    },
+            };
+
+            // Fetch paginated firms using the FirmRepository
+            var pagedFirms = await _repositoryManager.FirmRepository.GetPagedAsync(pagingParameters);
+
+            // Check if roles exist
+            if (pagedFirms == null || !pagedFirms.Any())
+            {
+                if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                {
+                    var draw = dataTableParams.Draw;
+                    return Json(new
+                    {
+                        draw,
+                        recordsFiltered = 0,
+                        recordsTotal = 0,
+                        data = Enumerable.Empty<ReadFirmDTO>()
+                    });
+                }
+                return Ok(Enumerable.Empty<ReadFirmDTO>()); // Return empty list
+            }
+
+            // Map the Roles to a list of ReadFirmDTOs
+            var mappedFirms = _mapper.Map<List<ReadFirmDTO>>(pagedFirms);
+
+            // Return datatable JSON if the request came from a datatable
+            if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+            {
+                var draw = dataTableParams.Draw;
+                var resultTotalFiltred = mappedFirms.Count;
+                var totalRecords = await _repositoryManager.FirmRepository.CountAsync(pagingParameters);
+
+
+                return Json(new
+                {
+                    draw,
+                    recordsFiltered = totalRecords,
+                    recordsTotal = totalRecords,
+                    data = mappedFirms.ToList() // Materialize the enumerable
+                });
+            }
+
+
+            // Return an Ok result with the mapped Roles
+            return Ok(mappedFirms);
+
+        }
+        catch (Exception ex)
+        {
+            await _errorLogService.LogErrorAsync(ex);
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    [HttpGet("pending/paged")]
+    public async Task<IActionResult> GetPendingFirms(int pageNumber = 1, int pageSize = 10)
+    {
+        try
+        {
+
+            string username = _httpContextAccessor.HttpContext.User.Identity.Name;
+
+            //get user id from username
+            var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
+            string CreatedById = user.Id;
+
+
+            string currentRole = Lambda.GetCurrentUserRole(_repositoryManager, user.Id);
+            // Create a new DataTablesParameters object
+            var dataTableParams = new DataTablesParameters();
+
+            var pagingParameters = new PagingParameters<Firm>
+            {
+                Predicate = u => u.Status == Lambda.Pending,
+                PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
+                PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
+                SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
+                SortColumn = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumn : null,
+                SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null,
+                Includes = new Expression<Func<Firm, object>>[] {
+                        f => f.InstitutionType,
+                    },
+            };
+
+            // Fetch paginated firms using the FirmRepository
+            var pagedFirms = await _repositoryManager.FirmRepository.GetPagedAsync(pagingParameters);
+
+            // Check if roles exist
+            if (pagedFirms == null || !pagedFirms.Any())
+            {
+                if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                {
+                    var draw = dataTableParams.Draw;
+                    return Json(new
+                    {
+                        draw,
+                        recordsFiltered = 0,
+                        recordsTotal = 0,
+                        data = Enumerable.Empty<ReadFirmDTO>()
+                    });
+                }
+                return Ok(Enumerable.Empty<ReadFirmDTO>()); // Return empty list
+            }
+
+            // Map the Roles to a list of ReadFirmDTOs
+            var mappedFirms = _mapper.Map<List<ReadFirmDTO>>(pagedFirms);
+
+            // Return datatable JSON if the request came from a datatable
+            if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+            {
+                var draw = dataTableParams.Draw;
+                var resultTotalFiltred = mappedFirms.Count;
+                var totalRecords = await _repositoryManager.FirmRepository.CountAsync(pagingParameters);
+
+
+                return Json(new
+                {
+                    draw,
+                    recordsFiltered = totalRecords,
+                    recordsTotal = totalRecords,
+                    data = mappedFirms.ToList() // Materialize the enumerable
+                });
+            }
+
+
+            // Return an Ok result with the mapped Roles
+            return Ok(mappedFirms);
+
+        }
+        catch (Exception ex)
+        {
+            await _errorLogService.LogErrorAsync(ex);
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    [HttpGet("denied/paged")]
+    public async Task<IActionResult> GetDeniedFirms(int pageNumber = 1, int pageSize = 10)
+    {
+        try
+        {
+
+            string username = _httpContextAccessor.HttpContext.User.Identity.Name;
+
+            //get user id from username
+            var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
+            string CreatedById = user.Id;
+
+
+            string currentRole = Lambda.GetCurrentUserRole(_repositoryManager, user.Id);
+            // Create a new DataTablesParameters object
+            var dataTableParams = new DataTablesParameters();
+
+            var pagingParameters = new PagingParameters<Firm>
+            {
+                Predicate = u => u.Status == Lambda.Denied,
                 PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
                 PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
                 SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
