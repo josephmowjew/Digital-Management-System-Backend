@@ -62,7 +62,110 @@ namespace MLS_Digital_MGM_API.Controllers
 
                 pagingParameters = new PagingParameters<ProBonoApplication>
                 {
-                    Predicate = u => u.Status != Lambda.Deleted && (string.Equals(currentRole, "secretariat", StringComparison.OrdinalIgnoreCase) || string.Equals(currentRole, "ceo", StringComparison.OrdinalIgnoreCase) || string.Equals(currentRole, "president", StringComparison.OrdinalIgnoreCase) || string.Equals(currentRole, "honarary secretary", StringComparison.OrdinalIgnoreCase) || u.CreatedById == user.Id) && u.ApplicationStatus != Lambda.Approved,
+                    Predicate = u => u.Status != Lambda.Deleted && u.ApplicationStatus != Lambda.Denied && (string.Equals(currentRole, "secretariat", StringComparison.OrdinalIgnoreCase) || string.Equals(currentRole, "ceo", StringComparison.OrdinalIgnoreCase) || string.Equals(currentRole, "president", StringComparison.OrdinalIgnoreCase) || string.Equals(currentRole, "honarary secretary", StringComparison.OrdinalIgnoreCase) || u.CreatedById == user.Id) && u.ApplicationStatus != Lambda.Approved,
+                    PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
+                    PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
+                    SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,
+                    SortColumn = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumn : null,
+                    SortDirection = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SortColumnAscDesc : null,
+                    Includes = new Expression<Func<ProBonoApplication, object>>[] {
+                        p => p.YearOfOperation,
+                        p => p.ProbonoClient,
+                        p => p.CreatedBy,
+                        p => p.Attachments
+                    },
+                    CreatedById = string.Equals(currentRole, "secretariat", StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(currentRole, "ceo", StringComparison.OrdinalIgnoreCase) ? null : CreatedById,
+
+                };
+                
+
+                
+                var proBonoApplicationspaged = await _repositoryManager.ProBonoApplicationRepository.GetPagedAsync(pagingParameters);
+    
+                if (proBonoApplicationspaged == null || !proBonoApplicationspaged.Any())
+                {
+                    if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                    {
+                       
+                        var draw = dataTableParams.Draw;
+                        return Json(new
+                        {
+                            draw,
+                            recordsFiltered = 0,
+                            recordsTotal = 0,
+                            data = Enumerable.Empty<ReadProBonoApplicationDTO>()
+                        });
+                    }
+                    return Ok(Enumerable.Empty<ReadProBonoApplicationDTO>()); // Return empty list
+
+                }
+
+                // Map the Roles to a list of ReadFirmDTOs
+                var probonoapplication = _mapper.Map<List<ReadProBonoApplicationDTO>>(proBonoApplicationspaged);
+
+                foreach (var probono in probonoapplication)
+                {
+                    foreach (var attachment in probono.Attachments)
+                    {
+                        string attachmentTypeName = attachment.AttachmentType.Name;
+
+
+                        string newfilePath = Path.Combine("Uploads/ProBonoApplicationAttachments/", attachment.FileName);
+
+                        attachment.FilePath = newfilePath;
+                    }
+                }
+
+                // Return datatable JSON if the request came from a datatable
+                if (dataTableParams.LoadFromRequest(_httpContextAccessor))
+                {
+                    var draw = dataTableParams.Draw;
+                    var resultTotalFiltred = probonoapplication.Count;
+                    var totalRecords = await _repositoryManager.ProBonoApplicationRepository.CountAsync(pagingParameters);
+
+                    return Json(new
+                    {
+                        draw,
+                        recordsFiltered = totalRecords,
+                        recordsTotal = totalRecords,
+                        data = probonoapplication.ToList() // Materialize the enumerable
+                    });
+                }
+
+
+                // Return an Ok result with the mapped Roles
+                return Ok(probonoapplication);
+    
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpGet("denied/paged")]
+        public async Task<IActionResult> GetDeniedProBonoApplications(int pageNumber = 1, int pageSize = 10)
+        {
+            try
+            {   // Create a new DataTablesParameters object
+                var dataTableParams = new DataTablesParameters();
+
+                string username = _httpContextAccessor.HttpContext.User.Identity.Name;
+
+                //get user id from username
+                var user = await _repositoryManager.UserRepository.FindByEmailAsync(username);
+                string CreatedById = user.Id;
+
+
+                string currentRole  = Lambda.GetCurrentUserRole(_repositoryManager,user.Id);
+                
+                var pagingParameters = new PagingParameters<ProBonoApplication>();
+
+                pagingParameters = new PagingParameters<ProBonoApplication>
+                {
+                    Predicate = u => u.Status != Lambda.Deleted && u.ApplicationStatus == Lambda.Denied && (string.Equals(currentRole, "secretariat", StringComparison.OrdinalIgnoreCase) || string.Equals(currentRole, "ceo", StringComparison.OrdinalIgnoreCase) || string.Equals(currentRole, "president", StringComparison.OrdinalIgnoreCase) || string.Equals(currentRole, "honarary secretary", StringComparison.OrdinalIgnoreCase) || u.CreatedById == user.Id) && u.ApplicationStatus != Lambda.Approved,
                     PageNumber = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageNumber : pageNumber,
                     PageSize = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.PageSize : pageSize,
                     SearchTerm = dataTableParams.LoadFromRequest(_httpContextAccessor) ? dataTableParams.SearchValue : null,

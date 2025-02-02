@@ -559,6 +559,7 @@ namespace MLS_Digital_MGM_API.Controllers
         }
 
         [AutomaticRetry(Attempts = 3)]
+        [NonAction]
         public async Task ProcessBulkRegistration(string filePath, List<ApplicationUser> secretariatUsers)
         {
             var result = new BulkRegistrationResult();
@@ -747,6 +748,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 }
             }
         }
+        [NonAction]
         public async Task SendCompletionEmailAsync(string? email, BulkRegistrationResult result)
         {
             if (string.IsNullOrWhiteSpace(email)) return;
@@ -778,6 +780,7 @@ namespace MLS_Digital_MGM_API.Controllers
             await _emailService.SendMailWithKeyVarReturn(email, subject, body);
         }
 
+        [NonAction]
         public async Task SendErrorEmailAsync(string? email, string errorMessage)
         {
             if (string.IsNullOrWhiteSpace(email)) return;
@@ -961,6 +964,7 @@ namespace MLS_Digital_MGM_API.Controllers
             return missingFields;
         }
 
+        [NonAction]
         public async Task SendMissingFieldsEmailAsync(string email, List<string> missingFields)
         {
             var subject = "Please Update Your Member Profile";
@@ -977,7 +981,7 @@ namespace MLS_Digital_MGM_API.Controllers
 
             await _emailService.SendMailWithKeyVarReturn(email, subject, body);
         }
-
+        [NonAction]
         public async Task SendWelcomeEmailAsync(ApplicationUser user, string password)
         {
             // Send login details email
@@ -1079,6 +1083,7 @@ namespace MLS_Digital_MGM_API.Controllers
         }
 
         [AutomaticRetry(Attempts = 3)]
+        [NonAction]
         public async Task ProcessEmailQueue()
         {
             await _emailService.ProcessEmailQueueAsync();
