@@ -258,7 +258,7 @@ namespace MLS_Digital_MGM_API.Controllers
         {
             try
             {
-                var yearOfOperation = await _repositoryManager.YearOfOperationRepository.GetCurrentYearOfOperation();
+                var yearOfOperation = await _repositoryManager.YearOfOperationRepository.GetByIdAsync(1);
 
                 if (yearOfOperation == null) throw new ArgumentException("No valid year of operation found");
 
