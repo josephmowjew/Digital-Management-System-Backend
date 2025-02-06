@@ -200,7 +200,12 @@ namespace MLS_Digital_MGM_API.Controllers
                if ((cpdTraining.MemberPhysicalAttendanceFee == null || cpdTraining.MemberPhysicalAttendanceFee < 1) &&
                     (cpdTraining.MemberVirtualAttendanceFee == null || cpdTraining.MemberVirtualAttendanceFee < 1) &&
                     (cpdTraining.NonMemberPhysicalAttendanceFee == null || cpdTraining.NonMemberPhysicalAttendanceFee < 1) &&
-                    (cpdTraining.NonMemberVirtualAttandanceFee == null || cpdTraining.NonMemberVirtualAttandanceFee < 1))
+                    (cpdTraining.NonMemberVirtualAttandanceFee == null || cpdTraining.NonMemberVirtualAttandanceFee < 1) &&
+                    (cpdTraining.SeniorLawyerPhysicalAttendanceFee == null || cpdTraining.SeniorLawyerPhysicalAttendanceFee < 1) &&
+                    (cpdTraining.SeniorLawyerVirtualAttendanceFee == null || cpdTraining.SeniorLawyerVirtualAttendanceFee < 1) &&
+                    (cpdTraining.JuniorLawyerPhysicalAttendanceFee == null || cpdTraining.JuniorLawyerPhysicalAttendanceFee < 1) && 
+                    (cpdTraining.JuniorLawyerVirtualAttendanceFee == null || cpdTraining.JuniorLawyerVirtualAttendanceFee < 1)
+                    )
                 {
                     cpdTraining.IsFree = true;
                 }

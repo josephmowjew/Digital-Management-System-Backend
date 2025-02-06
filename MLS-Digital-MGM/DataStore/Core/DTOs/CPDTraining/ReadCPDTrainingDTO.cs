@@ -33,12 +33,17 @@ namespace DataStore.Core.DTOs.CPDTraining
         public double? MemberVirtualAttendanceFee { get; set; } = 0;
         public double? NonMemberPhysicalAttendanceFee { get; set; } = 0; 
         public double? NonMemberVirtualAttandanceFee { get; set; } = 0;
+        public double? SeniorLawyerPhysicalAttendanceFee { get; set; } = 0;
+        public double? SeniorLawyerVirtualAttendanceFee { get; set; } = 0;
+        public double? JuniorLawyerPhysicalAttendanceFee { get; set; } = 0;
+        public double? JuniorLawyerVirtualAttendanceFee { get; set; } = 0;
         public string? PhysicalVenue { get; set; }
         public ReadUserDTO CreatedBy { get; set; }
         public int YearOfOperationId { get; set; }
         
         public DateOnly RegistrationDueDate { get; set; }
         public bool IsFree { get; set; } = false;
+        public bool IsCategorizedForMembers { get; set; } = false;
         public ReadYearOfOperationDTO YearOfOperation { get; set; }
         public ICollection<ReadCPDUnitsEarnedDTO> CPDUnitsEarned { get; set; }
         public ICollection<ReadCPDTrainingRegistrationDTO> CPDTrainingRegistration { get; set; }

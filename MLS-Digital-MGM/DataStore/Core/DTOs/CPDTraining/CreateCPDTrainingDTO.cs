@@ -29,7 +29,12 @@ namespace DataStore.Core.DTOs.CPDTraining
         public double? MemberVirtualAttendanceFee { get; set; } = 0;
         public double? NonMemberPhysicalAttendanceFee { get; set; } = 0; 
         public double? NonMemberVirtualAttandanceFee { get; set; } = 0;
+        public double? SeniorLawyerPhysicalAttendanceFee { get; set; } = 0;
+        public double? SeniorLawyerVirtualAttendanceFee { get; set; } = 0;
+        public double? JuniorLawyerPhysicalAttendanceFee { get; set; } = 0;
+        public double? JuniorLawyerVirtualAttendanceFee { get; set; } = 0;
         public bool IsFree { get; set; } = false;
+        public bool IsCategorizedForMembers { get; set; } = false;
         [Required]
         public int CPDUnitsAwarded { get; set; }
 

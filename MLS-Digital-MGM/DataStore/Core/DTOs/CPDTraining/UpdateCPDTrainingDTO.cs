@@ -14,13 +14,17 @@ namespace DataStore.Core.DTOs.CPDTraining
         [StringLength(250)]
         public string Description { get; set; }
         public double Duration { get; set; }
-   
         public double? MemberPhysicalAttendanceFee { get; set; } = 0;
         public double? MemberVirtualAttendanceFee { get; set; } = 0;
-        public double? NonMemberPhysicalAttendanceFee { get; set; } = 0; 
-         public double? NonMemberVirtualAttandanceFee { get; set; } = 0;
+        public double? NonMemberPhysicalAttendanceFee { get; set; } = 0;
+        public double? NonMemberVirtualAttandanceFee { get; set; } = 0;
+        public double? SeniorLawyerPhysicalAttendanceFee { get; set; } = 0;
+        public double? SeniorLawyerVirtualAttendanceFee { get; set; } = 0;
+        public double? JuniorLawyerPhysicalAttendanceFee { get; set; } = 0;
+        public double? JuniorLawyerVirtualAttendanceFee { get; set; } = 0;
         public string? PhysicalVenue { get; set; }
         public bool IsFree { get; set; } = false;
+        public bool IsCategorizedForMembers { get; set; } = false;
         public DateTime DateToBeConducted { get; set; }
         [DateGreaterThanOrEqualToToday(ErrorMessage = "Registration due date must be today or a future date.")]
         public DateTime? RegistrationDueDate { get; set; }
@@ -30,11 +34,11 @@ namespace DataStore.Core.DTOs.CPDTraining
         public string? AccreditingInstitution { get; set; }
         public string? AccreditingInstitutionRepresentativePosition { get; set; }
 
-        public List<IFormFile> Attachments  { get; set; }
+        public List<IFormFile> Attachments { get; set; }
 
-         public void SetDefaultValues()
+        public void SetDefaultValues()
         {
-            MemberPhysicalAttendanceFee ??= 0; 
+            MemberPhysicalAttendanceFee ??= 0;
             MemberVirtualAttendanceFee ??= 0;
             NonMemberPhysicalAttendanceFee ??= 0;
             NonMemberVirtualAttandanceFee ??= 0;
