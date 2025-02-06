@@ -216,7 +216,7 @@ namespace MLS_Digital_MGM_API.Controllers
                 DateOfBirth = user.DateOfBirth,
                 TokenExpiryMinutes = (DateTime)tokenDescriptor.Expires,
                 ProfilePicture = user.ProfilePictures?.FirstOrDefault()?.FileName == null ? null :
-                    $"{Lambda.http}://{HttpContext.Request.Host}{Configuration["APISettings:API_Prefix"]}/Uploads/UserProfilePictures/{user.ProfilePictures.FirstOrDefault()?.FileName}",
+                    $"{Lambda.https}://{HttpContext.Request.Host}{Configuration["APISettings:API_Prefix"]}/Uploads/UserProfilePictures/{user.ProfilePictures.FirstOrDefault()?.FileName}",
 
             };
             return userData;
@@ -419,7 +419,7 @@ namespace MLS_Digital_MGM_API.Controllers
             var token = await this._repositoryManager.UserManager.GeneratePasswordResetTokenAsync(user);
 
             var code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
-            var callbackUrl = $"{Request.Scheme}://{Request.Host}/Home/ResetPassword?code={code}";
+            var callbackUrl = $"{Lambda.https}://{Request.Host}/Home/ResetPassword?code={code}";
 
             var body = $"Please reset your password by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.";
 
