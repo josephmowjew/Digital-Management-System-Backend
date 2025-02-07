@@ -210,6 +210,17 @@ namespace MLS_Digital_MGM_API.Controllers
                     cpdTraining.IsFree = true;
                 }
 
+                if((cpdTraining.MemberPhysicalAttendanceFee == null || cpdTraining.MemberPhysicalAttendanceFee < 1) &&
+                    (cpdTraining.MemberVirtualAttendanceFee == null || cpdTraining.MemberVirtualAttendanceFee < 1) &&
+                    (cpdTraining.SeniorLawyerPhysicalAttendanceFee != null || cpdTraining.SeniorLawyerPhysicalAttendanceFee >= 1) &&
+                    (cpdTraining.SeniorLawyerVirtualAttendanceFee != null || cpdTraining.SeniorLawyerVirtualAttendanceFee >= 1) &&
+                    (cpdTraining.JuniorLawyerPhysicalAttendanceFee != null || cpdTraining.JuniorLawyerPhysicalAttendanceFee >= 1) &&
+                    (cpdTraining.JuniorLawyerVirtualAttendanceFee != null || cpdTraining.JuniorLawyerVirtualAttendanceFee >= 1)
+                    )
+                {
+                    cpdTraining.IsCategorizedForMembers = true;
+                }
+
                 //get the current year of operation
                 var currentYear = await _repositoryManager.YearOfOperationRepository.GetCurrentYearOfOperation();
                 if (currentYear == null)
