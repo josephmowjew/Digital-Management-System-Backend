@@ -180,6 +180,44 @@ namespace MLS_Digital_MGM_API.Controllers
             }
         }
 
+        [HttpGet("verify/{id}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> VerifyLicense(int id)
+        {
+            try
+            {
+                var license = await _repositoryManager.LicenseRepository.GetByIdAsync(id);
+                if (license == null)
+                {
+                    return NotFound();
+                }
+
+                var member = await _repositoryManager.MemberRepository.GetByIdAsync(license.MemberId);
+                if (member == null)
+                {
+                    return NotFound();
+                }
+
+                var licenseDTO = _mapper.Map<ReadLicenseDTO>(license);
+
+                /*foreach (var attachment in licenseDTO.LicenseApplication.Attachments)
+                {
+                    string attachmentTypeName = attachment.AttachmentType.Name;
+
+                    string newFilePath = Path.Combine($"{Lambda.http}://{HttpContext.Request.Host}{_configuration["APISettings:API_Prefix"]}/Uploads/{Lambda.LicenseApplicationFolderName}", attachment.FileName);
+
+                    attachment.FilePath = newFilePath;
+                }*/
+
+                return Ok(licenseDTO);
+            }
+            catch (Exception ex)
+            {
+                await _errorLogService.LogErrorAsync(ex);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
         // DELETE api/license/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteLicense(int id)
